@@ -40,6 +40,8 @@ public class DownloadInfo
 
     public TransmitParam getTransmitParam()
     {
+        if (mTransmitParam == null)
+            mTransmitParam = new TransmitParam();
         return mTransmitParam;
     }
 }
