@@ -223,49 +223,104 @@ public class FDownloadManager implements DownloadManager
     private void notifyPrepare(DownloadInfo info)
     {
         info.setState(DownloadState.Prepare);
-        for (Callback item : mListCallback)
-        {
-            item.onPrepare(info);
-        }
+        mMainThreadCallback.onPrepare(info);
     }
 
     private void notifyProgress(DownloadInfo info, long total, long current)
     {
         info.setState(DownloadState.Downloading);
+        final boolean changed = info.getTransmitParam().transmit(total, current);
 
-        final int old = info.getTransmitParam().getProgress();
-        info.getTransmitParam().transmit(total, current);
-        final int progress = info.getTransmitParam().getProgress();
-
-        if (progress > old)
-        {
-            for (Callback item : mListCallback)
-            {
-                item.onProgress(info);
-            }
-        }
+        if (changed)
+            mMainThreadCallback.onProgress(info);
     }
 
-    private synchronized void notifySuccess(DownloadInfo info, File file)
+    private void notifySuccess(DownloadInfo info, File file)
     {
         info.setState(DownloadState.Success);
-        for (Callback item : mListCallback)
-        {
-            item.onSuccess(info, file);
-        }
+        mMainThreadCallback.onSuccess(info, file);
 
-        mMapDownloadInfo.remove(info.getUrl());
+        removeDownloadInfo(info);
     }
 
-    private synchronized void notifyError(DownloadInfo info, DownloadError error)
+    private void notifyError(DownloadInfo info, DownloadError error)
     {
         info.setState(DownloadState.Error);
         info.setError(error);
-        for (Callback item : mListCallback)
-        {
-            item.onError(info);
-        }
+        mMainThreadCallback.onError(info);
 
+        removeDownloadInfo(info);
+    }
+
+    private synchronized void removeDownloadInfo(DownloadInfo info)
+    {
         mMapDownloadInfo.remove(info.getUrl());
     }
+
+    private final Callback mMainThreadCallback = new Callback()
+    {
+        @Override
+        public void onPrepare(final DownloadInfo info)
+        {
+            Utils.runOnMainThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    for (Callback item : mListCallback)
+                    {
+                        item.onPrepare(info);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onProgress(final DownloadInfo info)
+        {
+            Utils.runOnMainThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    for (Callback item : mListCallback)
+                    {
+                        item.onProgress(info);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onSuccess(final DownloadInfo info, final File file)
+        {
+            Utils.runOnMainThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    for (Callback item : mListCallback)
+                    {
+                        item.onSuccess(info, file);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onError(final DownloadInfo info)
+        {
+            Utils.runOnMainThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    for (Callback item : mListCallback)
+                    {
+                        item.onError(info);
+                    }
+                }
+            });
+        }
+    };
 }

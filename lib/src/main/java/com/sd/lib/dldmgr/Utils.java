@@ -2,6 +2,8 @@ package com.sd.lib.dldmgr;
 
 import android.content.Context;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 
 import java.io.File;
 import java.security.MessageDigest;
@@ -9,6 +11,16 @@ import java.security.NoSuchAlgorithmException;
 
 class Utils
 {
+    private static final Handler HANDLER = new Handler(Looper.getMainLooper());
+
+    public static void runOnMainThread(Runnable runnable)
+    {
+        if (Looper.myLooper() == Looper.getMainLooper())
+            runnable.run();
+        else
+            HANDLER.post(runnable);
+    }
+
     public static File getCacheDir(String dirName, Context context)
     {
         File dir = null;
@@ -63,4 +75,6 @@ class Utils
             return null;
         }
     }
+
+
 }

@@ -19,9 +19,12 @@ public class TransmitParam
      *
      * @param total
      * @param current
+     * @return true-进度增加了
      */
-    synchronized void transmit(long total, long current)
+    synchronized boolean transmit(long total, long current)
     {
+        final int oldProgress = mProgress;
+
         mTotal = total;
         mCurrent = current;
 
@@ -43,6 +46,7 @@ public class TransmitParam
         }
 
         mProgress = (int) (current * 100 / total);
+        return mProgress > oldProgress;
     }
 
     /**
