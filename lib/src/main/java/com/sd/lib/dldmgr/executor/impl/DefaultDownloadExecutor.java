@@ -1,6 +1,7 @@
 package com.sd.lib.dldmgr.executor.impl;
 
 import com.sd.lib.dldmgr.DownloadRequest;
+import com.sd.lib.dldmgr.exception.DownloadHttpException;
 import com.sd.lib.dldmgr.executor.DownloadExecutor;
 import com.sd.lib.dldmgr.updater.DownloadUpdater;
 
@@ -81,11 +82,11 @@ public class DefaultDownloadExecutor implements DownloadExecutor
                         });
                     } else
                     {
-                        updater.notifyError(new RuntimeException(), "");
+                        updater.notifyError(new DownloadHttpException(null), null);
                     }
                 } catch (Exception e)
                 {
-                    updater.notifyError(e, "");
+                    updater.notifyError(new DownloadHttpException(e), null);
                 } finally
                 {
                     closeQuietly(input);
@@ -109,7 +110,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
 
         long count = 0;
         int len = 0;
-        final byte[] buffer = new byte[1024];
+        final byte[] buffer = new byte[4 * 1024];
         while ((len = in.read(buffer)) != -1)
         {
             out.write(buffer, 0, len);
