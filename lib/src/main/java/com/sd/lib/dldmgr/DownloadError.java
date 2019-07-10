@@ -15,6 +15,10 @@ public enum DownloadError
      */
     RenameFile,
     /**
+     * 提交下载任务失败
+     */
+    SubmitFailed,
+    /**
      * Http请求异常
      */
     Http

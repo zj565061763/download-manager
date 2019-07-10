@@ -142,7 +142,7 @@ public class FDownloadManager implements DownloadManager
         if (downloadFile == null)
         {
             if (getConfig().isDebug())
-                Log.e(TAG, "addTask failed create download file error:" + url);
+                Log.e(TAG, "addTask error create download file error:" + url);
 
             notifyError(info, DownloadError.CreateFile);
             return false;
@@ -200,7 +200,7 @@ public class FDownloadManager implements DownloadManager
             public void notifyError(Exception e, String details)
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, "addTask onError:" + url + " " + e);
+                    Log.e(TAG, "onError:" + url + " " + e);
 
                 FDownloadManager.this.notifyError(info, DownloadError.Http);
             }
@@ -212,10 +212,16 @@ public class FDownloadManager implements DownloadManager
         {
             mMapDownloadInfo.put(url, info);
             notifyPrepare(info);
-        }
 
-        if (getConfig().isDebug())
-            Log.i(TAG, "addTask:" + url + " path:" + downloadFile.getAbsolutePath() + " submitted:" + submitted);
+            if (getConfig().isDebug())
+                Log.i(TAG, "addTask:" + url + " path:" + downloadFile.getAbsolutePath() + " size:" + mMapDownloadInfo.size());
+        } else
+        {
+            if (getConfig().isDebug())
+                Log.e(TAG, "addTask error submit request failed:" + url);
+
+            FDownloadManager.this.notifyError(info, DownloadError.SubmitFailed);
+        }
 
         return submitted;
     }
