@@ -14,12 +14,15 @@ public class DownloadManagerConfig
 {
     private static DownloadManagerConfig sConfig;
 
+    private final boolean mIsDebug;
+
     private final Context mContext;
     private final DownloadExecutor mDownloadExecutor;
     private final String mDownloadDirectory;
 
     private DownloadManagerConfig(Builder builder)
     {
+        mIsDebug = builder.mIsDebug;
         mContext = builder.mContext;
         mDownloadExecutor = builder.mDownloadExecutor;
 
@@ -67,6 +70,11 @@ public class DownloadManagerConfig
             throw new RuntimeException(DownloadExecutor.class.getSimpleName() + " is null");
     }
 
+    public boolean isDebug()
+    {
+        return mIsDebug;
+    }
+
     public Context getContext()
     {
         return mContext;
@@ -84,9 +92,23 @@ public class DownloadManagerConfig
 
     public static class Builder
     {
+        private boolean mIsDebug = false;
+
         private Context mContext;
         private DownloadExecutor mDownloadExecutor;
         private String mDownloadDirectory;
+
+        /**
+         * 设置调试模式
+         *
+         * @param debug
+         * @return
+         */
+        public Builder setDebug(boolean debug)
+        {
+            mIsDebug = debug;
+            return this;
+        }
 
         /**
          * 设置下载执行器
@@ -104,12 +126,20 @@ public class DownloadManagerConfig
          * 设置下载目录
          *
          * @param directory
+         * @return
          */
-        public void setDownloadDirectory(String directory)
+        public Builder setDownloadDirectory(String directory)
         {
             mDownloadDirectory = directory;
+            return this;
         }
 
+        /**
+         * 构建对象
+         *
+         * @param context
+         * @return
+         */
         public DownloadManagerConfig build(Context context)
         {
             mContext = context.getApplicationContext();
