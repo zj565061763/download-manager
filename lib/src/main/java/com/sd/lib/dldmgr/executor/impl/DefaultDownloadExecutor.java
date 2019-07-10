@@ -110,7 +110,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
 
         long count = 0;
         int len = 0;
-        final byte[] buffer = new byte[4 * 1024];
+        final byte[] buffer = new byte[1024];
         while ((len = in.read(buffer)) != -1)
         {
             out.write(buffer, 0, len);
