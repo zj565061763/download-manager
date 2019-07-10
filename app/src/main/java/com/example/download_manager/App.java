@@ -13,7 +13,6 @@ public class App extends Application
 
         DownloadManagerConfig.init(new DownloadManagerConfig.Builder()
                 .setDebug(true)
-                .setDownloadExecutor(new SimpleDownloadExecutor())
                 .build(this));
     }
 }
