@@ -145,7 +145,7 @@ public class FDownloadManager implements DownloadManager
             if (getConfig().isDebug())
                 Log.e(TAG, "addTask error create temp file error:" + url);
 
-            notifyError(info, DownloadError.CreateFile);
+            notifyError(info, DownloadError.CreateTempFile);
             return false;
         }
 
@@ -168,7 +168,7 @@ public class FDownloadManager implements DownloadManager
                     if (getConfig().isDebug())
                         Log.e(TAG, "download success error temp file not exists:" + url);
 
-                    FDownloadManager.this.notifyError(info, DownloadError.DownloadFileNotExists);
+                    FDownloadManager.this.notifyError(info, DownloadError.TempFileNotExists);
                     return;
                 }
 
@@ -178,7 +178,7 @@ public class FDownloadManager implements DownloadManager
                     if (getConfig().isDebug())
                         Log.e(TAG, "download success error create download file:" + url);
 
-                    FDownloadManager.this.notifyError(info, DownloadError.CreateFile);
+                    FDownloadManager.this.notifyError(info, DownloadError.CreateDownloadFile);
                     return;
                 }
 

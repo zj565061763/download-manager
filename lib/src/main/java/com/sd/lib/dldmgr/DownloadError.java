@@ -3,25 +3,29 @@ package com.sd.lib.dldmgr;
 public enum DownloadError
 {
     /**
-     * 创建文件失败
+     * 获取临时文件失败
      */
-    CreateFile,
+    CreateTempFile,
     /**
      * 提交下载任务失败
      */
     SubmitFailed,
     /**
+     * 临时文件文件不存在
+     */
+    TempFileNotExists,
+    /**
+     * 获取下载文件失败
+     */
+    CreateDownloadFile,
+    /**
+     * 临时文件重命名为下载文件失败
+     */
+    RenameFile,
+    /**
      * Http请求异常
      */
     Http,
-    /**
-     * 下载文件不存在
-     */
-    DownloadFileNotExists,
-    /**
-     * 重命名文件失败
-     */
-    RenameFile,
     /**
      * 其他未知异常
      */
