@@ -179,7 +179,8 @@ public class FDownloadManager implements DownloadManager
             }
         };
 
-        final boolean submitted = DownloadManagerConfig.get().getDownloadExecutor().submit(downloadUpdater, downloadFile);
+        final DownloadRequest downloadRequest = new DownloadRequest(url);
+        final boolean submitted = DownloadManagerConfig.get().getDownloadExecutor().submit(downloadUpdater, downloadFile, downloadRequest);
         if (submitted)
         {
             mMapDownloadInfo.put(url, info);
