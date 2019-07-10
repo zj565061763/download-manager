@@ -11,6 +11,10 @@ public enum DownloadError
      */
     SubmitFailed,
     /**
+     * Http请求异常
+     */
+    Http,
+    /**
      * 下载文件不存在
      */
     DownloadFileNotExists,
@@ -18,10 +22,6 @@ public enum DownloadError
      * 重命名文件失败
      */
     RenameFile,
-    /**
-     * Http请求异常
-     */
-    Http,
     /**
      * 其他未知异常
      */
