@@ -2,7 +2,7 @@ package com.sd.lib.dldmgr;
 
 public class TransmitParam
 {
-    private static final long CALCULATE_SPEED_INTERVAL = 50;
+    private static final long CALCULATE_SPEED_INTERVAL = 100;
 
     private long mCurrent;
     private long mTotal;
