@@ -36,12 +36,16 @@ public class FDownloadManager implements DownloadManager
             {
                 if (sDefault == null)
                 {
-                    final DownloadManagerConfig config = DownloadManagerConfig.get();
-                    sDefault = new FDownloadManager(config.getDownloadDirectory());
+                    sDefault = new FDownloadManager(getConfig().getDownloadDirectory());
                 }
             }
         }
         return sDefault;
+    }
+
+    private static DownloadManagerConfig getConfig()
+    {
+        return DownloadManagerConfig.get();
     }
 
     private boolean checkDirectory()
@@ -59,7 +63,9 @@ public class FDownloadManager implements DownloadManager
             return;
 
         mListCallback.add(callback);
-        Log.i(TAG, "addCallback:" + callback);
+
+        if (getConfig().isDebug())
+            Log.i(TAG, "addCallback:" + callback);
     }
 
     @Override
@@ -69,7 +75,10 @@ public class FDownloadManager implements DownloadManager
             return;
 
         if (mListCallback.remove(callback))
-            Log.i(TAG, "removeCallback:" + callback);
+        {
+            if (getConfig().isDebug())
+                Log.i(TAG, "removeCallback:" + callback);
+        }
     }
 
     @Override
@@ -132,7 +141,9 @@ public class FDownloadManager implements DownloadManager
         final File downloadFile = getDownloadFile(url, null);
         if (downloadFile == null)
         {
-            Log.e(TAG, "addTask failed create download file error:" + url);
+            if (getConfig().isDebug())
+                Log.e(TAG, "addTask failed create download file error:" + url);
+
             notifyError(info, DownloadError.CreateFile);
             return false;
         }
@@ -148,11 +159,14 @@ public class FDownloadManager implements DownloadManager
             @Override
             public void notifySuccess()
             {
-                Log.i(TAG, "onSuccess:" + url);
+                if (getConfig().isDebug())
+                    Log.i(TAG, "onSuccess:" + url);
 
                 if (!downloadFile.exists())
                 {
-                    Log.e(TAG, "onSuccess error download file not exists:" + url);
+                    if (getConfig().isDebug())
+                        Log.e(TAG, "onSuccess error download file not exists:" + url);
+
                     FDownloadManager.this.notifyError(info, DownloadError.DownloadFileNotExists);
                     return;
                 }
@@ -160,7 +174,9 @@ public class FDownloadManager implements DownloadManager
                 final File renameFile = getUrlFile(url);
                 if (renameFile == null)
                 {
-                    Log.e(TAG, "onSuccess error create rename file:" + url);
+                    if (getConfig().isDebug())
+                        Log.e(TAG, "onSuccess error create rename file:" + url);
+
                     FDownloadManager.this.notifyError(info, DownloadError.CreateFile);
                     return;
                 }
@@ -173,7 +189,9 @@ public class FDownloadManager implements DownloadManager
                     FDownloadManager.this.notifySuccess(info, renameFile);
                 } else
                 {
-                    Log.e(TAG, "onSuccess error rename file:" + url);
+                    if (getConfig().isDebug())
+                        Log.e(TAG, "onSuccess error rename file:" + url);
+
                     FDownloadManager.this.notifyError(info, DownloadError.RenameFile);
                 }
             }
@@ -181,20 +199,24 @@ public class FDownloadManager implements DownloadManager
             @Override
             public void notifyError(Exception e, String details)
             {
-                Log.e(TAG, "addTask onError:" + url + " " + e);
+                if (getConfig().isDebug())
+                    Log.e(TAG, "addTask onError:" + url + " " + e);
+
                 FDownloadManager.this.notifyError(info, DownloadError.Http);
             }
         };
 
         final DownloadRequest downloadRequest = new DownloadRequest(url);
-        final boolean submitted = DownloadManagerConfig.get().getDownloadExecutor().submit(downloadUpdater, downloadFile, downloadRequest);
+        final boolean submitted = getConfig().getDownloadExecutor().submit(downloadUpdater, downloadFile, downloadRequest);
         if (submitted)
         {
             mMapDownloadInfo.put(url, info);
             notifyPrepare(info);
         }
 
-        Log.i(TAG, "addTask:" + url + " path:" + downloadFile.getAbsolutePath() + " submitted:" + submitted);
+        if (getConfig().isDebug())
+            Log.i(TAG, "addTask:" + url + " path:" + downloadFile.getAbsolutePath() + " submitted:" + submitted);
+
         return submitted;
     }
 
