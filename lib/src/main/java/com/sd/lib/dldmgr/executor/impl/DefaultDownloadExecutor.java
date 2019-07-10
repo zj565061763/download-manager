@@ -13,6 +13,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.net.HttpURLConnection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultDownloadExecutor implements DownloadExecutor
 {
     private ExecutorService mExecutor;
+    private boolean mPreferBreakpoint = false;
 
     private ExecutorService getExecutor()
     {
@@ -42,6 +45,16 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         return mExecutor;
     }
 
+    private static HttpRequest newHttpRequest(DownloadRequest downloadRequest)
+    {
+        final HttpRequest httpRequest = HttpRequest.get(downloadRequest.getUrl());
+        return httpRequest
+                .connectTimeout(15 * 1000)
+                .readTimeout(15 * 1000)
+                .trustAllCerts()
+                .trustAllCerts();
+    }
+
     @Override
     public boolean submit(final DownloadRequest request, final File file, final DownloadUpdater updater)
     {
@@ -50,36 +63,36 @@ public class DefaultDownloadExecutor implements DownloadExecutor
             @Override
             public void run()
             {
-                final HttpRequest httpRequest = HttpRequest.get(request.getUrl());
+                final long length = file.length();
+                final boolean breakpoint = length > 0;
 
-                httpRequest.connectTimeout(15 * 1000)
-                        .readTimeout(15 * 1000)
-                        .trustAllCerts()
-                        .trustAllCerts();
+                HttpRequest httpRequest = newHttpRequest(request);
 
-                InputStream input = null;
-                OutputStream output = null;
+                if (mPreferBreakpoint && breakpoint)
+                {
+                    httpRequest.header("Range", "bytes=" + (length + 1) + "-");
+                }
 
                 try
                 {
-                    if (httpRequest.ok())
+                    int code = httpRequest.code();
+                    if (mPreferBreakpoint && breakpoint)
                     {
-                        final long total = httpRequest.contentLength();
-
-                        input = httpRequest.stream();
-                        output = new BufferedOutputStream(new FileOutputStream(file));
-
-                        copy(input, output, new ProgressCallback()
+                        if (code == HttpURLConnection.HTTP_PARTIAL)
                         {
-                            @Override
-                            public void onProgress(long count)
-                            {
-                                updater.notifyProgress(total, count);
+                            downloadBreakpoint(httpRequest, file, updater);
+                            return;
+                        } else
+                        {
+                            // 不支持断点下载，尝试正常下载
+                            httpRequest = newHttpRequest(request);
+                            code = httpRequest.code();
+                        }
+                    }
 
-                                if (total == count && count > 0)
-                                    updater.notifySuccess();
-                            }
-                        });
+                    if (code == HttpURLConnection.HTTP_OK)
+                    {
+                        downloadNormal(httpRequest, file, updater);
                     } else
                     {
                         updater.notifyError(new DownloadHttpException(null), null);
@@ -87,10 +100,6 @@ public class DefaultDownloadExecutor implements DownloadExecutor
                 } catch (Exception e)
                 {
                     updater.notifyError(new DownloadHttpException(e), null);
-                } finally
-                {
-                    closeQuietly(input);
-                    closeQuietly(output);
                 }
             }
         };
@@ -99,27 +108,95 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         return true;
     }
 
+    private void downloadNormal(HttpRequest request, File file, final DownloadUpdater updater) throws IOException
+    {
+        InputStream input = null;
+        OutputStream output = null;
 
-    private static void copy(InputStream in, OutputStream out, ProgressCallback callback) throws IOException
+        try
+        {
+            input = request.stream();
+            output = new BufferedOutputStream(new FileOutputStream(file));
+
+            final long total = request.contentLength();
+            final OutputStream finalOut = output;
+            read(input, new ReadCallback()
+            {
+                @Override
+                public void write(byte[] buffer, int offset, int length) throws IOException
+                {
+                    finalOut.write(buffer, offset, length);
+                }
+
+                @Override
+                public void count(int count)
+                {
+                    updater.notifyProgress(total, count);
+                }
+            });
+            output.flush();
+            updater.notifySuccess();
+        } finally
+        {
+            closeQuietly(input);
+            closeQuietly(output);
+        }
+    }
+
+    private void downloadBreakpoint(HttpRequest request, File file, final DownloadUpdater updater) throws IOException
+    {
+        final long length = file.length();
+        if (length <= 0)
+            throw new RuntimeException("file length must > 0");
+
+        InputStream input = null;
+        RandomAccessFile randomAccessFile = null;
+
+        try
+        {
+            input = request.stream();
+            randomAccessFile = new RandomAccessFile(file, "rwd");
+            randomAccessFile.seek(length);
+
+            final long total = request.contentLength();
+            final RandomAccessFile finalFile = randomAccessFile;
+            read(input, new ReadCallback()
+            {
+                @Override
+                public void write(byte[] buffer, int offset, int length) throws IOException
+                {
+                    finalFile.write(buffer, offset, length);
+                }
+
+                @Override
+                public void count(int count)
+                {
+                    updater.notifyProgress(total, count);
+                }
+            });
+            updater.notifySuccess();
+        } finally
+        {
+            closeQuietly(input);
+            closeQuietly(randomAccessFile);
+        }
+    }
+
+
+    private static void read(InputStream in, ReadCallback callback) throws IOException
     {
         if (!(in instanceof BufferedInputStream))
             in = new BufferedInputStream(in);
 
-        if (!(out instanceof BufferedOutputStream))
-            out = new BufferedOutputStream(out);
-
-        long count = 0;
-        int len = 0;
+        int count = 0;
+        int length = 0;
         final byte[] buffer = new byte[1024];
-        while ((len = in.read(buffer)) != -1)
+        while ((length = in.read(buffer)) != -1)
         {
-            out.write(buffer, 0, len);
-            count += len;
-
-            if (callback != null)
-                callback.onProgress(count);
+            callback.write(buffer, 0, length);
+            count += length;
+            callback.count(count);
         }
-        out.flush();
     }
 
     private static void closeQuietly(Closeable closeable)
@@ -135,8 +212,10 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         }
     }
 
-    private interface ProgressCallback
+    private interface ReadCallback
     {
-        void onProgress(long count);
+        void write(byte[] buffer, int offset, int length) throws IOException;
+
+        void count(int count);
     }
 }
