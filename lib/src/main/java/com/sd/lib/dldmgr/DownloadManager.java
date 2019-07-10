@@ -26,7 +26,7 @@ public interface DownloadManager
      * @param url
      * @return
      */
-    File getUrlFile(String url);
+    File getDownloadFile(String url);
 
     /**
      * 返回下载信息

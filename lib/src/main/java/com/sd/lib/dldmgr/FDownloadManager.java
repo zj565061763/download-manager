@@ -83,7 +83,7 @@ public class FDownloadManager implements DownloadManager
     }
 
     @Override
-    public File getUrlFile(String url)
+    public File getDownloadFile(String url)
     {
         if (TextUtils.isEmpty(url))
             return null;
@@ -172,7 +172,7 @@ public class FDownloadManager implements DownloadManager
                     return;
                 }
 
-                final File renameFile = getUrlFile(url);
+                final File renameFile = getDownloadFile(url);
                 if (renameFile == null)
                 {
                     if (getConfig().isDebug())
