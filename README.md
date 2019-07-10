@@ -1,6 +1,9 @@
 # About
 安卓下载管理
 
+# Gradle
+[![](https://jitpack.io/v/zj565061763/download-manager.svg)](https://jitpack.io/#zj565061763/download-manager)
+
 # Demo
 ```java
 public class MainActivity extends AppCompatActivity
