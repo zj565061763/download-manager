@@ -5,8 +5,8 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
+        versionCode 20190710
+        versionName "1.0.0-beta1"
     }
 
     buildTypes {
@@ -18,5 +18,4 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
