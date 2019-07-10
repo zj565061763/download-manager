@@ -172,26 +172,26 @@ public class FDownloadManager implements DownloadManager
                     return;
                 }
 
-                final File renameFile = getDownloadFile(url);
-                if (renameFile == null)
+                final File downloadFile = getDownloadFile(url);
+                if (downloadFile == null)
                 {
                     if (getConfig().isDebug())
-                        Log.e(TAG, "download success error create rename file:" + url);
+                        Log.e(TAG, "download success error create download file:" + url);
 
                     FDownloadManager.this.notifyError(info, DownloadError.CreateFile);
                     return;
                 }
 
-                if (renameFile.exists())
-                    renameFile.delete();
+                if (downloadFile.exists())
+                    downloadFile.delete();
 
-                if (tempFile.renameTo(renameFile))
+                if (tempFile.renameTo(downloadFile))
                 {
-                    FDownloadManager.this.notifySuccess(info, renameFile);
+                    FDownloadManager.this.notifySuccess(info, downloadFile);
                 } else
                 {
                     if (getConfig().isDebug())
-                        Log.e(TAG, "download success error rename file:" + url);
+                        Log.e(TAG, "download success error rename temp file to download file:" + url);
 
                     FDownloadManager.this.notifyError(info, DownloadError.RenameFile);
                 }
