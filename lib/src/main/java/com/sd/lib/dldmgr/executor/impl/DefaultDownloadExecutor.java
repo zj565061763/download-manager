@@ -158,7 +158,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
             randomAccessFile = new RandomAccessFile(file, "rwd");
             randomAccessFile.seek(length);
 
-            final long total = request.contentLength();
+            final long total = request.contentLength() + length;
             final RandomAccessFile finalFile = randomAccessFile;
             read(input, new ReadCallback()
             {
@@ -171,7 +171,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
                 @Override
                 public void count(int count)
                 {
-                    updater.notifyProgress(total, count);
+                    updater.notifyProgress(total, count + length);
                 }
             });
             updater.notifySuccess();
@@ -190,7 +190,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
 
         int count = 0;
         int length = 0;
-        final byte[] buffer = new byte[1024];
+        final byte[] buffer = new byte[10 * 1024];
         while ((length = in.read(buffer)) != -1)
         {
             callback.write(buffer, 0, length);
