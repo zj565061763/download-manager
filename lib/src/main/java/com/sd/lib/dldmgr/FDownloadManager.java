@@ -160,12 +160,12 @@ public class FDownloadManager implements DownloadManager
             public void notifySuccess()
             {
                 if (getConfig().isDebug())
-                    Log.i(TAG, "onSuccess:" + url);
+                    Log.i(TAG, "download success:" + url);
 
                 if (!downloadFile.exists())
                 {
                     if (getConfig().isDebug())
-                        Log.e(TAG, "onSuccess error download file not exists:" + url);
+                        Log.e(TAG, "download success error download file not exists:" + url);
 
                     FDownloadManager.this.notifyError(info, DownloadError.DownloadFileNotExists);
                     return;
@@ -175,7 +175,7 @@ public class FDownloadManager implements DownloadManager
                 if (renameFile == null)
                 {
                     if (getConfig().isDebug())
-                        Log.e(TAG, "onSuccess error create rename file:" + url);
+                        Log.e(TAG, "download success error create rename file:" + url);
 
                     FDownloadManager.this.notifyError(info, DownloadError.CreateFile);
                     return;
@@ -190,7 +190,7 @@ public class FDownloadManager implements DownloadManager
                 } else
                 {
                     if (getConfig().isDebug())
-                        Log.e(TAG, "onSuccess error rename file:" + url);
+                        Log.e(TAG, "download success error rename file:" + url);
 
                     FDownloadManager.this.notifyError(info, DownloadError.RenameFile);
                 }
@@ -200,7 +200,7 @@ public class FDownloadManager implements DownloadManager
             public void notifyError(Exception e, String details)
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, "onError:" + url + " " + e);
+                    Log.e(TAG, "download error:" + url + " " + e);
 
                 FDownloadManager.this.notifyError(info, DownloadError.Http);
             }
