@@ -19,7 +19,16 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-package com.example.download_manager.utils;
+package com.sd.lib.dldmgr.executor.impl;
+
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
+import static java.net.HttpURLConnection.HTTP_CREATED;
+import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
+import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
+import static java.net.HttpURLConnection.HTTP_OK;
+import static java.net.Proxy.Type.HTTP;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -79,15 +88,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
-import static java.net.HttpURLConnection.HTTP_CREATED;
-import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
-import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
-import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
-import static java.net.HttpURLConnection.HTTP_OK;
-import static java.net.Proxy.Type.HTTP;
-
 /**
  * A fluid interface for making HTTP requests using an underlying
  * {@link HttpURLConnection} (or sub-class).
@@ -95,8 +95,7 @@ import static java.net.Proxy.Type.HTTP;
  * Each instance supports making a single request and cannot be reused for
  * further requests.
  */
-public class HttpRequest
-{
+class HttpRequest {
 
   /**
    * 'UTF-8' charset name
@@ -313,7 +312,7 @@ public class HttpRequest
   }
 
   private static StringBuilder addPathSeparator(final String baseUrl,
-                                                final StringBuilder result) {
+      final StringBuilder result) {
     // Add trailing slash if the base URL doesn't have any path segments.
     //
     // The following test is checking for the last slash not being part of
@@ -324,7 +323,7 @@ public class HttpRequest
   }
 
   private static StringBuilder addParamPrefix(final String baseUrl,
-                                              final StringBuilder result) {
+      final StringBuilder result) {
     // Add '?' if missing and add '&' if params already exist in base url
     final int queryStart = baseUrl.indexOf('?');
     final int lastChar = result.length() - 1;
@@ -336,7 +335,7 @@ public class HttpRequest
   }
 
   private static StringBuilder addParam(final Object key, Object value,
-                                        final StringBuilder result) {
+      final StringBuilder result) {
     if (value != null && value.getClass().isArray())
       value = arrayToList(value);
 
@@ -386,13 +385,11 @@ public class HttpRequest
      * {@link URL#openConnection()}
      */
     ConnectionFactory DEFAULT = new ConnectionFactory() {
-      public HttpURLConnection create(URL url) throws IOException
-      {
+      public HttpURLConnection create(URL url) throws IOException {
         return (HttpURLConnection) url.openConnection();
       }
 
-      public HttpURLConnection create(URL url, Proxy proxy) throws IOException
-      {
+      public HttpURLConnection create(URL url, Proxy proxy) throws IOException {
         return (HttpURLConnection) url.openConnection(proxy);
       }
     };
@@ -660,8 +657,7 @@ public class HttpRequest
   /**
    * HTTP request exception whose cause is always an {@link IOException}
    */
-  public static class HttpRequestException extends RuntimeException
-  {
+  public static class HttpRequestException extends RuntimeException {
 
     private static final long serialVersionUID = -1170466989781746231L;
 
@@ -691,8 +687,7 @@ public class HttpRequest
    *
    * @param <V>
    */
-  protected static abstract class Operation<V> implements Callable<V>
-  {
+  protected static abstract class Operation<V> implements Callable<V> {
 
     /**
      * Run operation
@@ -756,8 +751,7 @@ public class HttpRequest
     }
 
     @Override
-    protected void done() throws IOException
-    {
+    protected void done() throws IOException {
       if (closeable instanceof Flushable)
         ((Flushable) closeable).flush();
       if (ignoreCloseExceptions)
@@ -791,8 +785,7 @@ public class HttpRequest
     }
 
     @Override
-    protected void done() throws IOException
-    {
+    protected void done() throws IOException {
       flushable.flush();
     }
   }
@@ -800,8 +793,7 @@ public class HttpRequest
   /**
    * Request output stream
    */
-  public static class RequestOutputStream extends BufferedOutputStream
-  {
+  public static class RequestOutputStream extends BufferedOutputStream {
 
     private final CharsetEncoder encoder;
 
@@ -813,7 +805,7 @@ public class HttpRequest
      * @param bufferSize
      */
     public RequestOutputStream(final OutputStream stream, final String charset,
-                               final int bufferSize) {
+        final int bufferSize) {
       super(stream, bufferSize);
 
       encoder = Charset.forName(getValidCharset(charset)).newEncoder();
@@ -826,8 +818,7 @@ public class HttpRequest
      * @return this stream
      * @throws IOException
      */
-    public RequestOutputStream write(final String value) throws IOException
-    {
+    public RequestOutputStream write(final String value) throws IOException {
       final ByteBuffer bytes = encoder.encode(CharBuffer.wrap(value));
 
       super.write(bytes.array(), 0, bytes.limit());
@@ -1015,7 +1006,7 @@ public class HttpRequest
    * @return request
    */
   public static HttpRequest get(final CharSequence baseUrl,
-                                final Map<?, ?> params, final boolean encode) {
+      final Map<?, ?> params, final boolean encode) {
     String url = append(baseUrl, params);
     return get(encode ? encode(url) : url);
   }
@@ -1079,7 +1070,7 @@ public class HttpRequest
    * @return request
    */
   public static HttpRequest post(final CharSequence baseUrl,
-                                 final Map<?, ?> params, final boolean encode) {
+      final Map<?, ?> params, final boolean encode) {
     String url = append(baseUrl, params);
     return post(encode ? encode(url) : url);
   }
@@ -1143,7 +1134,7 @@ public class HttpRequest
    * @return request
    */
   public static HttpRequest put(final CharSequence baseUrl,
-                                final Map<?, ?> params, final boolean encode) {
+      final Map<?, ?> params, final boolean encode) {
     String url = append(baseUrl, params);
     return put(encode ? encode(url) : url);
   }
@@ -1207,7 +1198,7 @@ public class HttpRequest
    * @return request
    */
   public static HttpRequest delete(final CharSequence baseUrl,
-                                   final Map<?, ?> params, final boolean encode) {
+      final Map<?, ?> params, final boolean encode) {
     String url = append(baseUrl, params);
     return delete(encode ? encode(url) : url);
   }
@@ -1271,7 +1262,7 @@ public class HttpRequest
    * @return request
    */
   public static HttpRequest head(final CharSequence baseUrl,
-                                 final Map<?, ?> params, final boolean encode) {
+      final Map<?, ?> params, final boolean encode) {
     String url = append(baseUrl, params);
     return head(encode ? encode(url) : url);
   }
@@ -1964,8 +1955,7 @@ public class HttpRequest
     return new CloseOperation<HttpRequest>(output, ignoreCloseExceptions) {
 
       @Override
-      protected HttpRequest run() throws HttpRequestException, IOException
-      {
+      protected HttpRequest run() throws HttpRequestException, IOException {
         return receive(output);
       }
     }.call();
@@ -2012,8 +2002,7 @@ public class HttpRequest
     return new CloseOperation<HttpRequest>(reader, ignoreCloseExceptions) {
 
       @Override
-      public HttpRequest run() throws IOException
-      {
+      public HttpRequest run() throws IOException {
         final CharBuffer buffer = CharBuffer.allocate(bufferSize);
         int read;
         while ((read = reader.read(buffer)) != -1) {
@@ -2038,8 +2027,7 @@ public class HttpRequest
     return new CloseOperation<HttpRequest>(reader, ignoreCloseExceptions) {
 
       @Override
-      public HttpRequest run() throws IOException
-      {
+      public HttpRequest run() throws IOException {
         return copy(reader, writer);
       }
     }.call();
@@ -2621,13 +2609,11 @@ public class HttpRequest
    * @throws IOException
    */
   protected HttpRequest copy(final InputStream input, final OutputStream output)
-      throws IOException
-  {
+      throws IOException {
     return new CloseOperation<HttpRequest>(input, ignoreCloseExceptions) {
 
       @Override
-      public HttpRequest run() throws IOException
-      {
+      public HttpRequest run() throws IOException {
         final byte[] buffer = new byte[bufferSize];
         int read;
         while ((read = input.read(buffer)) != -1) {
@@ -2649,13 +2635,11 @@ public class HttpRequest
    * @throws IOException
    */
   protected HttpRequest copy(final Reader input, final Writer output)
-      throws IOException
-  {
+      throws IOException {
     return new CloseOperation<HttpRequest>(input, ignoreCloseExceptions) {
 
       @Override
-      public HttpRequest run() throws IOException
-      {
+      public HttpRequest run() throws IOException {
         final char[] buffer = new char[bufferSize];
         int read;
         while ((read = input.read(buffer)) != -1) {
@@ -2696,8 +2680,7 @@ public class HttpRequest
    * @throws HttpRequestException
    * @throws IOException
    */
-  protected HttpRequest closeOutput() throws IOException
-  {
+  protected HttpRequest closeOutput() throws IOException {
     progress(null);
     if (output == null)
       return this;
@@ -2736,8 +2719,7 @@ public class HttpRequest
    * @return this request
    * @throws IOException
    */
-  protected HttpRequest openOutput() throws IOException
-  {
+  protected HttpRequest openOutput() throws IOException {
     if (output != null)
       return this;
     getConnection().setDoOutput(true);
@@ -2754,8 +2736,7 @@ public class HttpRequest
    * @return this request
    * @throws IOException
    */
-  protected HttpRequest startPart() throws IOException
-  {
+  protected HttpRequest startPart() throws IOException {
     if (!multipart) {
       multipart = true;
       contentType(CONTENT_TYPE_MULTIPART).openOutput();
@@ -2774,8 +2755,7 @@ public class HttpRequest
    * @throws IOException
    */
   protected HttpRequest writePartHeader(final String name, final String filename)
-      throws IOException
-  {
+      throws IOException {
     return writePartHeader(name, filename, null);
   }
 
@@ -2789,8 +2769,7 @@ public class HttpRequest
    * @throws IOException
    */
   protected HttpRequest writePartHeader(final String name,
-                                        final String filename, final String contentType) throws IOException
-  {
+      final String filename, final String contentType) throws IOException {
     final StringBuilder partBuffer = new StringBuilder();
     partBuffer.append("form-data; name=\"").append(name);
     if (filename != null)
@@ -2823,7 +2802,7 @@ public class HttpRequest
    * @throws HttpRequestException
    */
   public HttpRequest part(final String name, final String filename,
-                          final String part) throws HttpRequestException {
+      final String part) throws HttpRequestException {
     return part(name, filename, null, part);
   }
 
@@ -2839,7 +2818,7 @@ public class HttpRequest
    * @throws HttpRequestException
    */
   public HttpRequest part(final String name, final String filename,
-                          final String contentType, final String part) throws HttpRequestException {
+      final String contentType, final String part) throws HttpRequestException {
     try {
       startPart();
       writePartHeader(name, filename, contentType);
@@ -2873,7 +2852,7 @@ public class HttpRequest
    * @throws HttpRequestException
    */
   public HttpRequest part(final String name, final String filename,
-                          final Number part) throws HttpRequestException {
+      final Number part) throws HttpRequestException {
     return part(name, filename, part != null ? part.toString() : null);
   }
 
@@ -2900,7 +2879,7 @@ public class HttpRequest
    * @throws HttpRequestException
    */
   public HttpRequest part(final String name, final String filename,
-                          final File part) throws HttpRequestException {
+      final File part) throws HttpRequestException {
     return part(name, filename, null, part);
   }
 
@@ -2916,7 +2895,7 @@ public class HttpRequest
    * @throws HttpRequestException
    */
   public HttpRequest part(final String name, final String filename,
-                          final String contentType, final File part) throws HttpRequestException {
+      final String contentType, final File part) throws HttpRequestException {
     final InputStream stream;
     try {
       stream = new BufferedInputStream(new FileInputStream(part));
@@ -2952,7 +2931,7 @@ public class HttpRequest
    * @throws HttpRequestException
    */
   public HttpRequest part(final String name, final String filename,
-                          final String contentType, final InputStream part)
+      final String contentType, final InputStream part)
       throws HttpRequestException {
     try {
       startPart();
@@ -3047,8 +3026,7 @@ public class HttpRequest
     return new FlushOperation<HttpRequest>(writer) {
 
       @Override
-      protected HttpRequest run() throws IOException
-      {
+      protected HttpRequest run() throws IOException {
         return copy(input, writer);
       }
     }.call();

@@ -3,6 +3,7 @@ package com.sd.lib.dldmgr;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.sd.lib.dldmgr.executor.impl.DefaultDownloadExecutor;
 import com.sd.lib.dldmgr.executor.DownloadExecutor;
 
 import java.io.File;
@@ -24,7 +25,7 @@ public class DownloadManagerConfig
     {
         mIsDebug = builder.mIsDebug;
         mContext = builder.mContext;
-        mDownloadExecutor = builder.mDownloadExecutor;
+        mDownloadExecutor = builder.mDownloadExecutor != null ? builder.mDownloadExecutor : new DefaultDownloadExecutor();
 
         String dir = builder.mDownloadDirectory;
         if (TextUtils.isEmpty(dir))
