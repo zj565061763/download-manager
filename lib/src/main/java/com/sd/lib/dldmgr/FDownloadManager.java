@@ -139,7 +139,7 @@ public class FDownloadManager implements DownloadManager
 
         final DownloadInfo info = new DownloadInfo(url);
 
-        final File tempFile = getUrlFile(url, null);
+        final File tempFile = getUrlFile(url, ".temp");
         if (tempFile == null)
         {
             if (getConfig().isDebug())
