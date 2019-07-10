@@ -104,10 +104,10 @@ public class FDownloadManager implements DownloadManager
         {
         }
 
-        return getDownloadFile(url, ext);
+        return getUrlFile(url, ext);
     }
 
-    private synchronized File getDownloadFile(String url, String ext)
+    private synchronized File getUrlFile(String url, String ext)
     {
         if (TextUtils.isEmpty(url))
             throw new IllegalArgumentException("url is empty");
@@ -139,11 +139,11 @@ public class FDownloadManager implements DownloadManager
 
         final DownloadInfo info = new DownloadInfo(url);
 
-        final File downloadFile = getDownloadFile(url, null);
-        if (downloadFile == null)
+        final File tempFile = getUrlFile(url, null);
+        if (tempFile == null)
         {
             if (getConfig().isDebug())
-                Log.e(TAG, "addTask error create download file error:" + url);
+                Log.e(TAG, "addTask error create temp file error:" + url);
 
             notifyError(info, DownloadError.CreateFile);
             return false;
@@ -163,10 +163,10 @@ public class FDownloadManager implements DownloadManager
                 if (getConfig().isDebug())
                     Log.i(TAG, "download success:" + url);
 
-                if (!downloadFile.exists())
+                if (!tempFile.exists())
                 {
                     if (getConfig().isDebug())
-                        Log.e(TAG, "download success error download file not exists:" + url);
+                        Log.e(TAG, "download success error temp file not exists:" + url);
 
                     FDownloadManager.this.notifyError(info, DownloadError.DownloadFileNotExists);
                     return;
@@ -185,7 +185,7 @@ public class FDownloadManager implements DownloadManager
                 if (renameFile.exists())
                     renameFile.delete();
 
-                if (downloadFile.renameTo(renameFile))
+                if (tempFile.renameTo(renameFile))
                 {
                     FDownloadManager.this.notifySuccess(info, renameFile);
                 } else
@@ -209,14 +209,14 @@ public class FDownloadManager implements DownloadManager
         };
 
         final DownloadRequest downloadRequest = new DownloadRequest(url);
-        final boolean submitted = getConfig().getDownloadExecutor().submit(downloadRequest, downloadFile, downloadUpdater);
+        final boolean submitted = getConfig().getDownloadExecutor().submit(downloadRequest, tempFile, downloadUpdater);
         if (submitted)
         {
             mMapDownloadInfo.put(url, info);
             notifyPrepare(info);
 
             if (getConfig().isDebug())
-                Log.i(TAG, "addTask:" + url + " path:" + downloadFile.getAbsolutePath() + " size:" + mMapDownloadInfo.size());
+                Log.i(TAG, "addTask:" + url + " path:" + tempFile.getAbsolutePath() + " size:" + mMapDownloadInfo.size());
         } else
         {
             if (getConfig().isDebug())
