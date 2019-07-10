@@ -13,6 +13,11 @@ public class DownloadRequest
         mUrl = url;
     }
 
+    /**
+     * 下载地址
+     *
+     * @return
+     */
     public String getUrl()
     {
         return mUrl;
