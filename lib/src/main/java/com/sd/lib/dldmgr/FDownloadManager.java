@@ -148,12 +148,19 @@ public class FDownloadManager implements DownloadManager
             @Override
             public void notifySuccess()
             {
-                Log.i(TAG, "addTask onSuccess:" + url);
+                Log.i(TAG, "onSuccess:" + url);
+
+                if (!downloadFile.exists())
+                {
+                    Log.e(TAG, "onSuccess error download file not exists:" + url);
+                    FDownloadManager.this.notifyError(info, DownloadError.DownloadFileNotExists);
+                    return;
+                }
 
                 final File renameFile = getUrlFile(url);
                 if (renameFile == null)
                 {
-                    Log.e(TAG, "addTask create rename file error:" + url);
+                    Log.e(TAG, "onSuccess error create rename file:" + url);
                     FDownloadManager.this.notifyError(info, DownloadError.CreateFile);
                     return;
                 }
@@ -166,7 +173,7 @@ public class FDownloadManager implements DownloadManager
                     FDownloadManager.this.notifySuccess(info, renameFile);
                 } else
                 {
-                    Log.e(TAG, "addTask rename file error:" + url);
+                    Log.e(TAG, "onSuccess error rename file:" + url);
                     FDownloadManager.this.notifyError(info, DownloadError.RenameFile);
                 }
             }

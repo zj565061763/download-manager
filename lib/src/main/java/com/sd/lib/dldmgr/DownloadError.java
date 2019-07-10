@@ -7,6 +7,10 @@ public enum DownloadError
      */
     CreateFile,
     /**
+     * 下载文件不存在
+     */
+    DownloadFileNotExists,
+    /**
      * 重命名文件失败
      */
     RenameFile,
