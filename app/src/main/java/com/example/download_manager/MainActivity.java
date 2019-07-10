@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.sd.lib.dldmgr.DownloadInfo;
 import com.sd.lib.dldmgr.DownloadManager;
 import com.sd.lib.dldmgr.FDownloadManager;
+import com.sd.lib.dldmgr.TransmitParam;
 
 import java.io.File;
 
@@ -16,7 +17,7 @@ public class MainActivity extends AppCompatActivity
 {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final String URL = "";
+    private static final String URL = "https://dldir1.qq.com/qqfile/qq/PCQQ9.1.5/25530/QQ9.1.5.25530.exe";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -47,7 +48,8 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onProgress(DownloadInfo info)
         {
-            Log.i(TAG, "onProgress:" + info.getTransmitParam());
+            final TransmitParam param = info.getTransmitParam();
+            Log.i(TAG, "onProgress:" + param.getProgress() + " " + param.getSpeedKBps());
         }
 
         @Override
