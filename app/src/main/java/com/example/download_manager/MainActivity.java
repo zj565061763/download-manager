@@ -30,10 +30,12 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
+                // 添加一个下载任务
                 FDownloadManager.getDefault().addTask(URL);
             }
         });
 
+        // 添加下载回调
         FDownloadManager.getDefault().addCallback(mDownloadCallback);
     }
 
@@ -49,7 +51,13 @@ public class MainActivity extends AppCompatActivity
         public void onProgress(DownloadInfo info)
         {
             final TransmitParam param = info.getTransmitParam();
-            Log.i(TAG, "onProgress:" + param.getProgress() + " " + param.getSpeedKBps());
+
+            // 下载进度
+            final int progress = param.getProgress();
+            // 下载速率
+            final int speed = param.getSpeedKBps();
+
+            Log.i(TAG, "onProgress:" + progress + " " + speed);
         }
 
         @Override
@@ -70,6 +78,7 @@ public class MainActivity extends AppCompatActivity
     protected void onDestroy()
     {
         super.onDestroy();
+        // 移除下载回调
         FDownloadManager.getDefault().removeCallback(mDownloadCallback);
     }
 }
