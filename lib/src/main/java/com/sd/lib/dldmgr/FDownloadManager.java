@@ -220,45 +220,52 @@ public class FDownloadManager implements DownloadManager
         return submitted;
     }
 
-    private void notifyPrepare(DownloadInfo downloadInfo)
+    private void notifyPrepare(DownloadInfo info)
     {
-        downloadInfo.setState(DownloadState.Prepare);
+        info.setState(DownloadState.Prepare);
         for (Callback item : mListCallback)
         {
-            item.onPrepare(downloadInfo);
+            item.onPrepare(info);
         }
     }
 
-    private void notifyProgress(DownloadInfo downloadInfo, long total, long current)
+    private void notifyProgress(DownloadInfo info, long total, long current)
     {
-        downloadInfo.setState(DownloadState.Downloading);
-        downloadInfo.getTransmitParam().transmit(total, current);
-        for (Callback item : mListCallback)
+        info.setState(DownloadState.Downloading);
+
+        final int old = info.getTransmitParam().getProgress();
+        info.getTransmitParam().transmit(total, current);
+        final int progress = info.getTransmitParam().getProgress();
+
+        if (progress > old)
         {
-            item.onProgress(downloadInfo);
+            for (Callback item : mListCallback)
+            {
+                item.onProgress(info);
+            }
         }
     }
 
-    private synchronized void notifySuccess(DownloadInfo downloadInfo, File file)
+    private synchronized void notifySuccess(DownloadInfo info, File file)
     {
-        downloadInfo.setState(DownloadState.Success);
+        info.setState(DownloadState.Success);
         for (Callback item : mListCallback)
         {
-            item.onSuccess(downloadInfo, file);
+            item.onSuccess(info, file);
         }
 
-        mMapDownloadInfo.remove(downloadInfo.getUrl());
+        mMapDownloadInfo.remove(info.getUrl());
     }
 
-    private synchronized void notifyError(DownloadInfo downloadInfo, DownloadError error)
+    private synchronized void notifyError(DownloadInfo info, DownloadError error)
     {
-        downloadInfo.setState(DownloadState.Error);
-        downloadInfo.setError(error);
+        info.setState(DownloadState.Error);
+        info.setError(error);
         for (Callback item : mListCallback)
         {
-            item.onError(downloadInfo);
+            item.onError(info);
         }
 
-        mMapDownloadInfo.remove(downloadInfo.getUrl());
+        mMapDownloadInfo.remove(info.getUrl());
     }
 }
