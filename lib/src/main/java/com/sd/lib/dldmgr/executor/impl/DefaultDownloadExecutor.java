@@ -70,7 +70,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
 
                 if (mPreferBreakpoint && breakpoint)
                 {
-                    httpRequest.header("Range", "bytes=" + (length + 1) + "-");
+                    httpRequest.header("Range", "bytes=" + length + "-");
                 }
 
                 try
