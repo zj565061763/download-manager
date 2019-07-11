@@ -1,6 +1,5 @@
 package com.sd.lib.dldmgr;
 
-import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -88,23 +87,21 @@ public class FDownloadManager implements DownloadManager
         if (TextUtils.isEmpty(url))
             return null;
 
-        String ext = null;
-        try
-        {
-            final Uri uri = Uri.parse(url);
-            final String path = uri.getPath();
-            if (!TextUtils.isEmpty(path))
-            {
-                ext = path.substring(path.lastIndexOf("."));
-            } else
-            {
-                ext = url.substring(url.lastIndexOf("."));
-            }
-        } catch (Exception e)
-        {
-        }
+        final File file = getDownloadFileInternal(url);
+        if (file.exists())
+            return file;
 
-        return getUrlFile(url, ext);
+        return null;
+    }
+
+    private File getTempFile(String url)
+    {
+        return getUrlFile(url, ".temp");
+    }
+
+    private File getDownloadFileInternal(String url)
+    {
+        return getUrlFile(url, Utils.getExt(url));
     }
 
     private synchronized File getUrlFile(String url, String ext)
@@ -139,7 +136,7 @@ public class FDownloadManager implements DownloadManager
 
         final DownloadInfo info = new DownloadInfo(url);
 
-        final File tempFile = getUrlFile(url, ".temp");
+        final File tempFile = getTempFile(url);
         if (tempFile == null)
         {
             if (getConfig().isDebug())
@@ -322,7 +319,7 @@ public class FDownloadManager implements DownloadManager
                 return;
             }
 
-            final File downloadFile = getDownloadFile(mUrl);
+            final File downloadFile = getDownloadFileInternal(mUrl);
             if (downloadFile == null)
             {
                 if (getConfig().isDebug())

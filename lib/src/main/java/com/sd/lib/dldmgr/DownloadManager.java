@@ -24,7 +24,7 @@ public interface DownloadManager
      * 返回url对应的文件
      *
      * @param url
-     * @return
+     * @return null-文件不存在，不为null下载文件存在
      */
     File getDownloadFile(String url);
 
