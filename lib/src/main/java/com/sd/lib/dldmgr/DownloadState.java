@@ -8,12 +8,12 @@ public enum DownloadState
     Error;
 
     /**
-     * 是否处于活动状态，{@link #Prepare}或者{@link #Downloading}
+     * 是否处于完成状态，{@link #Success}或者{@link #Error}
      *
      * @return
      */
-    public boolean isActive()
+    public boolean isCompleted()
     {
-        return this == Prepare || this == Downloading;
+        return this == Success || this == Error;
     }
 }
