@@ -99,6 +99,12 @@ public class DefaultDownloadExecutor implements DownloadExecutor
                     }
                 } catch (Exception e)
                 {
+                    if (e instanceof RuntimeException)
+                    {
+                        if (!(e instanceof HttpRequest.HttpRequestException))
+                            throw (RuntimeException) e;
+                    }
+
                     updater.notifyError(new DownloadHttpException(e), null);
                 }
             }
