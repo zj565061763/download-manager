@@ -88,10 +88,10 @@ public class FDownloadManager implements DownloadManager
             return null;
 
         final File file = getDownloadFileInternal(url);
-        if (file.exists())
-            return file;
+        if (file == null)
+            return null;
 
-        return null;
+        return file.exists() ? file : null;
     }
 
     private File getTempFile(String url)
