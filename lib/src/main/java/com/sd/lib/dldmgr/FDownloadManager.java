@@ -149,66 +149,9 @@ public class FDownloadManager implements DownloadManager
             return false;
         }
 
-        final DownloadUpdater downloadUpdater = new DownloadUpdater()
-        {
-            @Override
-            public void notifyProgress(long total, long current)
-            {
-                FDownloadManager.this.notifyProgress(info, total, current);
-            }
-
-            @Override
-            public void notifySuccess()
-            {
-                if (getConfig().isDebug())
-                    Log.i(TAG, "download success:" + url);
-
-                if (!tempFile.exists())
-                {
-                    if (getConfig().isDebug())
-                        Log.e(TAG, "download success error temp file not exists:" + url);
-
-                    FDownloadManager.this.notifyError(info, DownloadError.TempFileNotExists);
-                    return;
-                }
-
-                final File downloadFile = getDownloadFile(url);
-                if (downloadFile == null)
-                {
-                    if (getConfig().isDebug())
-                        Log.e(TAG, "download success error create download file:" + url);
-
-                    FDownloadManager.this.notifyError(info, DownloadError.CreateDownloadFile);
-                    return;
-                }
-
-                if (downloadFile.exists())
-                    downloadFile.delete();
-
-                if (tempFile.renameTo(downloadFile))
-                {
-                    FDownloadManager.this.notifySuccess(info, downloadFile);
-                } else
-                {
-                    if (getConfig().isDebug())
-                        Log.e(TAG, "download success error rename temp file to download file:" + url);
-
-                    FDownloadManager.this.notifyError(info, DownloadError.RenameFile);
-                }
-            }
-
-            @Override
-            public void notifyError(Exception e, String details)
-            {
-                if (getConfig().isDebug())
-                    Log.e(TAG, "download error:" + url + " " + e);
-
-                final DownloadError error = e instanceof DownloadHttpException ? DownloadError.Http : DownloadError.Other;
-                FDownloadManager.this.notifyError(info, error);
-            }
-        };
-
         final DownloadRequest downloadRequest = new DownloadRequest(url);
+        final DownloadUpdater downloadUpdater = new InternalDownloadUpdater(info, tempFile);
+
         final boolean submitted = getConfig().getDownloadExecutor().submit(downloadRequest, tempFile, downloadUpdater);
         if (submitted)
         {
@@ -331,4 +274,89 @@ public class FDownloadManager implements DownloadManager
             });
         }
     };
+
+    private final class InternalDownloadUpdater implements DownloadUpdater
+    {
+        private final DownloadInfo mInfo;
+        private final File mTempFile;
+
+        private final String mUrl;
+        private boolean mCompleted = false;
+
+        public InternalDownloadUpdater(DownloadInfo info, File tempFile)
+        {
+            if (info == null)
+                throw new IllegalArgumentException("info is null for updater");
+
+            if (tempFile == null)
+                throw new IllegalArgumentException("tempFile is null for updater");
+
+            mInfo = info;
+            mTempFile = tempFile;
+            mUrl = info.getUrl();
+        }
+
+        @Override
+        public void notifyProgress(long total, long current)
+        {
+            if (mCompleted)
+                throw new RuntimeException(DownloadUpdater.class.getSimpleName() + " completed but receive progress notify:" + mUrl);
+
+            FDownloadManager.this.notifyProgress(mInfo, total, current);
+        }
+
+        @Override
+        public void notifySuccess()
+        {
+            mCompleted = true;
+
+            if (getConfig().isDebug())
+                Log.i(TAG, "download success:" + mUrl);
+
+            if (!mTempFile.exists())
+            {
+                if (getConfig().isDebug())
+                    Log.e(TAG, "download success error temp file not exists:" + mUrl);
+
+                FDownloadManager.this.notifyError(mInfo, DownloadError.TempFileNotExists);
+                return;
+            }
+
+            final File downloadFile = getDownloadFile(mUrl);
+            if (downloadFile == null)
+            {
+                if (getConfig().isDebug())
+                    Log.e(TAG, "download success error create download file:" + mUrl);
+
+                FDownloadManager.this.notifyError(mInfo, DownloadError.CreateDownloadFile);
+                return;
+            }
+
+            if (downloadFile.exists())
+                downloadFile.delete();
+
+            if (mTempFile.renameTo(downloadFile))
+            {
+                FDownloadManager.this.notifySuccess(mInfo, downloadFile);
+            } else
+            {
+                if (getConfig().isDebug())
+                    Log.e(TAG, "download success error rename temp file to download file:" + mUrl);
+
+                FDownloadManager.this.notifyError(mInfo, DownloadError.RenameFile);
+            }
+        }
+
+        @Override
+        public void notifyError(Exception e, String details)
+        {
+            mCompleted = true;
+
+            if (getConfig().isDebug())
+                Log.e(TAG, "download error:" + mUrl + " " + e);
+
+            final DownloadError error = e instanceof DownloadHttpException ? DownloadError.Http : DownloadError.Other;
+            FDownloadManager.this.notifyError(mInfo, error);
+        }
+    }
 }
