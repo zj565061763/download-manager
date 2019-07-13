@@ -123,8 +123,12 @@ public class DefaultDownloadExecutor implements DownloadExecutor
                 {
                     if (e instanceof RuntimeException)
                     {
-                        if (!(e instanceof HttpRequest.HttpRequestException))
+                        if (e instanceof HttpRequest.HttpRequestException)
+                        {
+                        } else
+                        {
                             throw (RuntimeException) e;
+                        }
                     }
 
                     updater.notifyError(new DownloadHttpException(e), null);
