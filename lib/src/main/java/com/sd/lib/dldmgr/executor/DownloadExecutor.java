@@ -21,6 +21,7 @@ public interface DownloadExecutor
      * 取消下载任务
      *
      * @param url
+     * @return true-任务取消
      */
-    void cancel(String url);
+    boolean cancel(String url);
 }

@@ -170,19 +170,19 @@ public class FDownloadManager implements DownloadManager
     }
 
     @Override
-    public synchronized void cancelTask(String url)
+    public synchronized boolean cancelTask(String url)
     {
         if (TextUtils.isEmpty(url))
-            return;
+            return false;
 
         final DownloadInfo info = mMapDownloadInfo.remove(url);
-        if (info != null)
-        {
-            if (getConfig().isDebug())
-                Log.i(TAG, "cancelTask:" + url);
+        if (info == null)
+            return false;
 
-            getConfig().getDownloadExecutor().cancel(url);
-        }
+        if (getConfig().isDebug())
+            Log.i(TAG, "cancelTask:" + url);
+
+        return getConfig().getDownloadExecutor().cancel(url);
     }
 
     private void notifyPrepare(DownloadInfo info)

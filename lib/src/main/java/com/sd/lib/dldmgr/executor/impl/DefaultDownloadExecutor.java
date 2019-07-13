@@ -221,20 +221,21 @@ public class DefaultDownloadExecutor implements DownloadExecutor
     }
 
     @Override
-    public void cancel(String url)
+    public boolean cancel(String url)
     {
         if (TextUtils.isEmpty(url))
             throw new IllegalArgumentException("url is empty");
 
         final TaskInfo taskInfo = getMapTask().remove(url);
-        if (taskInfo != null)
-        {
-            if (!taskInfo.mFuture.isDone())
-            {
-                taskInfo.mUpdater.notifyError(new DownloadCancelException(null), "");
-                taskInfo.mFuture.cancel(true);
-            }
-        }
+        if (taskInfo == null)
+            return false;
+
+        if (taskInfo.mFuture.isDone())
+            return false;
+
+        taskInfo.mUpdater.notifyError(new DownloadCancelException(null), "");
+        taskInfo.mFuture.cancel(true);
+        return true;
     }
 
     private static final class TaskInfo

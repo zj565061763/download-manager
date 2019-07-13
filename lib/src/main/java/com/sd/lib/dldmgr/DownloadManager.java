@@ -40,7 +40,7 @@ public interface DownloadManager
      * 添加下载任务
      *
      * @param url
-     * @return
+     * @return true-任务被添加
      */
     boolean addTask(String url);
 
@@ -48,8 +48,9 @@ public interface DownloadManager
      * 取消下载任务
      *
      * @param url
+     * @return true-任务被取消
      */
-    void cancelTask(String url);
+    boolean cancelTask(String url);
 
     interface Callback
     {
