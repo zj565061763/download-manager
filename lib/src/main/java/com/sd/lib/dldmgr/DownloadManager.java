@@ -44,6 +44,13 @@ public interface DownloadManager
      */
     boolean addTask(String url);
 
+    /**
+     * 移除下载任务
+     *
+     * @param url
+     */
+    void removeTask(String url);
+
     interface Callback
     {
         void onPrepare(DownloadInfo info);

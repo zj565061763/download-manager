@@ -168,6 +168,22 @@ public class FDownloadManager implements DownloadManager
         return submitted;
     }
 
+    @Override
+    public synchronized void removeTask(String url)
+    {
+        if (TextUtils.isEmpty(url))
+            return;
+
+        final DownloadInfo info = mMapDownloadInfo.remove(url);
+        if (info != null)
+        {
+            if (getConfig().isDebug())
+                Log.i(TAG, "removeTask:" + url);
+
+            getConfig().getDownloadExecutor().cancel(url);
+        }
+    }
+
     private void notifyPrepare(DownloadInfo info)
     {
         info.setState(DownloadState.Prepare);

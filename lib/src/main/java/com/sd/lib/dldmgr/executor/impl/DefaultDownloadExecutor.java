@@ -1,5 +1,7 @@
 package com.sd.lib.dldmgr.executor.impl;
 
+import android.text.TextUtils;
+
 import com.sd.lib.dldmgr.DownloadRequest;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
 import com.sd.lib.dldmgr.executor.DownloadExecutor;
@@ -15,7 +17,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 public class DefaultDownloadExecutor implements DownloadExecutor
 {
     private ExecutorService mExecutor;
+    private Map<String, Future<?>> mMapTask;
+
     private boolean mPreferBreakpoint = false;
 
     private ExecutorService getExecutor()
@@ -45,6 +52,19 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         return mExecutor;
     }
 
+    private Map<String, Future<?>> getMapTask()
+    {
+        if (mMapTask == null)
+        {
+            synchronized (this)
+            {
+                if (mMapTask == null)
+                    mMapTask = new ConcurrentHashMap<>();
+            }
+        }
+        return mMapTask;
+    }
+
     private static HttpRequest newHttpRequest(DownloadRequest downloadRequest)
     {
         final HttpRequest httpRequest = HttpRequest.get(downloadRequest.getUrl());
@@ -58,6 +78,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
     @Override
     public boolean submit(final DownloadRequest request, final File file, final DownloadUpdater updater)
     {
+        final String url = request.getUrl();
         final Runnable runnable = new Runnable()
         {
             @Override
@@ -106,11 +127,16 @@ public class DefaultDownloadExecutor implements DownloadExecutor
                     }
 
                     updater.notifyError(new DownloadHttpException(e), null);
+                } finally
+                {
+                    getMapTask().remove(url);
                 }
             }
         };
 
-        getExecutor().submit(runnable);
+        final Future<?> future = getExecutor().submit(runnable);
+        getMapTask().put(url, future);
+
         return true;
     }
 
@@ -188,6 +214,19 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         }
     }
 
+    @Override
+    public void cancel(String url)
+    {
+        if (TextUtils.isEmpty(url))
+            throw new IllegalArgumentException("url is empty");
+
+        final Future<?> future = getMapTask().remove(url);
+        if (future != null)
+        {
+            future.cancel(true);
+            // TODO 通知回调
+        }
+    }
 
     private static void read(InputStream in, ReadCallback callback) throws IOException
     {

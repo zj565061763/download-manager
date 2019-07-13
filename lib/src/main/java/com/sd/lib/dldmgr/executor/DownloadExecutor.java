@@ -16,4 +16,11 @@ public interface DownloadExecutor
      * @return true-提交成功，false-提交失败
      */
     boolean submit(DownloadRequest request, File file, DownloadUpdater updater);
+
+    /**
+     * 取消下载任务
+     *
+     * @param url
+     */
+    void cancel(String url);
 }
