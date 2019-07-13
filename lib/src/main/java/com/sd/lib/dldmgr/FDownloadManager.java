@@ -15,10 +15,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class FDownloadManager implements DownloadManager
 {
+    private static final String EXT_TEMP = ".temp";
     private static FDownloadManager sDefault = null;
 
     private final File mDirectory;
-    private final Map<String, DownloadInfo> mMapDownloadInfo = new ConcurrentHashMap<>();
+    private final Map<String, DownloadInfoWrapper> mMapDownloadInfo = new ConcurrentHashMap<>();
+    private final Map<File, String> mMapTempFile = new ConcurrentHashMap<>();
+
     private final List<Callback> mListCallback = new CopyOnWriteArrayList<>();
 
     protected FDownloadManager(String directory)
@@ -97,7 +100,7 @@ public class FDownloadManager implements DownloadManager
 
     private File getTempFile(String url)
     {
-        return getUrlFile(url, ".temp");
+        return getUrlFile(url, EXT_TEMP);
     }
 
     private File getDownloadFileInternal(String url)
@@ -123,7 +126,46 @@ public class FDownloadManager implements DownloadManager
     @Override
     public DownloadInfo getDownloadInfo(String url)
     {
-        return mMapDownloadInfo.get(url);
+        final DownloadInfoWrapper wrapper = mMapDownloadInfo.get(url);
+        if (wrapper == null)
+            return null;
+
+        return wrapper.mDownloadInfo;
+    }
+
+    @Override
+    public synchronized void deleteAllTempFile()
+    {
+        if (!checkDirectory())
+            return;
+
+        final File[] files = mDirectory.listFiles();
+        if (files == null || files.length <= 0)
+            return;
+
+        try
+        {
+            int count = 0;
+            for (File item : files)
+            {
+                final String name = item.getName();
+                if (name.endsWith(EXT_TEMP))
+                {
+                    if (mMapTempFile.containsKey(item))
+                        continue;
+
+                    if (item.delete())
+                        count++;
+                }
+            }
+
+            if (getConfig().isDebug())
+                Log.i(TAG, "deleteAllTempFile count:" + count);
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -153,7 +195,10 @@ public class FDownloadManager implements DownloadManager
         final boolean submitted = getConfig().getDownloadExecutor().submit(downloadRequest, tempFile, downloadUpdater);
         if (submitted)
         {
-            mMapDownloadInfo.put(url, info);
+            final DownloadInfoWrapper wrapper = new DownloadInfoWrapper(info, tempFile);
+            mMapDownloadInfo.put(url, wrapper);
+            mMapTempFile.put(tempFile, url);
+
             notifyPrepare(info);
 
             if (getConfig().isDebug())
@@ -175,8 +220,8 @@ public class FDownloadManager implements DownloadManager
         if (TextUtils.isEmpty(url))
             return false;
 
-        final DownloadInfo info = mMapDownloadInfo.remove(url);
-        if (info == null)
+        final DownloadInfoWrapper wrapper = removeDownloadInfo(url);
+        if (wrapper == null)
             return false;
 
         if (getConfig().isDebug())
@@ -205,7 +250,7 @@ public class FDownloadManager implements DownloadManager
         info.setState(DownloadState.Success);
         mMainThreadCallback.onSuccess(info, file);
 
-        removeDownloadInfo(info);
+        removeDownloadInfo(info.getUrl());
     }
 
     private void notifyError(DownloadInfo info, DownloadError error)
@@ -214,12 +259,20 @@ public class FDownloadManager implements DownloadManager
         info.setError(error);
         mMainThreadCallback.onError(info);
 
-        removeDownloadInfo(info);
+        removeDownloadInfo(info.getUrl());
     }
 
-    private synchronized void removeDownloadInfo(DownloadInfo info)
+    private synchronized DownloadInfoWrapper removeDownloadInfo(String url)
     {
-        mMapDownloadInfo.remove(info.getUrl());
+        final DownloadInfoWrapper wrapper = mMapDownloadInfo.remove(url);
+        if (wrapper != null)
+        {
+            mMapTempFile.remove(wrapper.mTempFile);
+
+            if (getConfig().isDebug())
+                Log.i(TAG, "removeDownloadInfo:" + url + " size:" + mMapDownloadInfo.size() + " tempSize:" + mMapTempFile.size());
+        }
+        return wrapper;
     }
 
     private final Callback mMainThreadCallback = new Callback()
@@ -385,6 +438,24 @@ public class FDownloadManager implements DownloadManager
             }
 
             FDownloadManager.this.notifyError(mInfo, error);
+        }
+    }
+
+    private final class DownloadInfoWrapper
+    {
+        private final DownloadInfo mDownloadInfo;
+        private final File mTempFile;
+
+        public DownloadInfoWrapper(DownloadInfo downloadInfo, File tempFile)
+        {
+            if (downloadInfo == null)
+                throw new IllegalArgumentException("downloadInfo is null");
+
+            if (tempFile == null)
+                throw new IllegalArgumentException("tempFile is null");
+
+            mDownloadInfo = downloadInfo;
+            mTempFile = tempFile;
         }
     }
 }
