@@ -229,9 +229,10 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         final TaskInfo taskInfo = getMapTask().remove(url);
         if (taskInfo != null)
         {
-            if (taskInfo.mFuture.cancel(true))
+            if (!taskInfo.mFuture.isDone())
             {
                 taskInfo.mUpdater.notifyError(new DownloadCancelException(null), "");
+                taskInfo.mFuture.cancel(true);
             }
         }
     }
