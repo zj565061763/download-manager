@@ -7,7 +7,18 @@
     <Button
         android:id="@+id/btn_download"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:text="download"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btn_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:text="cancel"
+        android:textAllCaps="false" />
 
     <TextView
         android:id="@+id/tv_progress"

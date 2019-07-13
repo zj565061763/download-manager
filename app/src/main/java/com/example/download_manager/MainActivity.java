@@ -13,7 +13,7 @@ import com.sd.lib.dldmgr.TransmitParam;
 
 import java.io.File;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -25,26 +25,11 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.btn_download).setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                final DownloadInfo info = FDownloadManager.getDefault().getDownloadInfo(URL);
-                if (info == null)
-                {
-                    // 添加下载任务
-                    FDownloadManager.getDefault().addTask(URL);
-                } else
-                {
-                    // 取消下载任务
-                    FDownloadManager.getDefault().cancelTask(URL);
-                }
-            }
-        });
-
         // 添加下载回调
         FDownloadManager.getDefault().addCallback(mDownloadCallback);
+
+        // 删除所有临时文件
+        FDownloadManager.getDefault().deleteAllTempFile();
     }
 
     private final DownloadManager.Callback mDownloadCallback = new DownloadManager.Callback()
@@ -81,6 +66,24 @@ public class MainActivity extends AppCompatActivity
             Log.e(TAG, "onError:" + info.getError());
         }
     };
+
+    @Override
+    public void onClick(View v)
+    {
+        switch (v.getId())
+        {
+            case R.id.btn_download:
+                // 添加下载任务
+                FDownloadManager.getDefault().addTask(URL);
+                break;
+            case R.id.btn_cancel:
+                // 取消下载任务
+                FDownloadManager.getDefault().cancelTask(URL);
+                break;
+            default:
+                break;
+        }
+    }
 
     @Override
     protected void onDestroy()
