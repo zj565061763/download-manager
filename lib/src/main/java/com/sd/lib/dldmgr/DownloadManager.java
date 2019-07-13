@@ -45,11 +45,11 @@ public interface DownloadManager
     boolean addTask(String url);
 
     /**
-     * 移除下载任务
+     * 取消下载任务
      *
      * @param url
      */
-    void removeTask(String url);
+    void cancelTask(String url);
 
     interface Callback
     {

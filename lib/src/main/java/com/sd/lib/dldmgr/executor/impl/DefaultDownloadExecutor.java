@@ -3,6 +3,7 @@ package com.sd.lib.dldmgr.executor.impl;
 import android.text.TextUtils;
 
 import com.sd.lib.dldmgr.DownloadRequest;
+import com.sd.lib.dldmgr.exception.DownloadCancelException;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
 import com.sd.lib.dldmgr.executor.DownloadExecutor;
 import com.sd.lib.dldmgr.updater.DownloadUpdater;
@@ -31,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultDownloadExecutor implements DownloadExecutor
 {
     private ExecutorService mExecutor;
-    private Map<String, Future<?>> mMapTask;
+    private Map<String, TaskInfo> mMapTask;
 
     private boolean mPreferBreakpoint = false;
 
@@ -52,7 +53,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         return mExecutor;
     }
 
-    private Map<String, Future<?>> getMapTask()
+    private Map<String, TaskInfo> getMapTask()
     {
         if (mMapTask == null)
         {
@@ -135,7 +136,8 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         };
 
         final Future<?> future = getExecutor().submit(runnable);
-        getMapTask().put(url, future);
+        final TaskInfo taskInfo = new TaskInfo(future, updater);
+        getMapTask().put(url, taskInfo);
 
         return true;
     }
@@ -220,11 +222,28 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         if (TextUtils.isEmpty(url))
             throw new IllegalArgumentException("url is empty");
 
-        final Future<?> future = getMapTask().remove(url);
-        if (future != null)
+        final TaskInfo taskInfo = getMapTask().remove(url);
+        if (taskInfo != null)
         {
-            future.cancel(true);
-            // TODO 通知回调
+            if (taskInfo.mFuture.cancel(true))
+            {
+                taskInfo.mUpdater.notifyError(new DownloadCancelException(null), "");
+            }
+        }
+    }
+
+    private static final class TaskInfo
+    {
+        private final Future<?> mFuture;
+        private final DownloadUpdater mUpdater;
+
+        public TaskInfo(Future<?> future, DownloadUpdater updater)
+        {
+            if (future == null || updater == null)
+                throw new IllegalArgumentException();
+
+            mFuture = future;
+            mUpdater = updater;
         }
     }
 

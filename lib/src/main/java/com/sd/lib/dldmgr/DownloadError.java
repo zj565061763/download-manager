@@ -27,6 +27,10 @@ public enum DownloadError
      */
     Http,
     /**
+     * 下载被取消
+     */
+    Cancel,
+    /**
      * 其他未知异常
      */
     Other

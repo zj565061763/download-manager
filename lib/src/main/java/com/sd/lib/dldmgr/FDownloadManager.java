@@ -3,6 +3,7 @@ package com.sd.lib.dldmgr;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.sd.lib.dldmgr.exception.DownloadCancelException;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
 import com.sd.lib.dldmgr.updater.DownloadUpdater;
 
@@ -169,7 +170,7 @@ public class FDownloadManager implements DownloadManager
     }
 
     @Override
-    public synchronized void removeTask(String url)
+    public synchronized void cancelTask(String url)
     {
         if (TextUtils.isEmpty(url))
             return;
@@ -178,7 +179,7 @@ public class FDownloadManager implements DownloadManager
         if (info != null)
         {
             if (getConfig().isDebug())
-                Log.i(TAG, "removeTask:" + url);
+                Log.i(TAG, "cancelTask:" + url);
 
             getConfig().getDownloadExecutor().cancel(url);
         }
@@ -368,7 +369,15 @@ public class FDownloadManager implements DownloadManager
             if (getConfig().isDebug())
                 Log.e(TAG, "download error:" + mUrl + " " + e);
 
-            final DownloadError error = e instanceof DownloadHttpException ? DownloadError.Http : DownloadError.Other;
+            DownloadError error = DownloadError.Other;
+            if (e instanceof DownloadHttpException)
+            {
+                error = DownloadError.Http;
+            } else if (e instanceof DownloadCancelException)
+            {
+                error = DownloadError.Cancel;
+            }
+
             FDownloadManager.this.notifyError(mInfo, error);
         }
     }
