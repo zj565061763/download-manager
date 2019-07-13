@@ -134,7 +134,7 @@ public class FDownloadManager implements DownloadManager
     }
 
     @Override
-    public synchronized void deleteAllTempFile()
+    public synchronized void deleteTempFile()
     {
         if (!checkDirectory())
             return;
@@ -160,7 +160,7 @@ public class FDownloadManager implements DownloadManager
             }
 
             if (getConfig().isDebug())
-                Log.i(TAG, "deleteAllTempFile count:" + count);
+                Log.i(TAG, "deleteTempFile count:" + count);
 
         } catch (Exception e)
         {

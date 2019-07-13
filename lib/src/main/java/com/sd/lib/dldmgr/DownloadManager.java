@@ -39,7 +39,7 @@ public interface DownloadManager
     /**
      * 删除所有临时文件(下载中的临时文件不会被删除)
      */
-    void deleteAllTempFile();
+    void deleteTempFile();
 
     /**
      * 添加下载任务
