@@ -295,7 +295,7 @@ public class FDownloadManager implements DownloadManager
         private final File mTempFile;
 
         private final String mUrl;
-        private boolean mCompleted = false;
+        private volatile boolean mCompleted = false;
 
         public InternalDownloadUpdater(DownloadInfo info, File tempFile)
         {
@@ -314,7 +314,7 @@ public class FDownloadManager implements DownloadManager
         public void notifyProgress(long total, long current)
         {
             if (mCompleted)
-                throw new RuntimeException(DownloadUpdater.class.getSimpleName() + " completed but receive progress notify:" + mUrl);
+                return;
 
             FDownloadManager.this.notifyProgress(mInfo, total, current);
         }
@@ -322,13 +322,9 @@ public class FDownloadManager implements DownloadManager
         @Override
         public void notifySuccess()
         {
-            synchronized (this)
-            {
-                if (mCompleted)
-                    return;
-
-                mCompleted = true;
-            }
+            if (mCompleted)
+                return;
+            mCompleted = true;
 
             if (getConfig().isDebug())
                 Log.i(TAG, "download success:" + mUrl);
@@ -370,13 +366,9 @@ public class FDownloadManager implements DownloadManager
         @Override
         public void notifyError(Exception e, String details)
         {
-            synchronized (this)
-            {
-                if (mCompleted)
-                    return;
-
-                mCompleted = true;
-            }
+            if (mCompleted)
+                return;
+            mCompleted = true;
 
             if (getConfig().isDebug())
                 Log.e(TAG, "download error:" + mUrl + " " + e);
