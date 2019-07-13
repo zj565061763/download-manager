@@ -322,7 +322,13 @@ public class FDownloadManager implements DownloadManager
         @Override
         public void notifySuccess()
         {
-            mCompleted = true;
+            synchronized (this)
+            {
+                if (mCompleted)
+                    return;
+
+                mCompleted = true;
+            }
 
             if (getConfig().isDebug())
                 Log.i(TAG, "download success:" + mUrl);
@@ -364,7 +370,13 @@ public class FDownloadManager implements DownloadManager
         @Override
         public void notifyError(Exception e, String details)
         {
-            mCompleted = true;
+            synchronized (this)
+            {
+                if (mCompleted)
+                    return;
+
+                mCompleted = true;
+            }
 
             if (getConfig().isDebug())
                 Log.e(TAG, "download error:" + mUrl + " " + e);
