@@ -133,13 +133,22 @@ public class FDownloadManager implements DownloadManager
         return wrapper.mDownloadInfo;
     }
 
+    private File[] getAllFile()
+    {
+        if (!checkDirectory())
+            return null;
+
+        final File[] files = mDirectory.listFiles();
+        if (files == null || files.length <= 0)
+            return null;
+
+        return files;
+    }
+
     @Override
     public synchronized void deleteTempFile()
     {
-        if (!checkDirectory())
-            return;
-
-        final File[] files = mDirectory.listFiles();
+        final File[] files = getAllFile();
         if (files == null || files.length <= 0)
             return;
 
@@ -161,6 +170,39 @@ public class FDownloadManager implements DownloadManager
 
             if (getConfig().isDebug())
                 Log.i(TAG, "deleteTempFile count:" + count);
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public synchronized void deleteDownloadFile(String ext)
+    {
+        final File[] files = getAllFile();
+        if (files == null || files.length <= 0)
+            return;
+
+        try
+        {
+            int count = 0;
+            for (File item : files)
+            {
+                final String name = item.getName();
+                if (name.endsWith(EXT_TEMP))
+                    continue;
+
+                final boolean delete = TextUtils.isEmpty(ext) || name.endsWith(ext);
+                if (delete)
+                {
+                    if (item.delete())
+                        count++;
+                }
+            }
+
+            if (getConfig().isDebug())
+                Log.i(TAG, "deleteDownloadFile count:" + count + " ext:" + ext);
 
         } catch (Exception e)
         {

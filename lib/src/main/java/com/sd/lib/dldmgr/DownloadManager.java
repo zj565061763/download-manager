@@ -42,6 +42,13 @@ public interface DownloadManager
     void deleteTempFile();
 
     /**
+     * 删除下载文件
+     *
+     * @param ext 文件扩展名(例如.mp3)，null-所有下载文件
+     */
+    void deleteDownloadFile(String ext);
+
+    /**
      * 添加下载任务
      *
      * @param url
