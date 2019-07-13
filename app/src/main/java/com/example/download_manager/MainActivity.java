@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // 删除所有临时文件
         FDownloadManager.getDefault().deleteTempFile();
+        // 删除下载文件
+        FDownloadManager.getDefault().deleteDownloadFile(null);
     }
 
     private final DownloadManager.Callback mDownloadCallback = new DownloadManager.Callback()
