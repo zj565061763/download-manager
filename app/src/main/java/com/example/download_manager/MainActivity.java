@@ -30,8 +30,16 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                // 添加一个下载任务
-                FDownloadManager.getDefault().addTask(URL);
+                final DownloadInfo info = FDownloadManager.getDefault().getDownloadInfo(URL);
+                if (info == null)
+                {
+                    // 添加下载任务
+                    FDownloadManager.getDefault().addTask(URL);
+                } else
+                {
+                    // 取消下载任务
+                    FDownloadManager.getDefault().cancelTask(URL);
+                }
             }
         });
 
