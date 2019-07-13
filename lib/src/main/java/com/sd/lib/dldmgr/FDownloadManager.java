@@ -324,6 +324,7 @@ public class FDownloadManager implements DownloadManager
         {
             if (mCompleted)
                 return;
+
             mCompleted = true;
 
             if (getConfig().isDebug())
@@ -368,6 +369,7 @@ public class FDownloadManager implements DownloadManager
         {
             if (mCompleted)
                 return;
+
             mCompleted = true;
 
             if (getConfig().isDebug())
