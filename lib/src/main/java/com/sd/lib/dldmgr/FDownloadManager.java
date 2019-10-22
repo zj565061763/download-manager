@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.sd.lib.dldmgr.exception.DownloadCancelException;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
+import com.sd.lib.dldmgr.executor.DownloadExecutor;
 import com.sd.lib.dldmgr.updater.DownloadUpdater;
 
 import java.io.File;
@@ -265,6 +266,11 @@ public class FDownloadManager implements DownloadManager
         final boolean result = getConfig().getDownloadExecutor().cancel(url);
         if (result)
         {
+            /**
+             * 正常情况下{@link DownloadExecutor#cancel(String)}已经触发了移除，为了避免不规范的实现类，这边再移除一次
+             */
+            removeDownloadInfo(url);
+
             if (getConfig().isDebug())
                 Log.i(TAG, "cancelTask:" + url);
         }
