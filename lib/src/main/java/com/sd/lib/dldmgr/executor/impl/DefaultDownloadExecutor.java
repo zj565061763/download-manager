@@ -72,7 +72,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         return httpRequest
                 .connectTimeout(15 * 1000)
                 .readTimeout(15 * 1000)
-                .trustAllCerts()
+                .trustAllHosts()
                 .trustAllCerts();
     }
 
