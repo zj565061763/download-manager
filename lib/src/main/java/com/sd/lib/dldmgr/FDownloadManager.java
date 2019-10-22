@@ -267,16 +267,13 @@ public class FDownloadManager implements DownloadManager
             Log.i(TAG, "cancelTask start url:" + url);
 
         final boolean result = getConfig().getDownloadExecutor().cancel(url);
-        if (result)
-        {
-            /**
-             * 正常情况下{@link DownloadExecutor#cancel(String)}已经触发了移除，为了避免不规范的实现类，这边再移除一次
-             */
-            removeDownloadInfo(url);
-        }
+        /**
+         * 正常情况下{@link DownloadExecutor#cancel(String)}已经触发了移除，为了避免不规范的实现类，这边再移除一次
+         */
+        removeDownloadInfo(url);
 
         if (getConfig().isDebug())
-            Log.i(TAG, "cancelTask end result:" + result + " url:" + url);
+            Log.i(TAG, "cancelTask result:" + result + " url:" + url);
 
         return result;
     }
