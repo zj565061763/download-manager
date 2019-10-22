@@ -304,6 +304,12 @@ public class FDownloadManager implements DownloadManager
         removeDownloadInfo(info.getUrl());
     }
 
+    /**
+     * 任务结束，移除下载信息
+     *
+     * @param url
+     * @return
+     */
     private synchronized DownloadInfoWrapper removeDownloadInfo(String url)
     {
         final DownloadInfoWrapper wrapper = mMapDownloadInfo.remove(url);
