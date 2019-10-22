@@ -69,7 +69,7 @@ public class FDownloadManager implements DownloadManager
         mListCallback.add(callback);
 
         if (getConfig().isDebug())
-            Log.i(TAG, "addCallback:" + callback);
+            Log.i(TAG, "addCallback:" + callback + " size:" + mListCallback.size());
     }
 
     @Override
@@ -81,7 +81,7 @@ public class FDownloadManager implements DownloadManager
         if (mListCallback.remove(callback))
         {
             if (getConfig().isDebug())
-                Log.i(TAG, "removeCallback:" + callback);
+                Log.i(TAG, "removeCallback:" + callback + " size:" + mListCallback.size());
         }
     }
 
