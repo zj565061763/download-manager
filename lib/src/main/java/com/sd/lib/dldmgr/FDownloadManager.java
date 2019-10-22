@@ -157,12 +157,12 @@ public class FDownloadManager implements DownloadManager
             int count = 0;
             for (File item : files)
             {
+                if (mMapTempFile.containsKey(item))
+                    continue;
+
                 final String name = item.getName();
                 if (name.endsWith(EXT_TEMP))
                 {
-                    if (mMapTempFile.containsKey(item))
-                        continue;
-
                     if (item.delete())
                         count++;
                 }
