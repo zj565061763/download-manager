@@ -495,7 +495,7 @@ public class FDownloadManager implements DownloadManager
         }
     }
 
-    private final class DownloadInfoWrapper
+    private static final class DownloadInfoWrapper
     {
         private final DownloadInfo mDownloadInfo;
         private final File mTempFile;
