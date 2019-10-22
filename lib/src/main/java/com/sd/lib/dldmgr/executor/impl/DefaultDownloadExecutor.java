@@ -3,7 +3,6 @@ package com.sd.lib.dldmgr.executor.impl;
 import android.text.TextUtils;
 
 import com.sd.lib.dldmgr.DownloadRequest;
-import com.sd.lib.dldmgr.exception.DownloadCancelException;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
 import com.sd.lib.dldmgr.executor.DownloadExecutor;
 import com.sd.lib.dldmgr.updater.DownloadUpdater;
@@ -233,7 +232,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         if (taskInfo.mFuture.isDone())
             return false;
 
-        taskInfo.mUpdater.notifyError(new DownloadCancelException(null), "");
+        taskInfo.mUpdater.notifyCancel();
         taskInfo.mFuture.cancel(true);
         return true;
     }

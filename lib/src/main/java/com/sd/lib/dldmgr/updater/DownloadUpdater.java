@@ -22,4 +22,9 @@ public interface DownloadUpdater
      * @param details
      */
     void notifyError(Exception e, String details);
+
+    /**
+     * 通知下载被取消
+     */
+    void notifyCancel();
 }
