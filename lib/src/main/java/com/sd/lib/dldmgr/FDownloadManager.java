@@ -295,19 +295,19 @@ public class FDownloadManager implements DownloadManager
 
     private void notifySuccess(DownloadInfo info, File file)
     {
+        removeDownloadInfo(info.getUrl());
+
         info.setState(DownloadState.Success);
         mMainThreadCallback.onSuccess(info, file);
-
-        removeDownloadInfo(info.getUrl());
     }
 
     private void notifyError(DownloadInfo info, DownloadError error)
     {
+        removeDownloadInfo(info.getUrl());
+
         info.setState(DownloadState.Error);
         info.setError(error);
         mMainThreadCallback.onError(info);
-
-        removeDownloadInfo(info.getUrl());
     }
 
     /**
