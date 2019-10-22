@@ -262,14 +262,14 @@ public class FDownloadManager implements DownloadManager
         if (TextUtils.isEmpty(url))
             return false;
 
-        final DownloadInfoWrapper wrapper = removeDownloadInfo(url);
-        if (wrapper == null)
-            return false;
+        final boolean result = getConfig().getDownloadExecutor().cancel(url);
+        if (result)
+        {
+            if (getConfig().isDebug())
+                Log.i(TAG, "cancelTask:" + url);
+        }
 
-        if (getConfig().isDebug())
-            Log.i(TAG, "cancelTask:" + url);
-
-        return getConfig().getDownloadExecutor().cancel(url);
+        return result;
     }
 
     private void notifyPrepare(DownloadInfo info)

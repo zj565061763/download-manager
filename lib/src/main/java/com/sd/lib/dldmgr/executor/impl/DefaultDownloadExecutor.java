@@ -224,7 +224,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
     public boolean cancel(String url)
     {
         if (TextUtils.isEmpty(url))
-            throw new IllegalArgumentException("url is empty");
+            return false;
 
         final TaskInfo taskInfo = getMapTask().remove(url);
         if (taskInfo == null)
