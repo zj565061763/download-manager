@@ -365,6 +365,9 @@ public class FDownloadManager implements DownloadManager
                 @Override
                 public void run()
                 {
+                    if (getConfig().isDebug())
+                        Log.i(TAG, "notify callback onSuccess url:" + info.getUrl() + " file:" + file.getAbsolutePath());
+
                     for (Callback item : mListCallback)
                     {
                         item.onSuccess(info, file);
@@ -381,6 +384,9 @@ public class FDownloadManager implements DownloadManager
                 @Override
                 public void run()
                 {
+                    if (getConfig().isDebug())
+                        Log.i(TAG, "notify callback onError url:" + info.getUrl() + " error:" + info.getError());
+
                     for (Callback item : mListCallback)
                     {
                         item.onError(info);
