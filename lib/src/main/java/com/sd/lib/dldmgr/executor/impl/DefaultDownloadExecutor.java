@@ -43,9 +43,12 @@ public class DefaultDownloadExecutor implements DownloadExecutor
             {
                 if (mExecutor == null)
                 {
-                    mExecutor = new ThreadPoolExecutor(0, 3,
+                    final ThreadPoolExecutor executor = new ThreadPoolExecutor(3, 3,
                             10L, TimeUnit.SECONDS,
                             new LinkedBlockingQueue<Runnable>());
+                    executor.allowCoreThreadTimeOut(true);
+
+                    mExecutor = executor;
                 }
             }
         }
