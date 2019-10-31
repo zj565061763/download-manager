@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultDownloadExecutor implements DownloadExecutor
 {
     private ExecutorService mExecutor;
-    private Map<String, TaskInfo> mMapTask;
+    private final Map<String, TaskInfo> mMapTask = new ConcurrentHashMap<>();
 
     private boolean mPreferBreakpoint = false;
 
@@ -50,19 +50,6 @@ public class DefaultDownloadExecutor implements DownloadExecutor
             }
         }
         return mExecutor;
-    }
-
-    private Map<String, TaskInfo> getMapTask()
-    {
-        if (mMapTask == null)
-        {
-            synchronized (this)
-            {
-                if (mMapTask == null)
-                    mMapTask = new ConcurrentHashMap<>();
-            }
-        }
-        return mMapTask;
     }
 
     private static HttpRequest newHttpRequest(DownloadRequest downloadRequest)
@@ -133,14 +120,14 @@ public class DefaultDownloadExecutor implements DownloadExecutor
                     updater.notifyError(new DownloadHttpException(e), null);
                 } finally
                 {
-                    getMapTask().remove(url);
+                    mMapTask.remove(url);
                 }
             }
         };
 
         final Future<?> future = getExecutor().submit(runnable);
         final TaskInfo taskInfo = new TaskInfo(future, updater);
-        getMapTask().put(url, taskInfo);
+        mMapTask.put(url, taskInfo);
 
         return true;
     }
@@ -225,7 +212,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         if (TextUtils.isEmpty(url))
             return false;
 
-        final TaskInfo taskInfo = getMapTask().remove(url);
+        final TaskInfo taskInfo = mMapTask.remove(url);
         if (taskInfo == null)
             return false;
 
