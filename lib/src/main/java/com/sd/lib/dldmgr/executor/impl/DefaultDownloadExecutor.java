@@ -33,7 +33,20 @@ public class DefaultDownloadExecutor implements DownloadExecutor
     private ExecutorService mExecutor;
     private final Map<String, TaskInfo> mMapTask = new ConcurrentHashMap<>();
 
+    private final int mMaxPoolSize;
     private boolean mPreferBreakpoint = false;
+
+    public DefaultDownloadExecutor()
+    {
+        this(3);
+    }
+
+    public DefaultDownloadExecutor(int maxPoolSize)
+    {
+        if (maxPoolSize <= 0)
+            throw new IllegalArgumentException("maxPoolSize must be > 0");
+        mMaxPoolSize = maxPoolSize;
+    }
 
     private ExecutorService getExecutor()
     {
@@ -43,7 +56,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
             {
                 if (mExecutor == null)
                 {
-                    final ThreadPoolExecutor executor = new ThreadPoolExecutor(3, 3,
+                    final ThreadPoolExecutor executor = new ThreadPoolExecutor(mMaxPoolSize, mMaxPoolSize,
                             10L, TimeUnit.SECONDS,
                             new LinkedBlockingQueue<Runnable>());
                     executor.allowCoreThreadTimeOut(true);
