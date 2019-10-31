@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 {
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final String URL = "https://dldir1.qq.com/qqfile/qq/PCQQ9.1.5/25530/QQ9.1.5.25530.exe";
+    private static final String URL = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
