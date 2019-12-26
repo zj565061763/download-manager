@@ -104,7 +104,8 @@ public class FDownloadManager implements DownloadManager
 
     private File getDownloadFileInternal(String url)
     {
-        return getUrlFile(url, Utils.getExt(url));
+        final String ext = Utils.getExt(url);
+        return getUrlFile(url, ext);
     }
 
     private synchronized File getUrlFile(String url, String ext)

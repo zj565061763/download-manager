@@ -1,11 +1,11 @@
 package com.sd.lib.dldmgr;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.webkit.MimeTypeMap;
 
 import java.io.File;
 import java.security.MessageDigest;
@@ -83,19 +83,12 @@ class Utils
         String ext = null;
         try
         {
-            final Uri uri = Uri.parse(url);
-            final String path = uri.getPath();
-            if (!TextUtils.isEmpty(path))
-            {
-                ext = path.substring(path.lastIndexOf("."));
-            } else
-            {
-                ext = url.substring(url.lastIndexOf("."));
-            }
+            ext = MimeTypeMap.getFileExtensionFromUrl(url);
+            if (!TextUtils.isEmpty(ext))
+                ext = "." + ext;
         } catch (Exception e)
         {
         }
         return ext;
     }
-
 }
