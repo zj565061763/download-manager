@@ -30,7 +30,7 @@ public class DownloadManagerConfig
         String dir = builder.mDownloadDirectory;
         if (TextUtils.isEmpty(dir))
         {
-            final File dirFile = Utils.getCacheDir("download", mContext);
+            final File dirFile = Utils.getCacheDir("fdownload", mContext);
             dir = dirFile.getAbsolutePath();
         }
         mDownloadDirectory = dir;
