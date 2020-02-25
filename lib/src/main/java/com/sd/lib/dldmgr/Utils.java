@@ -26,7 +26,7 @@ class Utils
     public static File getCacheDir(String dirName, Context context)
     {
         File dir = null;
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
         {
             dir = new File(context.getExternalCacheDir(), dirName);
         } else
