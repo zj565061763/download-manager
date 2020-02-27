@@ -118,7 +118,7 @@ public class FDownloadManager implements DownloadManager
         if (!checkDirectory())
             return null;
 
-        if (ext == null)
+        if (TextUtils.isEmpty(ext))
         {
             ext = "";
         } else
