@@ -421,8 +421,11 @@ public class FDownloadManager implements DownloadManager
         @Override
         public void notifyProgress(long total, long current)
         {
-            if (mCompleted)
-                return;
+            synchronized (InternalDownloadUpdater.this)
+            {
+                if (mCompleted)
+                    return;
+            }
 
             FDownloadManager.this.notifyProgress(mInfo, total, current);
         }
