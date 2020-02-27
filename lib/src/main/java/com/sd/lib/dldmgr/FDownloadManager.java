@@ -14,7 +14,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class FDownloadManager implements DownloadManager
 {
-    private static final String EXT_TEMP = ".temp";
+    private static final String EXT_TEMP = "temp";
+    private static final String EXT_TEMP_TOTAL = "." + EXT_TEMP;
+
     private static FDownloadManager sDefault = null;
 
     private final File mDirectory;
@@ -117,7 +119,14 @@ public class FDownloadManager implements DownloadManager
             return null;
 
         if (ext == null)
+        {
             ext = "";
+        } else
+        {
+            if (ext.contains("."))
+                throw new IllegalArgumentException("Illegal ext contains dot:" + ext);
+            ext = "." + ext;
+        }
 
         final String fileName = Utils.MD5(url) + ext;
         return new File(mDirectory, fileName);
@@ -161,7 +170,7 @@ public class FDownloadManager implements DownloadManager
                     continue;
 
                 final String name = item.getName();
-                if (name.endsWith(EXT_TEMP))
+                if (name.endsWith(EXT_TEMP_TOTAL))
                 {
                     if (item.delete())
                         count++;
@@ -190,7 +199,7 @@ public class FDownloadManager implements DownloadManager
             for (File item : files)
             {
                 final String name = item.getName();
-                if (name.endsWith(EXT_TEMP))
+                if (name.endsWith(EXT_TEMP_TOTAL))
                     continue;
 
                 final boolean delete = TextUtils.isEmpty(ext) || name.endsWith(ext);

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 
 import java.io.File;
@@ -80,15 +79,13 @@ class Utils
 
     public static String getExt(String url)
     {
-        String ext = null;
         try
         {
-            ext = MimeTypeMap.getFileExtensionFromUrl(url);
-            if (!TextUtils.isEmpty(ext))
-                ext = "." + ext;
+            return MimeTypeMap.getFileExtensionFromUrl(url);
         } catch (Exception e)
         {
+            e.printStackTrace();
+            return null;
         }
-        return ext;
     }
 }
