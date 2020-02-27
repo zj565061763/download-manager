@@ -123,8 +123,7 @@ public class FDownloadManager implements DownloadManager
             ext = "";
         } else
         {
-            if (ext.contains("."))
-                throw new IllegalArgumentException("Illegal ext contains dot:" + ext);
+            Utils.checkExt(ext);
             ext = "." + ext;
         }
 
@@ -202,11 +201,32 @@ public class FDownloadManager implements DownloadManager
                 if (name.endsWith(EXT_TEMP_TOTAL))
                     continue;
 
-                final boolean delete = TextUtils.isEmpty(ext) || name.endsWith(ext);
-                if (delete)
+                if (ext == null)
                 {
+                    // 删除所有下载文件
                     if (item.delete())
                         count++;
+                } else
+                {
+                    final String itemExt = Utils.getExt(item.getAbsolutePath());
+                    if (ext.isEmpty())
+                    {
+                        // 删除扩展名为空的下载文件
+                        if (TextUtils.isEmpty(itemExt))
+                        {
+                            if (item.delete())
+                                count++;
+                        }
+                    } else
+                    {
+                        // 删除指定扩展名的文件
+                        Utils.checkExt(ext);
+                        if (ext.equals(itemExt))
+                        {
+                            if (item.delete())
+                                count++;
+                        }
+                    }
                 }
             }
 
