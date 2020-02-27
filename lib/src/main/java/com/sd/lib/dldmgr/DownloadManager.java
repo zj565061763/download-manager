@@ -43,6 +43,10 @@ public interface DownloadManager
 
     /**
      * 删除下载文件（临时文件不会被删除）
+     * <p>
+     * 如果指定了扩展名，则扩展名不能包含点符号：<br>
+     * 合法：mp3<br>
+     * 不合法：.mp3
      *
      * @param ext 文件扩展名(例如mp3)；null-所有下载文件；空字符串-删除扩展名为空的文件
      */
