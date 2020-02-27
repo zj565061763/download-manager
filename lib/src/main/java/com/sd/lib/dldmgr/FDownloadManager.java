@@ -92,25 +92,25 @@ public class FDownloadManager implements DownloadManager
         if (TextUtils.isEmpty(url))
             return null;
 
-        final File file = getDownloadFileInternal(url);
+        final File file = newDownloadFile(url);
         if (file == null)
             return null;
 
         return file.exists() ? file : null;
     }
 
-    private File getTempFile(String url)
+    private File newTempFile(String url)
     {
-        return getUrlFile(url, EXT_TEMP);
+        return newUrlFile(url, EXT_TEMP);
     }
 
-    private File getDownloadFileInternal(String url)
+    private File newDownloadFile(String url)
     {
         final String ext = Utils.getExt(url);
-        return getUrlFile(url, ext);
+        return newUrlFile(url, ext);
     }
 
-    private synchronized File getUrlFile(String url, String ext)
+    private synchronized File newUrlFile(String url, String ext)
     {
         if (TextUtils.isEmpty(url))
             throw new IllegalArgumentException("url is empty");
@@ -230,7 +230,7 @@ public class FDownloadManager implements DownloadManager
 
         final DownloadInfo info = new DownloadInfo(url);
 
-        final File tempFile = getTempFile(url);
+        final File tempFile = newTempFile(url);
         if (tempFile == null)
         {
             if (getConfig().isDebug())
@@ -462,7 +462,7 @@ public class FDownloadManager implements DownloadManager
                 return;
             }
 
-            final File downloadFile = getDownloadFileInternal(mUrl);
+            final File downloadFile = newDownloadFile(mUrl);
             if (downloadFile == null)
             {
                 if (getConfig().isDebug())
