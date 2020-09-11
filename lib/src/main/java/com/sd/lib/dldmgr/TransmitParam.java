@@ -2,7 +2,7 @@ package com.sd.lib.dldmgr;
 
 public class TransmitParam
 {
-    private static final long CALCULATE_SPEED_INTERVAL = 100;
+    private final long mCalculateSpeedInterval;
 
     private long mCurrent;
     private long mTotal;
@@ -12,7 +12,30 @@ public class TransmitParam
     private long mLastTime;
     private long mLastCount;
 
-    private long mCalculateSpeedInterval = CALCULATE_SPEED_INTERVAL;
+    public TransmitParam()
+    {
+        this(0);
+    }
+
+    public TransmitParam(long calculateSpeedInterval)
+    {
+        if (calculateSpeedInterval <= 0)
+            calculateSpeedInterval = 100;
+        mCalculateSpeedInterval = calculateSpeedInterval;
+    }
+
+    public TransmitParam copy()
+    {
+        final TransmitParam copy = new TransmitParam(this.mCalculateSpeedInterval);
+        copy.mCurrent = this.mCurrent;
+        copy.mTotal = this.mTotal;
+        copy.mProgress = this.mProgress;
+        copy.mSpeedBps = this.mSpeedBps;
+
+        copy.mLastTime = this.mLastTime;
+        copy.mLastCount = this.mLastCount;
+        return copy;
+    }
 
     /**
      * 传输
@@ -57,19 +80,6 @@ public class TransmitParam
     public boolean isComplete()
     {
         return mCurrent == mTotal && mCurrent > 0;
-    }
-
-    /**
-     * 设置计算速率的间隔
-     *
-     * @param calculateSpeedInterval
-     */
-    public void setCalculateSpeedInterval(long calculateSpeedInterval)
-    {
-        if (calculateSpeedInterval <= 0)
-            calculateSpeedInterval = CALCULATE_SPEED_INTERVAL;
-
-        mCalculateSpeedInterval = calculateSpeedInterval;
     }
 
     /**
@@ -120,15 +130,5 @@ public class TransmitParam
     public int getSpeedKBps()
     {
         return getSpeedBps() / 1024;
-    }
-
-    @Override
-    public String toString()
-    {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(getCurrent()).append("/").append(getTotal()).append("\r\n")
-                .append(getProgress()).append("%").append("\r\n")
-                .append(getSpeedKBps()).append("KBps");
-        return sb.toString();
     }
 }
