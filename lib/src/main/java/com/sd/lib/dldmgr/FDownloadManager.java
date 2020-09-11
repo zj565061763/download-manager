@@ -448,11 +448,8 @@ public class FDownloadManager implements DownloadManager
         @Override
         public void notifyProgress(long total, long current)
         {
-            synchronized (InternalDownloadUpdater.this)
-            {
-                if (mCompleted)
-                    return;
-            }
+            if (mCompleted)
+                return;
 
             FDownloadManager.this.notifyProgress(mInfo, total, current);
         }
@@ -460,13 +457,10 @@ public class FDownloadManager implements DownloadManager
         @Override
         public void notifySuccess()
         {
-            synchronized (InternalDownloadUpdater.this)
-            {
-                if (mCompleted)
-                    return;
+            if (mCompleted)
+                return;
 
-                mCompleted = true;
-            }
+            mCompleted = true;
 
             if (getConfig().isDebug())
                 Log.i(TAG, "download success:" + mUrl);
@@ -508,13 +502,10 @@ public class FDownloadManager implements DownloadManager
         @Override
         public void notifyError(Exception e, String details)
         {
-            synchronized (InternalDownloadUpdater.this)
-            {
-                if (mCompleted)
-                    return;
+            if (mCompleted)
+                return;
 
-                mCompleted = true;
-            }
+            mCompleted = true;
 
             if (getConfig().isDebug())
                 Log.e(TAG, "download error:" + mUrl + " " + e);
@@ -531,13 +522,10 @@ public class FDownloadManager implements DownloadManager
         @Override
         public void notifyCancel()
         {
-            synchronized (InternalDownloadUpdater.this)
-            {
-                if (mCompleted)
-                    return;
+            if (mCompleted)
+                return;
 
-                mCompleted = true;
-            }
+            mCompleted = true;
 
             if (getConfig().isDebug())
                 Log.i(TAG, "download cancel:" + mUrl);
