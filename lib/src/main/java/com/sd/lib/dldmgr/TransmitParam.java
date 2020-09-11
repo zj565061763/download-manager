@@ -66,9 +66,9 @@ public class TransmitParam
                 mLastTime = currentTime;
                 mLastCount = current;
             }
+            mProgress = (int) (current * 100 / total);
         }
 
-        mProgress = (int) (current * 100 / total);
         return mProgress > oldProgress;
     }
 
