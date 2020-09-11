@@ -50,19 +50,18 @@ public class DefaultDownloadExecutor implements DownloadExecutor
 
     private ExecutorService getExecutor()
     {
-        if (mExecutor == null)
-        {
-            synchronized (this)
-            {
-                if (mExecutor == null)
-                {
-                    final ThreadPoolExecutor executor = new ThreadPoolExecutor(mMaxPoolSize, mMaxPoolSize,
-                            10L, TimeUnit.SECONDS,
-                            new LinkedBlockingQueue<Runnable>());
-                    executor.allowCoreThreadTimeOut(true);
+        if (mExecutor != null)
+            return mExecutor;
 
-                    mExecutor = executor;
-                }
+        synchronized (this)
+        {
+            if (mExecutor == null)
+            {
+                final ThreadPoolExecutor executor = new ThreadPoolExecutor(mMaxPoolSize, mMaxPoolSize,
+                        10L, TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<Runnable>());
+                executor.allowCoreThreadTimeOut(true);
+                mExecutor = executor;
             }
         }
         return mExecutor;
