@@ -123,8 +123,8 @@ public class FDownloadManager implements DownloadManager
             ext = "";
         } else
         {
-            Utils.checkExt(ext);
-            ext = "." + ext;
+            if (!ext.startsWith("."))
+                ext = "." + ext;
         }
 
         final String fileName = Utils.MD5(url) + ext;
