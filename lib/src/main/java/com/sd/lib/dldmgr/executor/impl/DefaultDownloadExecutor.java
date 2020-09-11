@@ -3,9 +3,9 @@ package com.sd.lib.dldmgr.executor.impl;
 import android.text.TextUtils;
 
 import com.sd.lib.dldmgr.DownloadRequest;
+import com.sd.lib.dldmgr.DownloadUpdater;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
 import com.sd.lib.dldmgr.executor.DownloadExecutor;
-import com.sd.lib.dldmgr.updater.DownloadUpdater;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

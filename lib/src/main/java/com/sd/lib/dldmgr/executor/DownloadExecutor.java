@@ -1,7 +1,7 @@
 package com.sd.lib.dldmgr.executor;
 
 import com.sd.lib.dldmgr.DownloadRequest;
-import com.sd.lib.dldmgr.updater.DownloadUpdater;
+import com.sd.lib.dldmgr.DownloadUpdater;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package com.sd.lib.dldmgr.updater;
+package com.sd.lib.dldmgr;
 
 public interface DownloadUpdater
 {

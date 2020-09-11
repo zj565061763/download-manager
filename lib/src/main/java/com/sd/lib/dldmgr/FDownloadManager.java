@@ -4,7 +4,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
-import com.sd.lib.dldmgr.updater.DownloadUpdater;
 
 import java.io.File;
 import java.util.List;
