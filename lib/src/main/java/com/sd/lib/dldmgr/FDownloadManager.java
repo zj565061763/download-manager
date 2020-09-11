@@ -14,8 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class FDownloadManager implements DownloadManager
 {
-    private static final String EXT_TEMP = "temp";
-    private static final String EXT_TEMP_TOTAL = "." + EXT_TEMP;
+    private static final String EXT_TEMP = ".temp";
 
     private static FDownloadManager sDefault = null;
 
@@ -169,7 +168,7 @@ public class FDownloadManager implements DownloadManager
                     continue;
 
                 final String name = item.getName();
-                if (name.endsWith(EXT_TEMP_TOTAL))
+                if (name.endsWith(EXT_TEMP))
                 {
                     if (item.delete())
                         count++;
@@ -198,7 +197,7 @@ public class FDownloadManager implements DownloadManager
             for (File item : files)
             {
                 final String name = item.getName();
-                if (name.endsWith(EXT_TEMP_TOTAL))
+                if (name.endsWith(EXT_TEMP))
                     continue;
 
                 if (ext == null)
