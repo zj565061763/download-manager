@@ -269,16 +269,16 @@ public class FDownloadManager implements DownloadManager
             mMapDownloadInfo.put(url, wrapper);
             mMapTempFile.put(tempFile, url);
 
-            notifyPrepare(info);
-
             if (getConfig().isDebug())
                 Log.i(TAG, "addTask:" + url + " path:" + tempFile.getAbsolutePath() + " size:" + mMapDownloadInfo.size());
+
+            notifyPrepare(info);
         } else
         {
             if (getConfig().isDebug())
                 Log.e(TAG, "addTask error submit request failed:" + url);
 
-            FDownloadManager.this.notifyError(info, DownloadError.SubmitFailed);
+            notifyError(info, DownloadError.SubmitFailed);
         }
 
         return submitted;
