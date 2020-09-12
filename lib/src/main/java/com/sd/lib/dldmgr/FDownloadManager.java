@@ -295,12 +295,19 @@ public class FDownloadManager implements DownloadManager
             return false;
 
         if (getConfig().isDebug())
-            Log.i(TAG, "cancelTask start url:" + url);
+        {
+            Log.i(TAG, "cancelTask start"
+                    + " url:" + url);
+        }
 
         final boolean result = getConfig().getDownloadExecutor().cancel(url);
 
         if (getConfig().isDebug())
-            Log.i(TAG, "cancelTask result:" + result + " url:" + url);
+        {
+            Log.i(TAG, "cancelTask finish"
+                    + " result:" + result
+                    + " url:" + url);
+        }
 
         return result;
     }
@@ -351,7 +358,12 @@ public class FDownloadManager implements DownloadManager
             mMapTempFile.remove(wrapper.mTempFile);
 
             if (getConfig().isDebug())
-                Log.i(TAG, "removeDownloadInfo:" + url + " size:" + mMapDownloadInfo.size() + " tempSize:" + mMapTempFile.size());
+            {
+                Log.i(TAG, "removeDownloadInfo"
+                        + " url:" + url
+                        + " size:" + mMapDownloadInfo.size()
+                        + " tempSize:" + mMapTempFile.size());
+            }
         }
         return wrapper;
     }
@@ -377,6 +389,13 @@ public class FDownloadManager implements DownloadManager
         @Override
         public void onProgress(final DownloadInfo info)
         {
+            if (info.getTransmitParam().getProgress() == 1)
+            {
+                Log.i(TAG, "onProgress"
+                        + " url:" + info.getUrl()
+                        + " progress:" + 1);
+            }
+
             Utils.runOnMainThread(new Runnable()
             {
                 @Override
@@ -399,7 +418,11 @@ public class FDownloadManager implements DownloadManager
                 public void run()
                 {
                     if (getConfig().isDebug())
-                        Log.i(TAG, "notify callback onSuccess url:" + info.getUrl() + " file:" + file.getAbsolutePath());
+                    {
+                        Log.i(TAG, "notify callback onSuccess"
+                                + " url:" + info.getUrl()
+                                + " file:" + file.getAbsolutePath());
+                    }
 
                     for (Callback item : mListCallback)
                     {
@@ -418,7 +441,11 @@ public class FDownloadManager implements DownloadManager
                 public void run()
                 {
                     if (getConfig().isDebug())
-                        Log.i(TAG, "notify callback onError url:" + info.getUrl() + " error:" + info.getError());
+                    {
+                        Log.i(TAG, "notify callback onError"
+                                + " url:" + info.getUrl()
+                                + " error:" + info.getError());
+                    }
 
                     for (Callback item : mListCallback)
                     {
