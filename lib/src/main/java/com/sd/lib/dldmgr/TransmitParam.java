@@ -51,7 +51,7 @@ public class TransmitParam
         mTotal = total;
         mCurrent = current;
 
-        if (mTotal <= 0)
+        if (total <= 0)
         {
             mProgress = 0;
         } else
