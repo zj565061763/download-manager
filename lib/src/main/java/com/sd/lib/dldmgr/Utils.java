@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 
 import java.io.File;
@@ -88,14 +87,5 @@ class Utils
             e.printStackTrace();
             return null;
         }
-    }
-
-    public static void checkExt(String ext)
-    {
-        if (TextUtils.isEmpty(ext))
-            throw new IllegalArgumentException("Illegal ext empty");
-
-        if (ext.contains("."))
-            throw new IllegalArgumentException("Illegal ext contains dot:" + ext);
     }
 }

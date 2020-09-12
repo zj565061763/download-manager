@@ -186,6 +186,12 @@ public class FDownloadManager implements DownloadManager
     @Override
     public synchronized void deleteDownloadFile(String ext)
     {
+        if (!TextUtils.isEmpty(ext))
+        {
+            if (ext.contains("."))
+                throw new IllegalArgumentException("Illegal ext contains dot:" + ext);
+        }
+
         final File[] files = getAllFile();
         if (files == null || files.length <= 0)
             return;
@@ -218,7 +224,6 @@ public class FDownloadManager implements DownloadManager
                     } else
                     {
                         // 删除指定扩展名的文件
-                        Utils.checkExt(ext);
                         if (ext.equals(itemExt))
                         {
                             if (item.delete())
