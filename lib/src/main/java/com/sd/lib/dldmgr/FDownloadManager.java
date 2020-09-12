@@ -274,7 +274,13 @@ public class FDownloadManager implements DownloadManager
             mMapTempFile.put(tempFile, url);
 
             if (getConfig().isDebug())
-                Log.i(TAG, "addTask:" + url + " path:" + tempFile.getAbsolutePath() + " size:" + mMapDownloadInfo.size());
+            {
+                Log.i(TAG, "addTask"
+                        + " url:" + url
+                        + " path:" + tempFile.getAbsolutePath()
+                        + " size:" + mMapDownloadInfo.size()
+                        + " tempSize:" + mMapTempFile.size());
+            }
 
             notifyPrepare(info);
         } else
