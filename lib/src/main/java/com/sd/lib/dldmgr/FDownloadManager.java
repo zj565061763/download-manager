@@ -487,12 +487,12 @@ public class FDownloadManager implements DownloadManager
             mCompleted = true;
 
             if (getConfig().isDebug())
-                Log.i(TAG, "download success:" + mUrl);
+                Log.i(TAG, DownloadUpdater.class.getSimpleName() + " download success:" + mUrl);
 
             if (!mTempFile.exists())
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, "download success error temp file not exists:" + mUrl);
+                    Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download success error temp file not exists:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.TempFileNotExists);
                 return;
@@ -502,7 +502,7 @@ public class FDownloadManager implements DownloadManager
             if (downloadFile == null)
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, "download success error create download file:" + mUrl);
+                    Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download success error create download file:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.CreateDownloadFile);
                 return;
@@ -517,7 +517,7 @@ public class FDownloadManager implements DownloadManager
             } else
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, "download success error rename temp file to download file:" + mUrl);
+                    Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download success error rename temp file to download file:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.RenameFile);
             }
@@ -532,7 +532,7 @@ public class FDownloadManager implements DownloadManager
             mCompleted = true;
 
             if (getConfig().isDebug())
-                Log.e(TAG, "download error:" + mUrl + " " + e);
+                Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download error:" + mUrl + " " + e);
 
             DownloadError error = DownloadError.Other;
             if (e instanceof DownloadHttpException)
@@ -552,7 +552,7 @@ public class FDownloadManager implements DownloadManager
             mCompleted = true;
 
             if (getConfig().isDebug())
-                Log.i(TAG, "download cancel:" + mUrl);
+                Log.i(TAG, DownloadUpdater.class.getSimpleName() + " download cancel:" + mUrl);
 
             FDownloadManager.this.notifyError(mInfo, DownloadError.Cancel);
         }
