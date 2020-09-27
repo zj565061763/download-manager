@@ -181,8 +181,8 @@ public class FDownloadManager implements DownloadManager
     {
         if (!TextUtils.isEmpty(ext))
         {
-            if (ext.contains("."))
-                throw new IllegalArgumentException("Illegal ext contains dot:" + ext);
+            if (ext.startsWith("."))
+                throw new IllegalArgumentException("Illegal ext start with dot:" + ext);
         }
 
         final File[] files = getAllFile();
