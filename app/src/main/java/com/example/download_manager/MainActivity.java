@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
         // 移除下载回调
         FDownloadManager.getDefault().removeCallback(mDownloadCallback);
-        // 删除所有临时文件(下载中的临时文件不会被删除)
+        // 删除所有临时文件（下载中的临时文件不会被删除）
         FDownloadManager.getDefault().deleteTempFile();
         // 删除下载文件（临时文件不会被删除）
         FDownloadManager.getDefault().deleteDownloadFile(null);
