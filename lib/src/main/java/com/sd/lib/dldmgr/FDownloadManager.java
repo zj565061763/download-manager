@@ -158,29 +158,22 @@ public class FDownloadManager implements DownloadManager
         if (files == null || files.length <= 0)
             return;
 
-        try
+        int count = 0;
+        for (File item : files)
         {
-            int count = 0;
-            for (File item : files)
+            if (mMapTempFile.containsKey(item))
+                continue;
+
+            final String name = item.getName();
+            if (name.endsWith(EXT_TEMP))
             {
-                if (mMapTempFile.containsKey(item))
-                    continue;
-
-                final String name = item.getName();
-                if (name.endsWith(EXT_TEMP))
-                {
-                    if (item.delete())
-                        count++;
-                }
+                if (item.delete())
+                    count++;
             }
-
-            if (getConfig().isDebug())
-                Log.i(TAG, "deleteTempFile count:" + count);
-
-        } catch (Exception e)
-        {
-            e.printStackTrace();
         }
+
+        if (getConfig().isDebug())
+            Log.i(TAG, "deleteTempFile count:" + count);
     }
 
     @Override
@@ -196,50 +189,43 @@ public class FDownloadManager implements DownloadManager
         if (files == null || files.length <= 0)
             return;
 
-        try
+        int count = 0;
+        for (File item : files)
         {
-            int count = 0;
-            for (File item : files)
-            {
-                final String name = item.getName();
-                if (name.endsWith(EXT_TEMP))
-                    continue;
+            final String name = item.getName();
+            if (name.endsWith(EXT_TEMP))
+                continue;
 
-                if (ext == null)
+            if (ext == null)
+            {
+                // 删除所有下载文件
+                if (item.delete())
+                    count++;
+            } else
+            {
+                final String itemExt = Utils.getExt(item.getAbsolutePath());
+                if (ext.isEmpty())
                 {
-                    // 删除所有下载文件
-                    if (item.delete())
-                        count++;
+                    // 删除扩展名为空的下载文件
+                    if (TextUtils.isEmpty(itemExt))
+                    {
+                        if (item.delete())
+                            count++;
+                    }
                 } else
                 {
-                    final String itemExt = Utils.getExt(item.getAbsolutePath());
-                    if (ext.isEmpty())
+                    // 删除指定扩展名的文件
+                    if (ext.equals(itemExt))
                     {
-                        // 删除扩展名为空的下载文件
-                        if (TextUtils.isEmpty(itemExt))
-                        {
-                            if (item.delete())
-                                count++;
-                        }
-                    } else
-                    {
-                        // 删除指定扩展名的文件
-                        if (ext.equals(itemExt))
-                        {
-                            if (item.delete())
-                                count++;
-                        }
+                        if (item.delete())
+                            count++;
                     }
                 }
             }
-
-            if (getConfig().isDebug())
-                Log.i(TAG, "deleteDownloadFile count:" + count + " ext:" + ext);
-
-        } catch (Exception e)
-        {
-            e.printStackTrace();
         }
+
+        if (getConfig().isDebug())
+            Log.i(TAG, "deleteDownloadFile count:" + count + " ext:" + ext);
     }
 
     @Override
