@@ -33,19 +33,22 @@ public class DefaultDownloadExecutor implements DownloadExecutor
     private ExecutorService mExecutor;
     private final Map<String, TaskInfo> mMapTask = new ConcurrentHashMap<>();
 
+    /** 同时下载的最大任务数量 */
     private final int mMaxPoolSize;
-    private boolean mPreferBreakpoint = false;
+    /** 是否需要断点下载 */
+    private final boolean mPreferBreakpoint;
 
     public DefaultDownloadExecutor()
     {
-        this(3);
+        this(3, false);
     }
 
-    public DefaultDownloadExecutor(int maxPoolSize)
+    public DefaultDownloadExecutor(int maxPoolSize, boolean preferBreakpoint)
     {
         if (maxPoolSize <= 0)
             throw new IllegalArgumentException("maxPoolSize must be > 0");
         mMaxPoolSize = maxPoolSize;
+        mPreferBreakpoint = preferBreakpoint;
     }
 
     private ExecutorService getExecutor()
@@ -81,6 +84,8 @@ public class DefaultDownloadExecutor implements DownloadExecutor
     public boolean submit(final DownloadRequest request, final File file, final DownloadUpdater updater)
     {
         final String url = request.getUrl();
+        final boolean preferBreakpoint = mPreferBreakpoint;
+
         final Runnable runnable = new Runnable()
         {
             @Override
@@ -91,7 +96,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
 
                 HttpRequest httpRequest = newHttpRequest(request);
 
-                if (mPreferBreakpoint && breakpoint)
+                if (preferBreakpoint && breakpoint)
                 {
                     httpRequest.header("Range", "bytes=" + length + "-");
                 }
@@ -99,7 +104,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
                 try
                 {
                     int code = httpRequest.code();
-                    if (mPreferBreakpoint && breakpoint)
+                    if (preferBreakpoint && breakpoint)
                     {
                         if (code == HttpURLConnection.HTTP_PARTIAL)
                         {
