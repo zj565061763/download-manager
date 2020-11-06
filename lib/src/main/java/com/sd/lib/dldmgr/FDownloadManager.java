@@ -263,7 +263,7 @@ public class FDownloadManager implements DownloadManager
             return false;
         }
 
-        final DownloadRequest downloadRequest = new DownloadRequest(url);
+        final DownloadRequest downloadRequest = new DownloadRequest.Builder().build(url);
         final DownloadUpdater downloadUpdater = new InternalDownloadUpdater(info, tempFile);
 
         final boolean submitted = getConfig().getDownloadExecutor().submit(downloadRequest, tempFile, downloadUpdater);

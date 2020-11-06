@@ -6,10 +6,12 @@ public class DownloadRequest
 {
     private final String mUrl;
 
-    public DownloadRequest(String url)
+    private DownloadRequest(Builder builder)
     {
+        final String url = builder.url;
         if (TextUtils.isEmpty(url))
             throw new IllegalArgumentException("url is empty");
+
         mUrl = url;
     }
 
@@ -21,5 +23,16 @@ public class DownloadRequest
     public String getUrl()
     {
         return mUrl;
+    }
+
+    public static class Builder
+    {
+        private String url;
+
+        public DownloadRequest build(String url)
+        {
+            this.url = url;
+            return new DownloadRequest(this);
+        }
     }
 }
