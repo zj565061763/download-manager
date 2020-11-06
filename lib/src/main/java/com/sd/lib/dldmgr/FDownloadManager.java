@@ -243,8 +243,22 @@ public class FDownloadManager implements DownloadManager
     }
 
     @Override
-    public synchronized boolean addTask(final String url)
+    public boolean addTask(final String url)
     {
+        if (TextUtils.isEmpty(url))
+            return false;
+
+        final DownloadRequest downloadRequest = new DownloadRequest.Builder().build(url);
+        return addTask(downloadRequest);
+    }
+
+    @Override
+    public synchronized boolean addTask(DownloadRequest request)
+    {
+        if (request == null)
+            return false;
+
+        final String url = request.getUrl();
         if (TextUtils.isEmpty(url))
             return false;
 
@@ -263,10 +277,8 @@ public class FDownloadManager implements DownloadManager
             return false;
         }
 
-        final DownloadRequest downloadRequest = new DownloadRequest.Builder().build(url);
         final DownloadUpdater downloadUpdater = new InternalDownloadUpdater(info, tempFile);
-
-        final boolean submitted = getConfig().getDownloadExecutor().submit(downloadRequest, tempFile, downloadUpdater);
+        final boolean submitted = getConfig().getDownloadExecutor().submit(request, tempFile, downloadUpdater);
         if (submitted)
         {
             final DownloadInfoWrapper wrapper = new DownloadInfoWrapper(info, tempFile);

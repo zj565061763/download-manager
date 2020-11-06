@@ -61,6 +61,14 @@ public interface DownloadManager
     boolean addTask(String url);
 
     /**
+     * 添加下载任务
+     *
+     * @param request
+     * @return
+     */
+    boolean addTask(DownloadRequest request);
+
+    /**
      * 取消下载任务
      *
      * @param url
