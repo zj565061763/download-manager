@@ -83,9 +83,10 @@ public class DefaultDownloadExecutor implements DownloadExecutor
     @Override
     public boolean submit(final DownloadRequest request, final File file, final DownloadUpdater updater)
     {
-        final String url = request.getUrl();
-        final boolean preferBreakpoint = mPreferBreakpoint;
+        final Boolean requestPreferBreakpoint = request.getPreferBreakpoint();
+        final boolean preferBreakpoint = requestPreferBreakpoint != null ? requestPreferBreakpoint : mPreferBreakpoint;
 
+        final String url = request.getUrl();
         final Runnable runnable = new Runnable()
         {
             @Override
