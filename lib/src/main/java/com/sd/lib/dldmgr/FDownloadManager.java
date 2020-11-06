@@ -158,29 +158,22 @@ public class FDownloadManager implements DownloadManager
         if (files == null || files.length <= 0)
             return;
 
-        try
+        int count = 0;
+        for (File item : files)
         {
-            int count = 0;
-            for (File item : files)
+            if (mMapTempFile.containsKey(item))
+                continue;
+
+            final String name = item.getName();
+            if (name.endsWith(EXT_TEMP))
             {
-                if (mMapTempFile.containsKey(item))
-                    continue;
-
-                final String name = item.getName();
-                if (name.endsWith(EXT_TEMP))
-                {
-                    if (item.delete())
-                        count++;
-                }
+                if (item.delete())
+                    count++;
             }
-
-            if (getConfig().isDebug())
-                Log.i(TAG, "deleteTempFile count:" + count);
-
-        } catch (Exception e)
-        {
-            e.printStackTrace();
         }
+
+        if (getConfig().isDebug())
+            Log.i(TAG, "deleteTempFile count:" + count);
     }
 
     @Override
@@ -188,58 +181,51 @@ public class FDownloadManager implements DownloadManager
     {
         if (!TextUtils.isEmpty(ext))
         {
-            if (ext.contains("."))
-                throw new IllegalArgumentException("Illegal ext contains dot:" + ext);
+            if (ext.startsWith("."))
+                throw new IllegalArgumentException("Illegal ext start with dot:" + ext);
         }
 
         final File[] files = getAllFile();
         if (files == null || files.length <= 0)
             return;
 
-        try
+        int count = 0;
+        for (File item : files)
         {
-            int count = 0;
-            for (File item : files)
-            {
-                final String name = item.getName();
-                if (name.endsWith(EXT_TEMP))
-                    continue;
+            final String name = item.getName();
+            if (name.endsWith(EXT_TEMP))
+                continue;
 
-                if (ext == null)
+            if (ext == null)
+            {
+                // 删除所有下载文件
+                if (item.delete())
+                    count++;
+            } else
+            {
+                final String itemExt = Utils.getExt(item.getAbsolutePath());
+                if (ext.isEmpty())
                 {
-                    // 删除所有下载文件
-                    if (item.delete())
-                        count++;
+                    // 删除扩展名为空的下载文件
+                    if (TextUtils.isEmpty(itemExt))
+                    {
+                        if (item.delete())
+                            count++;
+                    }
                 } else
                 {
-                    final String itemExt = Utils.getExt(item.getAbsolutePath());
-                    if (ext.isEmpty())
+                    // 删除指定扩展名的文件
+                    if (ext.equals(itemExt))
                     {
-                        // 删除扩展名为空的下载文件
-                        if (TextUtils.isEmpty(itemExt))
-                        {
-                            if (item.delete())
-                                count++;
-                        }
-                    } else
-                    {
-                        // 删除指定扩展名的文件
-                        if (ext.equals(itemExt))
-                        {
-                            if (item.delete())
-                                count++;
-                        }
+                        if (item.delete())
+                            count++;
                     }
                 }
             }
-
-            if (getConfig().isDebug())
-                Log.i(TAG, "deleteDownloadFile count:" + count + " ext:" + ext);
-
-        } catch (Exception e)
-        {
-            e.printStackTrace();
         }
+
+        if (getConfig().isDebug())
+            Log.i(TAG, "deleteDownloadFile count:" + count + " ext:" + ext);
     }
 
     @Override
@@ -513,12 +499,12 @@ public class FDownloadManager implements DownloadManager
             mCompleted = true;
 
             if (getConfig().isDebug())
-                Log.i(TAG, "download success:" + mUrl);
+                Log.i(TAG, DownloadUpdater.class.getSimpleName() + " download success:" + mUrl);
 
             if (!mTempFile.exists())
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, "download success error temp file not exists:" + mUrl);
+                    Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download success error temp file not exists:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.TempFileNotExists);
                 return;
@@ -528,7 +514,7 @@ public class FDownloadManager implements DownloadManager
             if (downloadFile == null)
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, "download success error create download file:" + mUrl);
+                    Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download success error create download file:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.CreateDownloadFile);
                 return;
@@ -543,7 +529,7 @@ public class FDownloadManager implements DownloadManager
             } else
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, "download success error rename temp file to download file:" + mUrl);
+                    Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download success error rename temp file to download file:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.RenameFile);
             }
@@ -558,7 +544,7 @@ public class FDownloadManager implements DownloadManager
             mCompleted = true;
 
             if (getConfig().isDebug())
-                Log.e(TAG, "download error:" + mUrl + " " + e);
+                Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download error:" + mUrl + " " + e);
 
             DownloadError error = DownloadError.Other;
             if (e instanceof DownloadHttpException)
@@ -578,7 +564,7 @@ public class FDownloadManager implements DownloadManager
             mCompleted = true;
 
             if (getConfig().isDebug())
-                Log.i(TAG, "download cancel:" + mUrl);
+                Log.i(TAG, DownloadUpdater.class.getSimpleName() + " download cancel:" + mUrl);
 
             FDownloadManager.this.notifyError(mInfo, DownloadError.Cancel);
         }
