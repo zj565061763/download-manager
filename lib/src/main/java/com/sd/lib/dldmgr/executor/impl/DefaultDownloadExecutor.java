@@ -128,17 +128,20 @@ public class DefaultDownloadExecutor implements DownloadExecutor
                     }
                 } catch (Exception e)
                 {
+                    Throwable throwable = e;
                     if (e instanceof RuntimeException)
                     {
                         if (e instanceof HttpRequest.HttpRequestException)
                         {
+                            final HttpRequest.HttpRequestException requestException = (HttpRequest.HttpRequestException) e;
+                            throwable = requestException.getCause();
                         } else
                         {
                             throw (RuntimeException) e;
                         }
                     }
 
-                    updater.notifyError(new DownloadHttpException(e), null);
+                    updater.notifyError(new DownloadHttpException(throwable), null);
                 } finally
                 {
                     mMapTask.remove(url);
