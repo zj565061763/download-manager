@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.sd.lib.dldmgr.DownloadInfo;
 import com.sd.lib.dldmgr.DownloadManager;
+import com.sd.lib.dldmgr.DownloadRequest;
 import com.sd.lib.dldmgr.FDownloadManager;
 import com.sd.lib.dldmgr.TransmitParam;
 
@@ -71,7 +72,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             case R.id.btn_download:
                 // 添加下载任务
-                FDownloadManager.getDefault().addTask(URL);
+                FDownloadManager.getDefault().addTask(new DownloadRequest.Builder()
+                        // 设置需要断点下载
+                        .setPreferBreakpoint(true)
+                        .build(URL));
                 break;
             case R.id.btn_cancel:
                 // 取消下载任务
