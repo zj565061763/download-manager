@@ -97,6 +97,19 @@ public class FDownloadManager implements DownloadManager
         return file.exists() ? file : null;
     }
 
+    @Override
+    public File getTempFile(String url)
+    {
+        if (TextUtils.isEmpty(url))
+            return null;
+
+        final File file = newTempFile(url);
+        if (file == null)
+            return null;
+
+        return file.exists() ? file : null;
+    }
+
     private File newTempFile(String url)
     {
         return newUrlFile(url, EXT_TEMP);

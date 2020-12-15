@@ -29,6 +29,14 @@ public interface DownloadManager
     File getDownloadFile(String url);
 
     /**
+     * 返回url对应的缓存文件
+     *
+     * @param url
+     * @return
+     */
+    File getTempFile(String url);
+
+    /**
      * 返回下载信息
      *
      * @param url
