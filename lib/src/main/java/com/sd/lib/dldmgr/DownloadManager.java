@@ -32,7 +32,7 @@ public interface DownloadManager
      * 返回url对应的缓存文件
      *
      * @param url
-     * @return
+     * @return null-文件不存在，不为null缓存文件存在
      */
     File getTempFile(String url);
 
