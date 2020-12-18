@@ -39,7 +39,8 @@ public class FDownloadManager implements DownloadManager
             {
                 if (sDefault == null)
                 {
-                    sDefault = new FDownloadManager(getConfig().getDownloadDirectory());
+                    final String directory = getConfig().getDownloadDirectory();
+                    sDefault = new FDownloadManager(directory);
                 }
             }
         }
