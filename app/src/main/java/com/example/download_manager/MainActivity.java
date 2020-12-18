@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onError(DownloadInfo info)
         {
-            Log.e(TAG, "onError:" + info.getError());
+            Log.e(TAG, "onError:" + info.getError() + " throwable:" + info.getThrowable());
         }
     };
 

@@ -5,6 +5,7 @@ public class DownloadInfo
     private final String mUrl;
     private DownloadState mState;
     private DownloadError mError;
+    private Throwable mThrowable;
 
     private TransmitParam mTransmitParam;
 
@@ -28,6 +29,11 @@ public class DownloadInfo
         return mError;
     }
 
+    public Throwable getThrowable()
+    {
+        return mThrowable;
+    }
+
     void setState(DownloadState state)
     {
         mState = state;
@@ -36,6 +42,11 @@ public class DownloadInfo
     void setError(DownloadError error)
     {
         mError = error;
+    }
+
+    void setThrowable(Throwable throwable)
+    {
+        mThrowable = throwable;
     }
 
     public TransmitParam getTransmitParam()

@@ -354,10 +354,16 @@ public class FDownloadManager implements DownloadManager
 
     private void notifyError(DownloadInfo info, DownloadError error)
     {
+        notifyError(info, error, null);
+    }
+
+    private void notifyError(DownloadInfo info, DownloadError error, Throwable throwable)
+    {
         removeDownloadInfo(info.getUrl());
 
         info.setState(DownloadState.Error);
         info.setError(error);
+        info.setThrowable(throwable);
         mMainThreadCallback.onError(info);
     }
 
@@ -565,7 +571,7 @@ public class FDownloadManager implements DownloadManager
                 error = DownloadError.Http;
             }
 
-            FDownloadManager.this.notifyError(mInfo, error);
+            FDownloadManager.this.notifyError(mInfo, error, e);
         }
 
         @Override
