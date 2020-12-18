@@ -204,6 +204,7 @@ public class FDownloadManager implements DownloadManager
             return;
 
         int count = 0;
+        boolean delete = false;
         for (File item : files)
         {
             final String name = item.getName();
@@ -213,8 +214,7 @@ public class FDownloadManager implements DownloadManager
             if (ext == null)
             {
                 // 删除所有下载文件
-                if (item.delete())
-                    count++;
+                delete = true;
             } else
             {
                 final String itemExt = Utils.getExt(item.getAbsolutePath());
@@ -222,19 +222,18 @@ public class FDownloadManager implements DownloadManager
                 {
                     // 删除扩展名为空的下载文件
                     if (TextUtils.isEmpty(itemExt))
-                    {
-                        if (item.delete())
-                            count++;
-                    }
-                } else
+                        delete = true;
+                } else if (ext.equals(itemExt))
                 {
                     // 删除指定扩展名的文件
-                    if (ext.equals(itemExt))
-                    {
-                        if (item.delete())
-                            count++;
-                    }
+                    delete = true;
                 }
+            }
+
+            if (delete)
+            {
+                if (item.delete())
+                    count++;
             }
         }
 
