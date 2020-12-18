@@ -7,14 +7,14 @@ public interface DownloadManager
     String TAG = DownloadManager.class.getName();
 
     /**
-     * 添加回调
+     * 添加回调对象
      *
      * @param callback
      */
     void addCallback(Callback callback);
 
     /**
-     * 移除回调
+     * 移除回调对象
      *
      * @param callback
      */
@@ -84,6 +84,9 @@ public interface DownloadManager
      */
     boolean cancelTask(String url);
 
+    /**
+     * 下载回调
+     */
     interface Callback
     {
         void onPrepare(DownloadInfo info);
