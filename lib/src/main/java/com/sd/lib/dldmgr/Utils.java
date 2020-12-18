@@ -35,7 +35,7 @@ class Utils
         return dir;
     }
 
-    public static boolean mkdirs(File dir)
+    public static boolean checkDir(File dir)
     {
         if (dir == null)
             return false;
@@ -48,6 +48,7 @@ class Utils
             return dir.mkdirs();
         } catch (Exception e)
         {
+            e.printStackTrace();
             return false;
         }
     }

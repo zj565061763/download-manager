@@ -54,7 +54,7 @@ public class FDownloadManager implements DownloadManager
 
     private boolean checkDirectory()
     {
-        return Utils.mkdirs(mDirectory);
+        return Utils.checkDir(mDirectory);
     }
 
     @Override
