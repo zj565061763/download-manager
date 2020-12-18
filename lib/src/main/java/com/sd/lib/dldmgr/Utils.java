@@ -1,7 +1,6 @@
 package com.sd.lib.dldmgr;
 
 import android.content.Context;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.webkit.MimeTypeMap;
@@ -24,14 +23,12 @@ class Utils
 
     public static File getCacheDir(String dirName, Context context)
     {
-        File dir = null;
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
-        {
-            dir = new File(context.getExternalCacheDir(), dirName);
-        } else
-        {
-            dir = new File(context.getCacheDir(), dirName);
-        }
+        File dir = new File(context.getExternalCacheDir(), dirName);
+        if (checkDir(dir))
+            return dir;
+
+        dir = new File(context.getCacheDir(), dirName);
+        checkDir(dir);
         return dir;
     }
 
