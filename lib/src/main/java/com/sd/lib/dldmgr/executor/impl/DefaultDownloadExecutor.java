@@ -134,7 +134,9 @@ public class DefaultDownloadExecutor implements DownloadExecutor
                         if (e instanceof HttpRequest.HttpRequestException)
                         {
                             final HttpRequest.HttpRequestException requestException = (HttpRequest.HttpRequestException) e;
-                            throwable = requestException.getCause();
+                            final Throwable cause = requestException.getCause();
+                            if (cause != null)
+                                throwable = cause;
                         } else
                         {
                             throw (RuntimeException) e;
