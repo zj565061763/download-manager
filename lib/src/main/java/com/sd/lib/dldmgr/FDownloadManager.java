@@ -302,7 +302,6 @@ public class FDownloadManager implements DownloadManager
 
             addCallback(callback);
             notifyPrepare(info);
-
         } else
         {
             if (getConfig().isDebug())
