@@ -80,13 +80,18 @@ class Utils
 
     public static String getExt(String url)
     {
+        String ext = null;
         try
         {
-            return MimeTypeMap.getFileExtensionFromUrl(url);
+            ext = MimeTypeMap.getFileExtensionFromUrl(url);
         } catch (Exception e)
         {
             e.printStackTrace();
-            return null;
         }
+
+        if (ext == null)
+            ext = "";
+
+        return ext;
     }
 }
