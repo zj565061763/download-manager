@@ -61,20 +61,29 @@ public interface DownloadManager
     void deleteDownloadFile(String ext);
 
     /**
-     * 添加下载任务
+     * {@link #addTask(DownloadRequest, Callback)}
      *
      * @param url
-     * @return true-任务被添加
+     * @return
      */
     boolean addTask(String url);
 
     /**
-     * 添加下载任务
+     * {@link #addTask(DownloadRequest, Callback)}
      *
      * @param request
      * @return
      */
     boolean addTask(DownloadRequest request);
+
+    /**
+     * 添加下载任务
+     *
+     * @param request
+     * @param callback 只有任务添加成功或者已经添加的情况下，回调对象才会被添加
+     * @return true-任务添加成功或者已经添加
+     */
+    boolean addTask(DownloadRequest request, Callback callback);
 
     /**
      * 取消下载任务
