@@ -6,10 +6,8 @@ import android.util.Log;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class FDownloadManager implements DownloadManager
 {
@@ -21,7 +19,7 @@ public class FDownloadManager implements DownloadManager
     private final Map<String, DownloadInfoWrapper> mMapDownloadInfo = new ConcurrentHashMap<>();
     private final Map<File, String> mMapTempFile = new ConcurrentHashMap<>();
 
-    private final List<Callback> mListCallback = new CopyOnWriteArrayList<>();
+    private final Map<Callback, String> mCallbackHolder = new ConcurrentHashMap<>();
 
     protected FDownloadManager(String directory)
     {
@@ -63,13 +61,12 @@ public class FDownloadManager implements DownloadManager
         if (callback == null)
             return;
 
-        if (mListCallback.contains(callback))
-            return;
-
-        mListCallback.add(callback);
-
-        if (getConfig().isDebug())
-            Log.i(TAG, "addCallback:" + callback + " size:" + mListCallback.size());
+        final String put = mCallbackHolder.put(callback, "");
+        if (put == null)
+        {
+            if (getConfig().isDebug())
+                Log.i(TAG, "addCallback:" + callback + " size:" + mCallbackHolder.size());
+        }
     }
 
     @Override
@@ -78,10 +75,11 @@ public class FDownloadManager implements DownloadManager
         if (callback == null)
             return;
 
-        if (mListCallback.remove(callback))
+        final String remove = mCallbackHolder.remove(callback);
+        if (remove != null)
         {
             if (getConfig().isDebug())
-                Log.i(TAG, "removeCallback:" + callback + " size:" + mListCallback.size());
+                Log.i(TAG, "removeCallback:" + callback + " size:" + mCallbackHolder.size());
         }
     }
 
@@ -410,7 +408,7 @@ public class FDownloadManager implements DownloadManager
                 @Override
                 public void run()
                 {
-                    for (Callback item : mListCallback)
+                    for (Callback item : mCallbackHolder.keySet())
                     {
                         item.onPrepare(info);
                     }
@@ -433,7 +431,7 @@ public class FDownloadManager implements DownloadManager
                 @Override
                 public void run()
                 {
-                    for (Callback item : mListCallback)
+                    for (Callback item : mCallbackHolder.keySet())
                     {
                         item.onProgress(info);
                     }
@@ -461,7 +459,7 @@ public class FDownloadManager implements DownloadManager
                         // 移除下载信息
                         removeDownloadInfo(info.getUrl());
 
-                        for (Callback item : mListCallback)
+                        for (Callback item : mCallbackHolder.keySet())
                         {
                             item.onSuccess(info, file);
                         }
@@ -490,7 +488,7 @@ public class FDownloadManager implements DownloadManager
                         // 移除下载信息
                         removeDownloadInfo(info.getUrl());
 
-                        for (Callback item : mListCallback)
+                        for (Callback item : mCallbackHolder.keySet())
                         {
                             item.onError(info);
                         }
