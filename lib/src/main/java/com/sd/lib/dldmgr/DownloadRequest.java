@@ -11,6 +11,11 @@ public class DownloadRequest
         mPreferBreakpoint = builder.preferBreakpoint;
     }
 
+    public static DownloadRequest url(String url)
+    {
+        return new Builder().build(url);
+    }
+
     /**
      * 下载地址
      *
