@@ -244,9 +244,6 @@ public class FDownloadManager implements DownloadManager
     @Override
     public boolean addTask(final String url)
     {
-        if (TextUtils.isEmpty(url))
-            return false;
-
         final DownloadRequest downloadRequest = new DownloadRequest.Builder().build(url);
         return addTask(downloadRequest);
     }

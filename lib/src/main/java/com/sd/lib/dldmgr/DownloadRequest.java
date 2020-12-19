@@ -1,7 +1,5 @@
 package com.sd.lib.dldmgr;
 
-import android.text.TextUtils;
-
 public class DownloadRequest
 {
     private final String mUrl;
@@ -9,11 +7,7 @@ public class DownloadRequest
 
     private DownloadRequest(Builder builder)
     {
-        final String url = builder.url;
-        if (TextUtils.isEmpty(url))
-            throw new IllegalArgumentException("url is empty");
-
-        mUrl = url;
+        mUrl = builder.url;
         mPreferBreakpoint = builder.preferBreakpoint;
     }
 
