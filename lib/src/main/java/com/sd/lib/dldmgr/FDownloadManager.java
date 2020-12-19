@@ -346,8 +346,6 @@ public class FDownloadManager implements DownloadManager
 
     private void notifySuccess(DownloadInfo info, File file)
     {
-        removeDownloadInfo(info.getUrl());
-
         info.setState(DownloadState.Success);
         mMainThreadCallback.onSuccess(info, file);
     }
@@ -359,6 +357,7 @@ public class FDownloadManager implements DownloadManager
 
     private void notifyError(DownloadInfo info, DownloadError error, Throwable throwable)
     {
+        // 如果下载失败，则立即移除下载信息，因为外部有可能在失败回调里面重新发起下载
         removeDownloadInfo(info.getUrl());
 
         info.setState(DownloadState.Error);
@@ -446,6 +445,8 @@ public class FDownloadManager implements DownloadManager
                                 + " url:" + info.getUrl()
                                 + " file:" + file.getAbsolutePath());
                     }
+
+                    removeDownloadInfo(info.getUrl());
 
                     for (Callback item : mListCallback)
                     {
