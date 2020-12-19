@@ -440,12 +440,15 @@ public class FDownloadManager implements DownloadManager
                                 + " file:" + file.getAbsolutePath());
                     }
 
-                    // 移除下载信息
-                    removeDownloadInfo(info.getUrl());
-
-                    for (Callback item : mListCallback)
+                    synchronized (FDownloadManager.this)
                     {
-                        item.onSuccess(info, file);
+                        // 移除下载信息
+                        removeDownloadInfo(info.getUrl());
+
+                        for (Callback item : mListCallback)
+                        {
+                            item.onSuccess(info, file);
+                        }
                     }
                 }
             });
@@ -466,12 +469,15 @@ public class FDownloadManager implements DownloadManager
                                 + " error:" + info.getError());
                     }
 
-                    // 移除下载信息
-                    removeDownloadInfo(info.getUrl());
-
-                    for (Callback item : mListCallback)
+                    synchronized (FDownloadManager.this)
                     {
-                        item.onError(info);
+                        // 移除下载信息
+                        removeDownloadInfo(info.getUrl());
+
+                        for (Callback item : mListCallback)
+                        {
+                            item.onError(info);
+                        }
                     }
                 }
             });
