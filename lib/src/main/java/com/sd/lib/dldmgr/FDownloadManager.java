@@ -109,36 +109,16 @@ public class FDownloadManager implements DownloadManager
         return file.exists() ? file : null;
     }
 
-    private File newTempFile(String url)
+    private synchronized File newTempFile(String url)
     {
-        return newUrlFile(url, EXT_TEMP);
+        final String ext = EXT_TEMP;
+        return Utils.getUrlFile(url, ext, mDirectory);
     }
 
-    private File newDownloadFile(String url)
+    private synchronized File newDownloadFile(String url)
     {
         final String ext = Utils.getExt(url);
-        return newUrlFile(url, ext);
-    }
-
-    private synchronized File newUrlFile(String url, String ext)
-    {
-        if (TextUtils.isEmpty(url))
-            throw new IllegalArgumentException("url is empty");
-
-        if (!checkDirectory())
-            return null;
-
-        if (TextUtils.isEmpty(ext))
-        {
-            ext = "";
-        } else
-        {
-            if (!ext.startsWith("."))
-                ext = "." + ext;
-        }
-
-        final String fileName = Utils.MD5(url) + ext;
-        return new File(mDirectory, fileName);
+        return Utils.getUrlFile(url, ext, mDirectory);
     }
 
     @Override
