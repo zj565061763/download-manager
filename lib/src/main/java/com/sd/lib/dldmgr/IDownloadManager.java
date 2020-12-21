@@ -61,6 +61,15 @@ public interface IDownloadManager
     void deleteDownloadFile(String ext);
 
     /**
+     * 设置url下载成功之后，要拷贝到哪个下载目录
+     *
+     * @param url
+     * @param directory
+     * @return
+     */
+    boolean addDownloadDirectory(String url, IDownloadDirectory directory);
+
+    /**
      * {@link #addTask(DownloadRequest, Callback)}
      *
      * @param url

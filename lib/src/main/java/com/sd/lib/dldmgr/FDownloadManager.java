@@ -19,6 +19,7 @@ public class FDownloadManager implements IDownloadManager
     private final Map<File, String> mMapTempFile = new ConcurrentHashMap<>();
 
     private final Map<Callback, String> mCallbackHolder = new ConcurrentHashMap<>();
+    private final Map<String, Map<IDownloadDirectory, String>> mDirectoryHolder = new ConcurrentHashMap<>();
 
     protected FDownloadManager(String directory)
     {
@@ -124,6 +125,38 @@ public class FDownloadManager implements IDownloadManager
 
         if (getConfig().isDebug())
             Log.i(TAG, "deleteDownloadFile count:" + count + " ext:" + ext);
+    }
+
+    @Override
+    public synchronized boolean addDownloadDirectory(String url, IDownloadDirectory directory)
+    {
+        if (directory == null)
+            return false;
+
+        final DownloadInfo downloadInfo = getDownloadInfo(url);
+        if (downloadInfo == null)
+            return false;
+
+        Map<IDownloadDirectory, String> map = mDirectoryHolder.get(url);
+        if (map == null)
+        {
+            map = new ConcurrentHashMap<>();
+            mDirectoryHolder.put(url, map);
+        }
+
+        final String put = map.put(directory, "");
+        if (put == null)
+        {
+            if (getConfig().isDebug())
+            {
+                Log.i(TAG, "addDownloadDirectory url:" + url
+                        + " directory:" + directory
+                        + " size:" + map.size()
+                        + " totalSize:" + mDirectoryHolder.size()
+                );
+            }
+        }
+        return true;
     }
 
     @Override
@@ -453,6 +486,7 @@ public class FDownloadManager implements IDownloadManager
 
             if (mTempFile.renameTo(downloadFile))
             {
+                copyFileIfNeed(downloadFile);
                 FDownloadManager.this.notifySuccess(mInfo, downloadFile);
             } else
             {
@@ -460,6 +494,37 @@ public class FDownloadManager implements IDownloadManager
                     Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error rename temp file to download file:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.RenameFile);
+            }
+        }
+
+        private void copyFileIfNeed(File downloadFile)
+        {
+            synchronized (FDownloadManager.this)
+            {
+                final Map<IDownloadDirectory, String> map = mDirectoryHolder.get(mUrl);
+                if (map == null)
+                    return;
+
+                for (IDownloadDirectory directory : map.keySet())
+                {
+                    final File copyFile = directory.copyFile(downloadFile);
+                    if (getConfig().isDebug())
+                    {
+                        Log.i(TAG, "copyFile url:" + mUrl
+                                + " directory:" + directory
+                                + " downloadFile:" + downloadFile
+                                + " copyFile:" + copyFile
+                        );
+                    }
+                }
+                mDirectoryHolder.remove(mUrl);
+
+                if (getConfig().isDebug())
+                {
+                    Log.i(TAG, "copyFile finish:" + mUrl
+                            + " totalSize:" + mDirectoryHolder.size()
+                    );
+                }
             }
         }
 

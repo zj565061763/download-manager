@@ -64,10 +64,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.i(TAG, "onSuccess:" + info.getUrl() + "\r\n"
                     + " file:" + file.getAbsolutePath()
                     + " state:" + info.getState());
-
-            // 拷贝下载文件到指定的下载目录
-            final File copyFile = mDownloadDirectory.copyFile(file);
-            Log.i(TAG, "copyFile:" + copyFile);
         }
 
         @Override
@@ -86,10 +82,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             case R.id.btn_download:
                 // 添加下载任务
-                FDownloadManager.getDefault().addTask(new DownloadRequest.Builder()
+                final boolean addTask = FDownloadManager.getDefault().addTask(new DownloadRequest.Builder()
                         // 设置需要断点下载
                         .setPreferBreakpoint(true)
                         .build(URL));
+
+                if (addTask)
+                    FDownloadManager.getDefault().addDownloadDirectory(URL, mDownloadDirectory);
                 break;
             case R.id.btn_cancel:
                 // 取消下载任务
