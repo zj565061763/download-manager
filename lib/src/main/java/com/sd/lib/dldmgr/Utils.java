@@ -7,7 +7,15 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -115,5 +123,124 @@ class Utils
             ext = "";
 
         return ext;
+    }
+
+    /**
+     * 删除文件或者目录
+     *
+     * @param file
+     * @return
+     */
+    public static boolean delete(File file)
+    {
+        if (file == null || !file.exists())
+            return true;
+
+        if (file.isFile())
+            return file.delete();
+
+        final File[] files = file.listFiles();
+        if (files != null)
+        {
+            for (File item : files)
+            {
+                delete(item);
+            }
+        }
+        return file.delete();
+    }
+
+    /**
+     * 将输入流的内容拷贝到输出流
+     *
+     * @param inputStream  输入流
+     * @param outputStream 输出流
+     * @throws IOException
+     */
+    public static void copy(InputStream inputStream, OutputStream outputStream) throws IOException
+    {
+        if (!(inputStream instanceof BufferedInputStream))
+            inputStream = new BufferedInputStream(inputStream);
+
+        if (!(outputStream instanceof BufferedOutputStream))
+            outputStream = new BufferedOutputStream(outputStream);
+
+        final byte[] buffer = new byte[1024];
+        int len = 0;
+        while ((len = inputStream.read(buffer)) != -1)
+        {
+            outputStream.write(buffer, 0, len);
+        }
+        outputStream.flush();
+    }
+
+    /**
+     * 拷贝文件
+     *
+     * @param fileFrom
+     * @param fileTo
+     * @return
+     */
+    public static boolean copyFile(File fileFrom, File fileTo)
+    {
+        if (fileFrom == null || !fileFrom.exists())
+            return false;
+
+        if (fileFrom.isDirectory())
+            throw new IllegalArgumentException("fileFrom must not be a directory");
+
+        if (fileTo == null)
+            return false;
+
+        if (fileTo.exists())
+        {
+            if (fileTo.isDirectory())
+            {
+                throw new IllegalArgumentException("fileTo must not be a directory");
+            } else
+            {
+                if (!fileTo.delete())
+                    return false;
+            }
+        }
+
+        final File fileToParent = fileTo.getParentFile();
+        if (fileToParent != null && !fileToParent.exists())
+        {
+            if (!fileToParent.mkdirs())
+                return false;
+        }
+
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try
+        {
+            inputStream = new FileInputStream(fileFrom);
+            outputStream = new FileOutputStream(fileTo);
+
+            copy(inputStream, outputStream);
+            return true;
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        } finally
+        {
+            closeQuietly(inputStream);
+            closeQuietly(outputStream);
+        }
+    }
+
+    public static void closeQuietly(Closeable closeable)
+    {
+        if (closeable != null)
+        {
+            try
+            {
+                closeable.close();
+            } catch (Throwable ignored)
+            {
+            }
+        }
     }
 }
