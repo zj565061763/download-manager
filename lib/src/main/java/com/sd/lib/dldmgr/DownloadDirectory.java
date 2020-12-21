@@ -10,7 +10,7 @@ public class DownloadDirectory implements IDownloadDirectory
 
     public DownloadDirectory(File directory)
     {
-        // 此处不检查路径对象是否为null
+        // 此处不检查目录对象是否为null
         mDirectory = directory;
     }
 
