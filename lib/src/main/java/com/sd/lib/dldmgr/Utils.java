@@ -44,27 +44,6 @@ class Utils
         return dir;
     }
 
-    public static File getUrlFile(String url, String ext, File directory)
-    {
-        if (TextUtils.isEmpty(url))
-            return null;
-
-        if (!checkDir(directory))
-            return null;
-
-        if (TextUtils.isEmpty(ext))
-        {
-            ext = "";
-        } else
-        {
-            if (!ext.startsWith("."))
-                ext = "." + ext;
-        }
-
-        final String fileName = MD5(url) + ext;
-        return new File(directory, fileName);
-    }
-
     public static boolean checkDir(File dir)
     {
         if (dir == null)

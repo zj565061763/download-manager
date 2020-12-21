@@ -18,11 +18,7 @@ public class DownloadDirectory implements IDownloadDirectory
     @Override
     public File getFile(String url)
     {
-        if (TextUtils.isEmpty(url))
-            return null;
-
-        final String ext = Utils.getExt(url);
-        final File file = newUrlFile(url, ext);
+        final File file = newUrlFile(url);
         if (file == null)
             return null;
 
@@ -32,11 +28,7 @@ public class DownloadDirectory implements IDownloadDirectory
     @Override
     public File getTempFile(String url)
     {
-        if (TextUtils.isEmpty(url))
-            return null;
-
-        final String ext = EXT_TEMP;
-        final File file = newUrlFile(url, ext);
+        final File file = newUrlTempFile(url);
         if (file == null)
             return null;
 
@@ -44,30 +36,27 @@ public class DownloadDirectory implements IDownloadDirectory
     }
 
     @Override
-    public File newUrlFile(String url, String ext)
+    public File newUrlFile(String url)
     {
         if (TextUtils.isEmpty(url))
             return null;
 
-        final File directory = mDirectory;
-        if (!Utils.checkDir(directory))
-            return null;
-
-        if (TextUtils.isEmpty(ext))
-        {
-            ext = "";
-        } else
-        {
-            if (!ext.startsWith("."))
-                ext = "." + ext;
-        }
-
-        final String fileName = Utils.MD5(url) + ext;
-        return new File(directory, fileName);
+        final String ext = Utils.getExt(url);
+        return createUrlFile(url, ext);
     }
 
     @Override
-    public boolean copyFile(File file)
+    public File newUrlTempFile(String url)
+    {
+        if (TextUtils.isEmpty(url))
+            return null;
+
+        final String ext = EXT_TEMP;
+        return createUrlFile(url, ext);
+    }
+
+    @Override
+    public synchronized boolean copyFile(File file)
     {
         if (!Utils.checkDir(mDirectory))
             return false;
@@ -92,7 +81,7 @@ public class DownloadDirectory implements IDownloadDirectory
     }
 
     @Override
-    public int deleteFile(String ext)
+    public synchronized int deleteFile(String ext)
     {
         if (!TextUtils.isEmpty(ext))
         {
@@ -132,7 +121,7 @@ public class DownloadDirectory implements IDownloadDirectory
     }
 
     @Override
-    public int deleteTempFile(FileInterceptor interceptor)
+    public synchronized int deleteTempFile(FileInterceptor interceptor)
     {
         final File[] files = getAllFile();
         if (files == null || files.length <= 0)
@@ -164,5 +153,27 @@ public class DownloadDirectory implements IDownloadDirectory
             return null;
 
         return files;
+    }
+
+    private synchronized File createUrlFile(String url, String ext)
+    {
+        if (TextUtils.isEmpty(url))
+            return null;
+
+        final File directory = mDirectory;
+        if (!Utils.checkDir(directory))
+            return null;
+
+        if (TextUtils.isEmpty(ext))
+        {
+            ext = "";
+        } else
+        {
+            if (!ext.startsWith("."))
+                ext = "." + ext;
+        }
+
+        final String fileName = Utils.MD5(url) + ext;
+        return new File(directory, fileName);
     }
 }

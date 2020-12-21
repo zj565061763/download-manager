@@ -89,18 +89,6 @@ public class FDownloadManager implements IDownloadManager
         return mDownloadDirectory.getTempFile(url);
     }
 
-    private synchronized File newTempFile(String url)
-    {
-        final String ext = IDownloadDirectory.EXT_TEMP;
-        return mDownloadDirectory.newUrlFile(url, ext);
-    }
-
-    private synchronized File newDownloadFile(String url)
-    {
-        final String ext = Utils.getExt(url);
-        return mDownloadDirectory.newUrlFile(url, ext);
-    }
-
     @Override
     public DownloadInfo getDownloadInfo(String url)
     {
@@ -112,7 +100,7 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized void deleteTempFile()
+    public void deleteTempFile()
     {
         final int count = mDownloadDirectory.deleteTempFile(new IDownloadDirectory.FileInterceptor()
         {
@@ -130,7 +118,7 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized void deleteDownloadFile(String ext)
+    public void deleteDownloadFile(String ext)
     {
         final int count = mDownloadDirectory.deleteFile(ext);
 
@@ -169,7 +157,7 @@ public class FDownloadManager implements IDownloadManager
 
         final DownloadInfo info = new DownloadInfo(url);
 
-        final File tempFile = newTempFile(url);
+        final File tempFile = mDownloadDirectory.newUrlTempFile(url);
         if (tempFile == null)
         {
             if (getConfig().isDebug())
@@ -446,7 +434,7 @@ public class FDownloadManager implements IDownloadManager
                 return;
             }
 
-            final File downloadFile = newDownloadFile(mUrl);
+            final File downloadFile = mDownloadDirectory.newUrlFile(mUrl);
             if (downloadFile == null)
             {
                 if (getConfig().isDebug())
