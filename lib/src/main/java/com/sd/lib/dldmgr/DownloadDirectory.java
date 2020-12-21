@@ -6,7 +6,6 @@ import java.io.File;
 
 public class DownloadDirectory implements IDownloadDirectory
 {
-    private static final String EXT_TEMP = ".temp";
     private final File mDirectory;
 
     public DownloadDirectory(File directory)
@@ -14,6 +13,57 @@ public class DownloadDirectory implements IDownloadDirectory
         if (directory == null)
             throw new NullPointerException("directory is null");
         mDirectory = directory;
+    }
+
+    @Override
+    public File getFile(String url)
+    {
+        if (TextUtils.isEmpty(url))
+            return null;
+
+        final String ext = Utils.getExt(url);
+        final File file = newUrlFile(url, ext);
+        if (file == null)
+            return null;
+
+        return file.exists() ? file : null;
+    }
+
+    @Override
+    public File getTempFile(String url)
+    {
+        if (TextUtils.isEmpty(url))
+            return null;
+
+        final String ext = EXT_TEMP;
+        final File file = newUrlFile(url, ext);
+        if (file == null)
+            return null;
+
+        return file.exists() ? file : null;
+    }
+
+    @Override
+    public File newUrlFile(String url, String ext)
+    {
+        if (TextUtils.isEmpty(url))
+            return null;
+
+        final File directory = mDirectory;
+        if (!Utils.checkDir(directory))
+            return null;
+
+        if (TextUtils.isEmpty(ext))
+        {
+            ext = "";
+        } else
+        {
+            if (!ext.startsWith("."))
+                ext = "." + ext;
+        }
+
+        final String fileName = Utils.MD5(url) + ext;
+        return new File(directory, fileName);
     }
 
     @Override
