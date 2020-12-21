@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         // 可以自定义下载文件保存目录
-        mDownloadDirectory = new DownloadDirectory(getExternalFilesDir("my_download"));
+        mDownloadDirectory = DownloadDirectory.from(getExternalFilesDir("my_download"));
 
         // 添加下载回调
         FDownloadManager.getDefault().addCallback(mDownloadCallback);

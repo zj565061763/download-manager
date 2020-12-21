@@ -8,10 +8,15 @@ public class DownloadDirectory implements IDownloadDirectory
 {
     private final File mDirectory;
 
-    public DownloadDirectory(File directory)
+    private DownloadDirectory(File directory)
     {
         // 此处不检查目录对象是否为null
         mDirectory = directory;
+    }
+
+    public static DownloadDirectory from(File directory)
+    {
+        return new DownloadDirectory(directory);
     }
 
     @Override
