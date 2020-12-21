@@ -6,10 +6,12 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.sd.lib.dldmgr.DownloadDirectory;
 import com.sd.lib.dldmgr.DownloadInfo;
-import com.sd.lib.dldmgr.IDownloadManager;
 import com.sd.lib.dldmgr.DownloadRequest;
 import com.sd.lib.dldmgr.FDownloadManager;
+import com.sd.lib.dldmgr.IDownloadDirectory;
+import com.sd.lib.dldmgr.IDownloadManager;
 import com.sd.lib.dldmgr.TransmitParam;
 
 import java.io.File;
@@ -20,11 +22,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String URL = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe";
 
+    private IDownloadDirectory mDownloadDirectory;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // 可以自定义下载文件保存目录
+        mDownloadDirectory = new DownloadDirectory(getExternalFilesDir("my_download"));
 
         // 添加下载回调
         FDownloadManager.getDefault().addCallback(mDownloadCallback);
@@ -56,6 +63,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             Log.i(TAG, "onSuccess:" + info.getUrl() + "\r\n"
                     + " file:" + file.getAbsolutePath());
+
+            // 拷贝下载文件到指定的下载目录
+            mDownloadDirectory.copyFile(file);
         }
 
         @Override
@@ -96,5 +106,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FDownloadManager.getDefault().deleteTempFile();
         // 删除下载文件（临时文件不会被删除）
         FDownloadManager.getDefault().deleteDownloadFile(null);
+
+        mDownloadDirectory.deleteTempFile(null);
+        mDownloadDirectory.deleteFile(null);
     }
 }
