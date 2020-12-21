@@ -9,8 +9,11 @@ public class DownloadInfo
 
     private TransmitParam mTransmitParam;
 
-    public DownloadInfo(String url)
+    DownloadInfo(String url)
     {
+        if (url == null)
+            throw new NullPointerException("url is null");
+
         mUrl = url;
     }
 
