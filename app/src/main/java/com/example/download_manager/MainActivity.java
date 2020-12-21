@@ -88,7 +88,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .build(URL));
 
                 if (addTask)
+                {
+                    // 设置下载成功之后，拷贝该目录
                     FDownloadManager.getDefault().addDownloadDirectory(URL, mDownloadDirectory);
+                }
                 break;
             case R.id.btn_cancel:
                 // 取消下载任务
