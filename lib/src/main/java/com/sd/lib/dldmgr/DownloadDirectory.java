@@ -43,7 +43,6 @@ public class DownloadDirectory implements IDownloadDirectory
         return createUrlFile(url, ext);
     }
 
-
     File newUrlTempFile(String url)
     {
         if (TextUtils.isEmpty(url))
