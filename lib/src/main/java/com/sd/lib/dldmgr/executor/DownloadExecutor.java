@@ -1,7 +1,7 @@
 package com.sd.lib.dldmgr.executor;
 
 import com.sd.lib.dldmgr.DownloadRequest;
-import com.sd.lib.dldmgr.DownloadUpdater;
+import com.sd.lib.dldmgr.IDownloadUpdater;
 
 import java.io.File;
 
@@ -15,7 +15,7 @@ public interface DownloadExecutor
      * @param updater 下载信息更新对象
      * @return true-提交成功，false-提交失败
      */
-    boolean submit(DownloadRequest request, File file, DownloadUpdater updater);
+    boolean submit(DownloadRequest request, File file, IDownloadUpdater updater);
 
     /**
      * 取消下载任务

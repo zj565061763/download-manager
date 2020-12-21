@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class FDownloadManager implements DownloadManager
+public class FDownloadManager implements IDownloadManager
 {
     private static final String EXT_TEMP = ".temp";
 
@@ -263,7 +263,7 @@ public class FDownloadManager implements DownloadManager
             return false;
         }
 
-        final DownloadUpdater downloadUpdater = new InternalDownloadUpdater(info, tempFile);
+        final IDownloadUpdater downloadUpdater = new InternalDownloadUpdater(info, tempFile);
         final boolean submitted = getConfig().getDownloadExecutor().submit(request, tempFile, downloadUpdater);
         if (submitted)
         {
@@ -477,7 +477,7 @@ public class FDownloadManager implements DownloadManager
         }
     };
 
-    private final class InternalDownloadUpdater implements DownloadUpdater
+    private final class InternalDownloadUpdater implements IDownloadUpdater
     {
         private final DownloadInfo mInfo;
         private final File mTempFile;
@@ -516,12 +516,12 @@ public class FDownloadManager implements DownloadManager
             mCompleted = true;
 
             if (getConfig().isDebug())
-                Log.i(TAG, DownloadUpdater.class.getSimpleName() + " download success:" + mUrl);
+                Log.i(TAG, IDownloadUpdater.class.getSimpleName() + " download success:" + mUrl);
 
             if (!mTempFile.exists())
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download success error temp file not exists:" + mUrl);
+                    Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error temp file not exists:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.TempFileNotExists);
                 return;
@@ -531,7 +531,7 @@ public class FDownloadManager implements DownloadManager
             if (downloadFile == null)
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download success error create download file:" + mUrl);
+                    Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error create download file:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.CreateDownloadFile);
                 return;
@@ -546,7 +546,7 @@ public class FDownloadManager implements DownloadManager
             } else
             {
                 if (getConfig().isDebug())
-                    Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download success error rename temp file to download file:" + mUrl);
+                    Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error rename temp file to download file:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.RenameFile);
             }
@@ -561,7 +561,7 @@ public class FDownloadManager implements DownloadManager
             mCompleted = true;
 
             if (getConfig().isDebug())
-                Log.e(TAG, DownloadUpdater.class.getSimpleName() + " download error:" + mUrl + " " + e);
+                Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download error:" + mUrl + " " + e);
 
             DownloadError error = DownloadError.Other;
             if (e instanceof DownloadHttpException)
@@ -581,7 +581,7 @@ public class FDownloadManager implements DownloadManager
             mCompleted = true;
 
             if (getConfig().isDebug())
-                Log.i(TAG, DownloadUpdater.class.getSimpleName() + " download cancel:" + mUrl);
+                Log.i(TAG, IDownloadUpdater.class.getSimpleName() + " download cancel:" + mUrl);
 
             FDownloadManager.this.notifyError(mInfo, DownloadError.Cancel);
         }

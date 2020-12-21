@@ -2,9 +2,9 @@ package com.sd.lib.dldmgr;
 
 import java.io.File;
 
-public interface DownloadManager
+public interface IDownloadManager
 {
-    String TAG = DownloadManager.class.getName();
+    String TAG = IDownloadManager.class.getName();
 
     /**
      * 添加回调对象

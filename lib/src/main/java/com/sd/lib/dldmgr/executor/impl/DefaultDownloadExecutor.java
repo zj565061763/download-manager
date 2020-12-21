@@ -3,7 +3,7 @@ package com.sd.lib.dldmgr.executor.impl;
 import android.text.TextUtils;
 
 import com.sd.lib.dldmgr.DownloadRequest;
-import com.sd.lib.dldmgr.DownloadUpdater;
+import com.sd.lib.dldmgr.IDownloadUpdater;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
 import com.sd.lib.dldmgr.executor.DownloadExecutor;
 
@@ -81,7 +81,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
     }
 
     @Override
-    public boolean submit(final DownloadRequest request, final File file, final DownloadUpdater updater)
+    public boolean submit(final DownloadRequest request, final File file, final IDownloadUpdater updater)
     {
         final Boolean requestPreferBreakpoint = request.getPreferBreakpoint();
         final boolean preferBreakpoint = requestPreferBreakpoint != null ? requestPreferBreakpoint : mPreferBreakpoint;
@@ -158,7 +158,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         return true;
     }
 
-    private void downloadNormal(HttpRequest request, File file, final DownloadUpdater updater) throws IOException
+    private void downloadNormal(HttpRequest request, File file, final IDownloadUpdater updater) throws IOException
     {
         InputStream input = null;
         OutputStream output = null;
@@ -193,7 +193,7 @@ public class DefaultDownloadExecutor implements DownloadExecutor
         }
     }
 
-    private void downloadBreakpoint(HttpRequest request, File file, final DownloadUpdater updater) throws IOException
+    private void downloadBreakpoint(HttpRequest request, File file, final IDownloadUpdater updater) throws IOException
     {
         final long length = file.length();
         if (length <= 0)
@@ -253,9 +253,9 @@ public class DefaultDownloadExecutor implements DownloadExecutor
     private static final class TaskInfo
     {
         private final Future<?> mFuture;
-        private final DownloadUpdater mUpdater;
+        private final IDownloadUpdater mUpdater;
 
-        public TaskInfo(Future<?> future, DownloadUpdater updater)
+        public TaskInfo(Future<?> future, IDownloadUpdater updater)
         {
             if (future == null || updater == null)
                 throw new IllegalArgumentException();

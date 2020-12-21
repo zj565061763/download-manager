@@ -1,6 +1,6 @@
 package com.sd.lib.dldmgr;
 
-public interface DownloadUpdater
+public interface IDownloadUpdater
 {
     /**
      * 通知下载进度

@@ -7,7 +7,7 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.sd.lib.dldmgr.DownloadInfo;
-import com.sd.lib.dldmgr.DownloadManager;
+import com.sd.lib.dldmgr.IDownloadManager;
 import com.sd.lib.dldmgr.DownloadRequest;
 import com.sd.lib.dldmgr.FDownloadManager;
 import com.sd.lib.dldmgr.TransmitParam;
@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FDownloadManager.getDefault().addCallback(mDownloadCallback);
     }
 
-    private final DownloadManager.Callback mDownloadCallback = new DownloadManager.Callback()
+    private final IDownloadManager.Callback mDownloadCallback = new IDownloadManager.Callback()
     {
         @Override
         public void onPrepare(DownloadInfo info)
