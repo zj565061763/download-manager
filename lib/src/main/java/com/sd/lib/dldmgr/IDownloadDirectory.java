@@ -11,6 +11,13 @@ public interface IDownloadDirectory
     String EXT_TEMP = ".temp";
 
     /**
+     * 检查目录是否存在
+     *
+     * @return
+     */
+    boolean checkExist();
+
+    /**
      * 返回url对应的文件
      *
      * @param url

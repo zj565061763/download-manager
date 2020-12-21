@@ -15,6 +15,12 @@ public class DownloadDirectory implements IDownloadDirectory
     }
 
     @Override
+    public boolean checkExist()
+    {
+        return Utils.checkDir(mDirectory);
+    }
+
+    @Override
     public File getFile(String url)
     {
         final File file = newUrlFile(url);
