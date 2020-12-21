@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onPrepare(DownloadInfo info)
         {
-            Log.i(TAG, "onPrepare:" + info.getUrl());
+            Log.i(TAG, "onPrepare:" + info.getUrl() + " state:" + info.getState());
         }
 
         @Override
@@ -55,14 +55,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // 下载速率
             final int speed = param.getSpeedKBps();
 
-            Log.i(TAG, "onProgress:" + progress + " " + speed);
+            Log.i(TAG, "onProgress:" + progress + " " + speed + " state:" + info.getState());
         }
 
         @Override
         public void onSuccess(DownloadInfo info, File file)
         {
             Log.i(TAG, "onSuccess:" + info.getUrl() + "\r\n"
-                    + " file:" + file.getAbsolutePath());
+                    + " file:" + file.getAbsolutePath()
+                    + " state:" + info.getState());
 
             // 拷贝下载文件到指定的下载目录
             final File copyFile = mDownloadDirectory.copyFile(file);
@@ -72,7 +73,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onError(DownloadInfo info)
         {
-            Log.e(TAG, "onError:" + info.getError() + " throwable:" + info.getThrowable());
+            Log.e(TAG, "onError:" + info.getError()
+                    + " throwable:" + info.getThrowable()
+                    + " state:" + info.getState());
         }
     };
 
