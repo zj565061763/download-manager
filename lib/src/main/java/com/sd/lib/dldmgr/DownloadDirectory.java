@@ -186,4 +186,25 @@ public class DownloadDirectory implements IDownloadDirectory
         final String fileName = Utils.MD5(url) + ext;
         return new File(directory, fileName);
     }
+
+    @Override
+    public int hashCode()
+    {
+        return mDirectory != null ? mDirectory.hashCode() : super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == this) return true;
+        if (obj == null) return false;
+        if (obj.getClass() != getClass()) return false;
+
+        if (mDirectory == null)
+            return super.equals(obj);
+
+        final DownloadDirectory other = (DownloadDirectory) obj;
+        return mDirectory.equals(other.mDirectory);
+    }
+
 }
