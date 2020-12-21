@@ -207,4 +207,12 @@ public class DownloadDirectory implements IDownloadDirectory
         return mDirectory.equals(other.mDirectory);
     }
 
+    @Override
+    public String toString()
+    {
+        return "{" +
+                "mDirectory=" + mDirectory +
+                " hash=" + super.toString() +
+                "}";
+    }
 }
