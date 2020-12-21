@@ -27,22 +27,6 @@ public interface IDownloadDirectory
     File getTempFile(String url);
 
     /**
-     * 新建url对应的文件
-     *
-     * @param url
-     * @return
-     */
-    File newUrlFile(String url);
-
-    /**
-     * 新建url对应的临时文件
-     *
-     * @param url
-     * @return
-     */
-    File newUrlTempFile(String url);
-
-    /**
      * 复制文件到当前目录
      *
      * @param file

@@ -35,8 +35,7 @@ public class DownloadDirectory implements IDownloadDirectory
         return file.exists() ? file : null;
     }
 
-    @Override
-    public File newUrlFile(String url)
+    File newUrlFile(String url)
     {
         if (TextUtils.isEmpty(url))
             return null;
@@ -45,8 +44,8 @@ public class DownloadDirectory implements IDownloadDirectory
         return createUrlFile(url, ext);
     }
 
-    @Override
-    public File newUrlTempFile(String url)
+
+    File newUrlTempFile(String url)
     {
         if (TextUtils.isEmpty(url))
             return null;

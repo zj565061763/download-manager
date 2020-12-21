@@ -13,7 +13,7 @@ public class FDownloadManager implements IDownloadManager
 {
     private static FDownloadManager sDefault = null;
 
-    private final IDownloadDirectory mDownloadDirectory;
+    private final DownloadDirectory mDownloadDirectory;
 
     private final Map<String, DownloadInfoWrapper> mMapDownloadInfo = new ConcurrentHashMap<>();
     private final Map<File, String> mMapTempFile = new ConcurrentHashMap<>();
