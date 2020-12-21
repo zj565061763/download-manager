@@ -69,12 +69,12 @@ public class DownloadDirectory implements IDownloadDirectory
             throw new IllegalArgumentException("file must not be a directory");
 
         final String filename = file.getName();
-        final File copyFile = new File(directory, filename);
-        Utils.delete(copyFile);
-
         final File tempFile = new File(directory, filename + EXT_TEMP);
         if (Utils.copyFile(file, tempFile))
         {
+            final File copyFile = new File(directory, filename);
+            Utils.delete(copyFile);
+
             if (tempFile.renameTo(copyFile))
                 return true;
         }
