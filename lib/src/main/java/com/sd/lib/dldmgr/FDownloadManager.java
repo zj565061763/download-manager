@@ -508,12 +508,14 @@ public class FDownloadManager implements IDownloadManager
                 for (IDownloadDirectory directory : map.keySet())
                 {
                     final File copyFile = directory.copyFile(downloadFile);
+                    final boolean success = copyFile != downloadFile;
                     if (getConfig().isDebug())
                     {
                         Log.i(TAG, "copyFile url:" + mUrl
                                 + " directory:" + directory
                                 + " downloadFile:" + downloadFile
                                 + " copyFile:" + copyFile
+                                + " success:" + success
                         );
                     }
                 }
