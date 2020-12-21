@@ -58,7 +58,8 @@ public class DownloadDirectory implements IDownloadDirectory
     @Override
     public synchronized boolean copyFile(File file)
     {
-        if (!Utils.checkDir(mDirectory))
+        final File directory = mDirectory;
+        if (!Utils.checkDir(directory))
             return false;
 
         if (file == null || !file.exists())
@@ -68,10 +69,10 @@ public class DownloadDirectory implements IDownloadDirectory
             throw new IllegalArgumentException("file must not be a directory");
 
         final String filename = file.getName();
-        final File copyFile = new File(mDirectory, filename);
+        final File copyFile = new File(directory, filename);
         Utils.delete(copyFile);
 
-        final File tempFile = new File(mDirectory, filename + EXT_TEMP);
+        final File tempFile = new File(directory, filename + EXT_TEMP);
         if (Utils.copyFile(file, tempFile))
         {
             if (tempFile.renameTo(copyFile))
@@ -145,10 +146,11 @@ public class DownloadDirectory implements IDownloadDirectory
 
     private File[] getAllFile()
     {
-        if (!Utils.checkDir(mDirectory))
+        final File directory = mDirectory;
+        if (!Utils.checkDir(directory))
             return null;
 
-        final File[] files = mDirectory.listFiles();
+        final File[] files = directory.listFiles();
         if (files == null || files.length <= 0)
             return null;
 
