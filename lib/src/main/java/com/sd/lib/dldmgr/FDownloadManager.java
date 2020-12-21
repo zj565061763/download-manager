@@ -226,25 +226,46 @@ public class FDownloadManager implements IDownloadManager
         return result;
     }
 
-    private void notifyPrepare(DownloadInfo info)
+    private void notifyPrepare(final DownloadInfo info)
     {
         info.setState(DownloadState.Prepare);
-        mMainThreadCallback.onPrepare(info);
+        Utils.runOnMainThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                mMainThreadCallback.onPrepare(info);
+            }
+        });
     }
 
-    private void notifyProgress(DownloadInfo info, long total, long current)
+    private void notifyProgress(final DownloadInfo info, final long total, final long current)
     {
-        info.setState(DownloadState.Downloading);
-        final boolean changed = info.getTransmitParam().transmit(total, current);
+        Utils.runOnMainThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                info.setState(DownloadState.Downloading);
+                final boolean changed = info.getTransmitParam().transmit(total, current);
 
-        if (changed)
-            mMainThreadCallback.onProgress(info);
+                if (changed)
+                    mMainThreadCallback.onProgress(info);
+            }
+        });
     }
 
-    private void notifySuccess(DownloadInfo info, File file)
+    private void notifySuccess(final DownloadInfo info, final File file)
     {
-        info.setState(DownloadState.Success);
-        mMainThreadCallback.onSuccess(info, file);
+        Utils.runOnMainThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                info.setState(DownloadState.Success);
+                mMainThreadCallback.onSuccess(info, file);
+            }
+        });
     }
 
     private void notifyError(DownloadInfo info, DownloadError error)
@@ -252,12 +273,19 @@ public class FDownloadManager implements IDownloadManager
         notifyError(info, error, null);
     }
 
-    private void notifyError(DownloadInfo info, DownloadError error, Throwable throwable)
+    private void notifyError(final DownloadInfo info, final DownloadError error, final Throwable throwable)
     {
-        info.setState(DownloadState.Error);
-        info.setError(error);
-        info.setThrowable(throwable);
-        mMainThreadCallback.onError(info);
+        Utils.runOnMainThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                info.setState(DownloadState.Error);
+                info.setError(error);
+                info.setThrowable(throwable);
+                mMainThreadCallback.onError(info);
+            }
+        });
     }
 
     /**
@@ -289,22 +317,17 @@ public class FDownloadManager implements IDownloadManager
         @Override
         public void onPrepare(final DownloadInfo info)
         {
-            Utils.runOnMainThread(new Runnable()
+            Utils.checkMainThread();
+            for (Callback item : mCallbackHolder.keySet())
             {
-                @Override
-                public void run()
-                {
-                    for (Callback item : mCallbackHolder.keySet())
-                    {
-                        item.onPrepare(info);
-                    }
-                }
-            });
+                item.onPrepare(info);
+            }
         }
 
         @Override
         public void onProgress(final DownloadInfo info)
         {
+            Utils.checkMainThread();
             if (info.getTransmitParam().getProgress() == 1)
             {
                 Log.i(TAG, "onProgress"
@@ -312,75 +335,56 @@ public class FDownloadManager implements IDownloadManager
                         + " progress:" + 1);
             }
 
-            Utils.runOnMainThread(new Runnable()
+            for (Callback item : mCallbackHolder.keySet())
             {
-                @Override
-                public void run()
-                {
-                    for (Callback item : mCallbackHolder.keySet())
-                    {
-                        item.onProgress(info);
-                    }
-                }
-            });
+                item.onProgress(info);
+            }
         }
 
         @Override
         public void onSuccess(final DownloadInfo info, final File file)
         {
-            Utils.runOnMainThread(new Runnable()
+            Utils.checkMainThread();
+            if (getConfig().isDebug())
             {
-                @Override
-                public void run()
+                Log.i(TAG, "notify callback onSuccess"
+                        + " url:" + info.getUrl()
+                        + " file:" + file.getAbsolutePath());
+            }
+
+            synchronized (FDownloadManager.this)
+            {
+                // 移除下载信息
+                removeDownloadInfo(info.getUrl());
+
+                for (Callback item : mCallbackHolder.keySet())
                 {
-                    if (getConfig().isDebug())
-                    {
-                        Log.i(TAG, "notify callback onSuccess"
-                                + " url:" + info.getUrl()
-                                + " file:" + file.getAbsolutePath());
-                    }
-
-                    synchronized (FDownloadManager.this)
-                    {
-                        // 移除下载信息
-                        removeDownloadInfo(info.getUrl());
-
-                        for (Callback item : mCallbackHolder.keySet())
-                        {
-                            item.onSuccess(info, file);
-                        }
-                    }
+                    item.onSuccess(info, file);
                 }
-            });
+            }
         }
 
         @Override
         public void onError(final DownloadInfo info)
         {
-            Utils.runOnMainThread(new Runnable()
+            Utils.checkMainThread();
+            if (getConfig().isDebug())
             {
-                @Override
-                public void run()
+                Log.i(TAG, "notify callback onError"
+                        + " url:" + info.getUrl()
+                        + " error:" + info.getError());
+            }
+
+            synchronized (FDownloadManager.this)
+            {
+                // 移除下载信息
+                removeDownloadInfo(info.getUrl());
+
+                for (Callback item : mCallbackHolder.keySet())
                 {
-                    if (getConfig().isDebug())
-                    {
-                        Log.i(TAG, "notify callback onError"
-                                + " url:" + info.getUrl()
-                                + " error:" + info.getError());
-                    }
-
-                    synchronized (FDownloadManager.this)
-                    {
-                        // 移除下载信息
-                        removeDownloadInfo(info.getUrl());
-
-                        for (Callback item : mCallbackHolder.keySet())
-                        {
-                            item.onError(info);
-                        }
-                    }
+                    item.onError(info);
                 }
-            });
+            }
         }
     };
 
