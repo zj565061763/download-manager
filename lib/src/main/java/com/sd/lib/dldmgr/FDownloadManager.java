@@ -25,7 +25,7 @@ public class FDownloadManager implements IDownloadManager
         if (TextUtils.isEmpty(directory))
             throw new IllegalArgumentException("directory is empty");
 
-        mDownloadDirectory = new DownloadDirectory(new File(directory));
+        mDownloadDirectory = DownloadDirectory.from(new File(directory));
     }
 
     public static FDownloadManager getDefault()
