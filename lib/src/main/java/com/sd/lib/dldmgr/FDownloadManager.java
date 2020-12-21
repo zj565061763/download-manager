@@ -11,11 +11,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FDownloadManager implements IDownloadManager
 {
-    private static final String EXT_TEMP = ".temp";
-
     private static FDownloadManager sDefault = null;
 
-    private final File mDirectory;
+    private final IDownloadDirectory mDownloadDirectory;
+
     private final Map<String, DownloadInfoWrapper> mMapDownloadInfo = new ConcurrentHashMap<>();
     private final Map<File, String> mMapTempFile = new ConcurrentHashMap<>();
 
@@ -23,10 +22,10 @@ public class FDownloadManager implements IDownloadManager
 
     protected FDownloadManager(String directory)
     {
-        if (directory == null)
-            throw new IllegalArgumentException("directory is null");
+        if (TextUtils.isEmpty(directory))
+            throw new IllegalArgumentException("directory is empty");
 
-        mDirectory = new File(directory);
+        mDownloadDirectory = new DownloadDirectory(new File(directory));
     }
 
     public static FDownloadManager getDefault()
@@ -48,11 +47,6 @@ public class FDownloadManager implements IDownloadManager
     private static DownloadManagerConfig getConfig()
     {
         return DownloadManagerConfig.get();
-    }
-
-    private boolean checkDirectory()
-    {
-        return Utils.checkDir(mDirectory);
     }
 
     @Override
@@ -86,39 +80,25 @@ public class FDownloadManager implements IDownloadManager
     @Override
     public File getDownloadFile(String url)
     {
-        if (TextUtils.isEmpty(url))
-            return null;
-
-        final File file = newDownloadFile(url);
-        if (file == null)
-            return null;
-
-        return file.exists() ? file : null;
+        return mDownloadDirectory.getFile(url);
     }
 
     @Override
     public File getTempFile(String url)
     {
-        if (TextUtils.isEmpty(url))
-            return null;
-
-        final File file = newTempFile(url);
-        if (file == null)
-            return null;
-
-        return file.exists() ? file : null;
+        return mDownloadDirectory.getTempFile(url);
     }
 
     private synchronized File newTempFile(String url)
     {
-        final String ext = EXT_TEMP;
-        return Utils.getUrlFile(url, ext, mDirectory);
+        final String ext = IDownloadDirectory.EXT_TEMP;
+        return mDownloadDirectory.newUrlFile(url, ext);
     }
 
     private synchronized File newDownloadFile(String url)
     {
         final String ext = Utils.getExt(url);
-        return Utils.getUrlFile(url, ext, mDirectory);
+        return mDownloadDirectory.newUrlFile(url, ext);
     }
 
     @Override
@@ -131,38 +111,19 @@ public class FDownloadManager implements IDownloadManager
         return wrapper.mDownloadInfo;
     }
 
-    private File[] getAllFile()
-    {
-        if (!checkDirectory())
-            return null;
-
-        final File[] files = mDirectory.listFiles();
-        if (files == null || files.length <= 0)
-            return null;
-
-        return files;
-    }
-
     @Override
     public synchronized void deleteTempFile()
     {
-        final File[] files = getAllFile();
-        if (files == null || files.length <= 0)
-            return;
-
-        int count = 0;
-        for (File item : files)
+        final int count = mDownloadDirectory.deleteTempFile(new IDownloadDirectory.FileInterceptor()
         {
-            if (mMapTempFile.containsKey(item))
-                continue;
-
-            final String name = item.getName();
-            if (name.endsWith(EXT_TEMP))
+            @Override
+            public boolean intercept(File file)
             {
-                if (item.delete())
-                    count++;
+                if (mMapTempFile.containsKey(file))
+                    return true;
+                return false;
             }
-        }
+        });
 
         if (getConfig().isDebug())
             Log.i(TAG, "deleteTempFile count:" + count);
@@ -171,49 +132,7 @@ public class FDownloadManager implements IDownloadManager
     @Override
     public synchronized void deleteDownloadFile(String ext)
     {
-        if (!TextUtils.isEmpty(ext))
-        {
-            if (ext.startsWith("."))
-                throw new IllegalArgumentException("Illegal ext start with dot:" + ext);
-        }
-
-        final File[] files = getAllFile();
-        if (files == null || files.length <= 0)
-            return;
-
-        int count = 0;
-        boolean delete = false;
-        for (File item : files)
-        {
-            final String name = item.getName();
-            if (name.endsWith(EXT_TEMP))
-                continue;
-
-            if (ext == null)
-            {
-                // 删除所有下载文件
-                delete = true;
-            } else
-            {
-                final String itemExt = Utils.getExt(item.getAbsolutePath());
-                if (ext.isEmpty())
-                {
-                    // 删除扩展名为空的下载文件
-                    if (TextUtils.isEmpty(itemExt))
-                        delete = true;
-                } else if (ext.equals(itemExt))
-                {
-                    // 删除指定扩展名的文件
-                    delete = true;
-                }
-            }
-
-            if (delete)
-            {
-                if (item.delete())
-                    count++;
-            }
-        }
+        final int count = mDownloadDirectory.deleteFile(ext);
 
         if (getConfig().isDebug())
             Log.i(TAG, "deleteDownloadFile count:" + count + " ext:" + ext);
