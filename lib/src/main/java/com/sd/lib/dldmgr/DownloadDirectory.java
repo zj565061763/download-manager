@@ -10,8 +10,7 @@ public class DownloadDirectory implements IDownloadDirectory
 
     public DownloadDirectory(File directory)
     {
-        if (directory == null)
-            throw new NullPointerException("directory is null");
+        // 此处不检查路径对象是否为null
         mDirectory = directory;
     }
 
