@@ -65,7 +65,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     + " file:" + file.getAbsolutePath());
 
             // 拷贝下载文件到指定的下载目录
-            mDownloadDirectory.copyFile(file);
+            final File copyFile = mDownloadDirectory.copyFile(file);
+            Log.i(TAG, "copyFile:" + copyFile);
         }
 
         @Override

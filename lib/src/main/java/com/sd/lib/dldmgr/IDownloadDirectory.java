@@ -37,9 +37,9 @@ public interface IDownloadDirectory
      * 复制文件到当前目录
      *
      * @param file
-     * @return
+     * @return 成功-返回拷贝后的文件；失败-返回原文件
      */
-    boolean copyFile(File file);
+    File copyFile(File file);
 
     /**
      * 删除文件（临时文件不会被删除）

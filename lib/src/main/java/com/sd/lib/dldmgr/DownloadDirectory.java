@@ -59,14 +59,14 @@ public class DownloadDirectory implements IDownloadDirectory
     }
 
     @Override
-    public synchronized boolean copyFile(File file)
+    public synchronized File copyFile(File file)
     {
         final File directory = mDirectory;
         if (!Utils.checkDir(directory))
-            return false;
+            return file;
 
         if (file == null || !file.exists())
-            return false;
+            return file;
 
         if (file.isDirectory())
             throw new IllegalArgumentException("file must not be a directory");
@@ -79,9 +79,9 @@ public class DownloadDirectory implements IDownloadDirectory
             Utils.delete(copyFile);
 
             if (tempFile.renameTo(copyFile))
-                return true;
+                return copyFile;
         }
-        return false;
+        return file;
     }
 
     @Override
