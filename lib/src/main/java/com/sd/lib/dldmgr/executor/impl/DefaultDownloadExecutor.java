@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import com.sd.lib.dldmgr.DownloadRequest;
 import com.sd.lib.dldmgr.IDownloadUpdater;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
-import com.sd.lib.dldmgr.executor.DownloadExecutor;
+import com.sd.lib.dldmgr.executor.IDownloadExecutor;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 默认下载器
  */
-public class DefaultDownloadExecutor implements DownloadExecutor
+public class DefaultDownloadExecutor implements IDownloadExecutor
 {
     private ExecutorService mExecutor;
     private final Map<String, TaskInfo> mMapTask = new ConcurrentHashMap<>();

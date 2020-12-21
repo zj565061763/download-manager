@@ -5,7 +5,7 @@ import com.sd.lib.dldmgr.IDownloadUpdater;
 
 import java.io.File;
 
-public interface DownloadExecutor
+public interface IDownloadExecutor
 {
     /**
      * 提交下载任务

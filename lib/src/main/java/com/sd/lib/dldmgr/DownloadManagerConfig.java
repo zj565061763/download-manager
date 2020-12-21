@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.sd.lib.dldmgr.executor.impl.DefaultDownloadExecutor;
-import com.sd.lib.dldmgr.executor.DownloadExecutor;
+import com.sd.lib.dldmgr.executor.IDownloadExecutor;
 
 import java.io.File;
 
@@ -18,7 +18,7 @@ public class DownloadManagerConfig
     private final boolean mIsDebug;
 
     private final Context mContext;
-    private final DownloadExecutor mDownloadExecutor;
+    private final IDownloadExecutor mDownloadExecutor;
     private final String mDownloadDirectory;
 
     private DownloadManagerConfig(Builder builder)
@@ -68,7 +68,7 @@ public class DownloadManagerConfig
     private void checkConfig()
     {
         if (mDownloadExecutor == null)
-            throw new RuntimeException(DownloadExecutor.class.getSimpleName() + " is null");
+            throw new RuntimeException(IDownloadExecutor.class.getSimpleName() + " is null");
     }
 
     public boolean isDebug()
@@ -81,7 +81,7 @@ public class DownloadManagerConfig
         return mContext;
     }
 
-    public DownloadExecutor getDownloadExecutor()
+    public IDownloadExecutor getDownloadExecutor()
     {
         return mDownloadExecutor;
     }
@@ -96,7 +96,7 @@ public class DownloadManagerConfig
         private boolean mIsDebug = false;
 
         private Context mContext;
-        private DownloadExecutor mDownloadExecutor;
+        private IDownloadExecutor mDownloadExecutor;
         private String mDownloadDirectory;
 
         /**
@@ -117,7 +117,7 @@ public class DownloadManagerConfig
          * @param executor
          * @return
          */
-        public Builder setDownloadExecutor(DownloadExecutor executor)
+        public Builder setDownloadExecutor(IDownloadExecutor executor)
         {
             mDownloadExecutor = executor;
             return this;
