@@ -160,6 +160,30 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
+    public synchronized void removeFileProcessor(String url, FileProcessor processor)
+    {
+        if (processor == null)
+            return;
+
+        final Map<FileProcessor, String> map = mProcessorHolder.get(url);
+        if (map == null)
+            return;
+
+        final String remove = map.remove(processor);
+        if (remove != null)
+        {
+            if (map.isEmpty())
+                mProcessorHolder.remove(url);
+
+            if (getConfig().isDebug())
+                Log.i(TAG, "removeFileProcessor url:" + url
+                        + " size:" + map.size()
+                        + " totalSize:" + mProcessorHolder.size()
+                );
+        }
+    }
+
+    @Override
     public boolean addTask(final String url)
     {
         final DownloadRequest downloadRequest = DownloadRequest.url(url);
