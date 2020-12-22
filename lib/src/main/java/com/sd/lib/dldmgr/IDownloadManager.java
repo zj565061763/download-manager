@@ -63,7 +63,7 @@ public interface IDownloadManager
     /**
      * 添加url对应的文件处理器
      * <p>
-     * 下载成功之后，会把文件传给处理器处理（后台线程）
+     * 下载成功之后，会把文件传给处理器处理（后台线程），处理完毕之后，处理器对象会被移除
      *
      * @param url
      * @param processor
