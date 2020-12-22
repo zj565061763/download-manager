@@ -13,6 +13,7 @@ import com.sd.lib.dldmgr.FDownloadManager;
 import com.sd.lib.dldmgr.IDownloadDirectory;
 import com.sd.lib.dldmgr.IDownloadManager;
 import com.sd.lib.dldmgr.TransmitParam;
+import com.sd.lib.dldmgr.processor.CopyFileProcessor;
 
 import java.io.File;
 
@@ -89,15 +90,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if (addTask)
                 {
-                    FDownloadManager.getDefault().addFileProcessor(URL, new IDownloadManager.FileProcessor()
-                    {
-                        @Override
-                        public void process(File file)
-                        {
-                            // 设置下载成功之后，拷贝文件到指定目录
-                            mDownloadDirectory.copyFile(file);
-                        }
-                    });
+                    // 添加文件处理器
+                    FDownloadManager.getDefault().addFileProcessor(URL, new CopyFileProcessor(mDownloadDirectory));
                 }
                 break;
             case R.id.btn_cancel:
