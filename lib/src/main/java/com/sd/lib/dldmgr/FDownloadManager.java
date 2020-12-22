@@ -6,6 +6,7 @@ import android.util.Log;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -341,7 +342,8 @@ public class FDownloadManager implements IDownloadManager
             @Override
             public void run()
             {
-                for (Callback item : mCallbackHolder.keySet())
+                final Collection<Callback> callbacks = mCallbackHolder.keySet();
+                for (Callback item : callbacks)
                 {
                     item.onPrepare(copyInfo);
                 }
@@ -362,7 +364,8 @@ public class FDownloadManager implements IDownloadManager
                 @Override
                 public void run()
                 {
-                    for (Callback item : mCallbackHolder.keySet())
+                    final Collection<Callback> callbacks = mCallbackHolder.keySet();
+                    for (Callback item : callbacks)
                     {
                         item.onProgress(copyInfo);
                     }
@@ -394,7 +397,8 @@ public class FDownloadManager implements IDownloadManager
                     // 移除下载信息
                     removeDownloadInfo(copyInfo.getUrl());
 
-                    for (Callback item : mCallbackHolder.keySet())
+                    final Collection<Callback> callbacks = mCallbackHolder.keySet();
+                    for (Callback item : callbacks)
                     {
                         item.onSuccess(copyInfo, file);
                     }
@@ -433,7 +437,8 @@ public class FDownloadManager implements IDownloadManager
                     // 移除下载信息
                     removeDownloadInfo(copyInfo.getUrl());
 
-                    for (Callback item : mCallbackHolder.keySet())
+                    final Collection<Callback> callbacks = mCallbackHolder.keySet();
+                    for (Callback item : callbacks)
                     {
                         item.onError(copyInfo);
                     }
