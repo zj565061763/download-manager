@@ -6,6 +6,7 @@ import android.util.Log;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -412,14 +413,20 @@ public class FDownloadManager implements IDownloadManager
         notifyError(info, error, null);
     }
 
-    private void notifyError(DownloadInfo info, DownloadError error, Throwable throwable)
+    private synchronized void notifyError(DownloadInfo info, DownloadError error, Throwable throwable)
     {
+        /**
+         * 由于外部可能取消任务后立即重新开始任务，所以这边立即移除下载信息，避免重新开始任务无效
+         */
+        removeDownloadInfo(info.getUrl());
+
         info.setState(DownloadState.Error);
         info.setError(error);
         info.setThrowable(throwable);
         clearFileProcessor(info.getUrl());
 
         final DownloadInfo copyInfo = info.copy();
+        final Collection<Callback> callbacks = new ArrayList<>(mCallbackHolder.keySet());
         Utils.runOnMainThread(new Runnable()
         {
             @Override
@@ -432,16 +439,9 @@ public class FDownloadManager implements IDownloadManager
                             + " error:" + copyInfo.getError());
                 }
 
-                synchronized (FDownloadManager.this)
+                for (Callback item : callbacks)
                 {
-                    // 移除下载信息
-                    removeDownloadInfo(copyInfo.getUrl());
-
-                    final Collection<Callback> callbacks = mCallbackHolder.keySet();
-                    for (Callback item : callbacks)
-                    {
-                        item.onError(copyInfo);
-                    }
+                    item.onError(copyInfo);
                 }
             }
         });
