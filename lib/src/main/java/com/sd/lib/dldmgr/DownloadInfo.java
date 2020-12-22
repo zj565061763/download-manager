@@ -3,11 +3,12 @@ package com.sd.lib.dldmgr;
 public class DownloadInfo
 {
     private final String mUrl;
-    private DownloadState mState;
+
+    private volatile DownloadState mState;
     private DownloadError mError;
     private Throwable mThrowable;
 
-    private TransmitParam mTransmitParam;
+    private TransmitParam mTransmitParam = new TransmitParam();
 
     DownloadInfo(String url)
     {
@@ -23,9 +24,7 @@ public class DownloadInfo
         info.mState = mState;
         info.mError = mError;
         info.mThrowable = mThrowable;
-
-        final TransmitParam param = mTransmitParam;
-        info.mTransmitParam = param == null ? null : param.copy();
+        info.mTransmitParam = mTransmitParam.copy();
         return info;
     }
 
@@ -49,6 +48,11 @@ public class DownloadInfo
         return mThrowable;
     }
 
+    public TransmitParam getTransmitParam()
+    {
+        return mTransmitParam;
+    }
+
     void setState(DownloadState state)
     {
         mState = state;
@@ -62,12 +66,5 @@ public class DownloadInfo
     void setThrowable(Throwable throwable)
     {
         mThrowable = throwable;
-    }
-
-    public TransmitParam getTransmitParam()
-    {
-        if (mTransmitParam == null)
-            mTransmitParam = new TransmitParam();
-        return mTransmitParam;
     }
 }
