@@ -307,6 +307,30 @@ public class FDownloadManager implements IDownloadManager
         return result;
     }
 
+    /**
+     * 任务结束，移除下载信息
+     *
+     * @param url
+     * @return
+     */
+    private synchronized DownloadInfoWrapper removeDownloadInfo(String url)
+    {
+        final DownloadInfoWrapper wrapper = mMapDownloadInfo.remove(url);
+        if (wrapper != null)
+        {
+            mMapTempFile.remove(wrapper.mTempFile);
+
+            if (getConfig().isDebug())
+            {
+                Log.i(TAG, "removeDownloadInfo"
+                        + " url:" + url
+                        + " size:" + mMapDownloadInfo.size()
+                        + " tempSize:" + mMapTempFile.size());
+            }
+        }
+        return wrapper;
+    }
+
     private void notifyPrepare(DownloadInfo info)
     {
         info.setState(DownloadState.Prepare);
@@ -352,30 +376,6 @@ public class FDownloadManager implements IDownloadManager
         mMainThreadCallback.onError(copyInfo);
     }
 
-    /**
-     * 任务结束，移除下载信息
-     *
-     * @param url
-     * @return
-     */
-    private synchronized DownloadInfoWrapper removeDownloadInfo(String url)
-    {
-        final DownloadInfoWrapper wrapper = mMapDownloadInfo.remove(url);
-        if (wrapper != null)
-        {
-            mMapTempFile.remove(wrapper.mTempFile);
-
-            if (getConfig().isDebug())
-            {
-                Log.i(TAG, "removeDownloadInfo"
-                        + " url:" + url
-                        + " size:" + mMapDownloadInfo.size()
-                        + " tempSize:" + mMapTempFile.size());
-            }
-        }
-        return wrapper;
-    }
-
     private final Callback mMainThreadCallback = new Callback()
     {
         @Override
@@ -397,13 +397,6 @@ public class FDownloadManager implements IDownloadManager
         @Override
         public void onProgress(final DownloadInfo info)
         {
-            if (info.getTransmitParam().getProgress() == 1)
-            {
-                Log.i(TAG, "onProgress"
-                        + " url:" + info.getUrl()
-                        + " progress:" + 1);
-            }
-
             Utils.runOnMainThread(new Runnable()
             {
                 @Override
@@ -420,18 +413,18 @@ public class FDownloadManager implements IDownloadManager
         @Override
         public void onSuccess(final DownloadInfo info, final File file)
         {
-            if (getConfig().isDebug())
-            {
-                Log.i(TAG, "notify callback onSuccess"
-                        + " url:" + info.getUrl()
-                        + " file:" + file.getAbsolutePath());
-            }
-
             Utils.runOnMainThread(new Runnable()
             {
                 @Override
                 public void run()
                 {
+                    if (getConfig().isDebug())
+                    {
+                        Log.i(TAG, "notify callback onSuccess"
+                                + " url:" + info.getUrl()
+                                + " file:" + file.getAbsolutePath());
+                    }
+
                     synchronized (FDownloadManager.this)
                     {
                         // 移除下载信息
@@ -449,18 +442,18 @@ public class FDownloadManager implements IDownloadManager
         @Override
         public void onError(final DownloadInfo info)
         {
-            if (getConfig().isDebug())
-            {
-                Log.i(TAG, "notify callback onError"
-                        + " url:" + info.getUrl()
-                        + " error:" + info.getError());
-            }
-
             Utils.runOnMainThread(new Runnable()
             {
                 @Override
                 public void run()
                 {
+                    if (getConfig().isDebug())
+                    {
+                        Log.i(TAG, "notify callback onError"
+                                + " url:" + info.getUrl()
+                                + " error:" + info.getError());
+                    }
+
                     synchronized (FDownloadManager.this)
                     {
                         // 移除下载信息
