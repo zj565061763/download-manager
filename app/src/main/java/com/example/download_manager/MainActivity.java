@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if (addTask)
                 {
-                    // 添加文件处理器
+                    // 添加文件处理器，下载成功之后，拷贝文件到指定目录
                     final IDownloadManager.FileProcessor fileProcessor = new CopyFileProcessor(mDownloadDirectory);
                     FDownloadManager.getDefault().addFileProcessor(mUrl, fileProcessor);
                 }
