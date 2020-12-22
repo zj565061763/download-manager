@@ -27,12 +27,6 @@ class Utils
         HANDLER.post(runnable);
     }
 
-    public static void checkMainThread()
-    {
-        if (Looper.myLooper() != Looper.getMainLooper())
-            throw new RuntimeException("not in main thread");
-    }
-
     public static File getCacheDir(String dirName, Context context)
     {
         File dir = null;
