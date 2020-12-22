@@ -36,6 +36,13 @@ public class DownloadDirectory implements IDownloadDirectory
     }
 
     @Override
+    public File getFile(String url, File defaultFile)
+    {
+        final File file = getFile(url);
+        return file != null ? file : defaultFile;
+    }
+
+    @Override
     public File getTempFile(String url)
     {
         final File file = newUrlTempFile(url);

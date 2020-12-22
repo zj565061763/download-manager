@@ -26,6 +26,15 @@ public interface IDownloadDirectory
     File getFile(String url);
 
     /**
+     * 返回url对应的文件
+     *
+     * @param url
+     * @param defaultFile 默认文件
+     * @return 如果文件不存在则返回默认文件
+     */
+    File getFile(String url, File defaultFile);
+
+    /**
      * 返回url对应的缓存文件
      *
      * @param url
