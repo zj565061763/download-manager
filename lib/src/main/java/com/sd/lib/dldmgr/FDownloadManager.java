@@ -291,19 +291,26 @@ public class FDownloadManager implements IDownloadManager
         if (TextUtils.isEmpty(url))
             return false;
 
-        if (getConfig().isDebug())
+        final boolean isDownloading = mMapDownloadInfo.containsKey(url);
+        if (isDownloading)
         {
-            Log.i(TAG, "cancelTask start"
-                    + " url:" + url);
+            if (getConfig().isDebug())
+            {
+                Log.i(TAG, "cancelTask start"
+                        + " url:" + url);
+            }
         }
 
         final boolean result = getConfig().getDownloadExecutor().cancel(url);
 
-        if (getConfig().isDebug())
+        if (isDownloading)
         {
-            Log.i(TAG, "cancelTask finish"
-                    + " result:" + result
-                    + " url:" + url);
+            if (getConfig().isDebug())
+            {
+                Log.i(TAG, "cancelTask finish"
+                        + " result:" + result
+                        + " url:" + url);
+            }
         }
 
         return result;
