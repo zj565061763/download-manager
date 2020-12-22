@@ -61,13 +61,15 @@ public interface IDownloadManager
     void deleteDownloadFile(String ext);
 
     /**
-     * 设置url下载成功之后，要拷贝到哪个下载目录
+     * 添加url对应的文件处理器
+     * <p>
+     * 下载成功之后，会把文件传给处理器处理（后台线程）
      *
      * @param url
-     * @param directory
+     * @param processor
      * @return
      */
-    boolean addDownloadDirectory(String url, IDownloadDirectory directory);
+    boolean addFileProcessor(String url, FileProcessor processor);
 
     /**
      * {@link #addTask(DownloadRequest, Callback)}
@@ -114,5 +116,13 @@ public interface IDownloadManager
         void onSuccess(DownloadInfo info, File file);
 
         void onError(DownloadInfo info);
+    }
+
+    /**
+     * 文件处理器
+     */
+    interface FileProcessor
+    {
+        void process(File file);
     }
 }

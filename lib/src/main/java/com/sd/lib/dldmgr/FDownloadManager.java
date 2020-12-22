@@ -19,7 +19,7 @@ public class FDownloadManager implements IDownloadManager
     private final Map<File, String> mMapTempFile = new ConcurrentHashMap<>();
 
     private final Map<Callback, String> mCallbackHolder = new ConcurrentHashMap<>();
-    private final Map<String, Map<IDownloadDirectory, String>> mDirectoryHolder = new ConcurrentHashMap<>();
+    private final Map<String, Map<FileProcessor, String>> mProcessorHolder = new ConcurrentHashMap<>();
 
     protected FDownloadManager(String directory)
     {
@@ -128,31 +128,31 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized boolean addDownloadDirectory(String url, IDownloadDirectory directory)
+    public synchronized boolean addFileProcessor(String url, FileProcessor processor)
     {
-        if (directory == null)
+        if (processor == null)
             return false;
 
         final DownloadInfo downloadInfo = getDownloadInfo(url);
         if (downloadInfo == null)
             return false;
 
-        Map<IDownloadDirectory, String> map = mDirectoryHolder.get(url);
+        Map<FileProcessor, String> map = mProcessorHolder.get(url);
         if (map == null)
         {
             map = new ConcurrentHashMap<>();
-            mDirectoryHolder.put(url, map);
+            mProcessorHolder.put(url, map);
         }
 
-        final String put = map.put(directory, "");
+        final String put = map.put(processor, "");
         if (put == null)
         {
             if (getConfig().isDebug())
             {
-                Log.i(TAG, "addDownloadDirectory url:" + url
-                        + " directory:" + directory
+                Log.i(TAG, "addFileProcessor url:" + url
+                        + " processor:" + processor
                         + " size:" + map.size()
-                        + " totalSize:" + mDirectoryHolder.size()
+                        + " totalSize:" + mProcessorHolder.size()
                 );
             }
         }
@@ -486,7 +486,7 @@ public class FDownloadManager implements IDownloadManager
 
             if (mTempFile.renameTo(downloadFile))
             {
-                copyFileIfNeed(downloadFile);
+                processDownloadFile(downloadFile);
                 FDownloadManager.this.notifySuccess(mInfo, downloadFile);
             } else
             {
@@ -497,34 +497,25 @@ public class FDownloadManager implements IDownloadManager
             }
         }
 
-        private void copyFileIfNeed(File downloadFile)
+        private void processDownloadFile(File downloadFile)
         {
             synchronized (FDownloadManager.this)
             {
-                final Map<IDownloadDirectory, String> map = mDirectoryHolder.get(mUrl);
+                final String url = mUrl;
+                final Map<FileProcessor, String> map = mProcessorHolder.get(url);
                 if (map == null)
                     return;
 
-                for (IDownloadDirectory directory : map.keySet())
+                for (FileProcessor processor : map.keySet())
                 {
-                    final File copyFile = directory.copyFile(downloadFile);
-                    final boolean success = copyFile != downloadFile;
-                    if (getConfig().isDebug())
-                    {
-                        Log.i(TAG, "copyFile url:" + mUrl
-                                + " directory:" + directory
-                                + " downloadFile:" + downloadFile
-                                + " copyFile:" + copyFile
-                                + " success:" + success
-                        );
-                    }
+                    processor.process(downloadFile);
                 }
-                mDirectoryHolder.remove(mUrl);
+                mProcessorHolder.remove(url);
 
                 if (getConfig().isDebug())
                 {
-                    Log.i(TAG, "copyFile finish:" + mUrl
-                            + " totalSize:" + mDirectoryHolder.size()
+                    Log.i(TAG, "processDownloadFile finish:" + url
+                            + " totalSize:" + mProcessorHolder.size()
                     );
                 }
             }
