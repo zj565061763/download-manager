@@ -17,6 +17,18 @@ public class DownloadInfo
         mUrl = url;
     }
 
+    public DownloadInfo copy()
+    {
+        final DownloadInfo info = new DownloadInfo(mUrl);
+        info.mState = mState;
+        info.mError = mError;
+        info.mThrowable = mThrowable;
+
+        final TransmitParam param = mTransmitParam;
+        info.mTransmitParam = param == null ? null : param.copy();
+        return info;
+    }
+
     public String getUrl()
     {
         return mUrl;

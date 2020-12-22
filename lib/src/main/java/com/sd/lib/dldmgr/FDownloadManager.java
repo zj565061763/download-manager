@@ -304,45 +304,52 @@ public class FDownloadManager implements IDownloadManager
         return result;
     }
 
-    private void notifyPrepare(final DownloadInfo info)
+    private void notifyPrepare(DownloadInfo info)
     {
         info.setState(DownloadState.Prepare);
+
+        final DownloadInfo copyInfo = info.copy();
         Utils.runOnMainThread(new Runnable()
         {
             @Override
             public void run()
             {
-                mMainThreadCallback.onPrepare(info);
+                mMainThreadCallback.onPrepare(copyInfo);
             }
         });
     }
 
-    private void notifyProgress(final DownloadInfo info, final long total, final long current)
+    private void notifyProgress(DownloadInfo info, long total, long current)
     {
-        Utils.runOnMainThread(new Runnable()
+        info.setState(DownloadState.Downloading);
+
+        final boolean changed = info.getTransmitParam().transmit(total, current);
+        if (changed)
         {
-            @Override
-            public void run()
+            final DownloadInfo copyInfo = info.copy();
+            Utils.runOnMainThread(new Runnable()
             {
-                info.setState(DownloadState.Downloading);
-                final boolean changed = info.getTransmitParam().transmit(total, current);
-
-                if (changed)
-                    mMainThreadCallback.onProgress(info);
-            }
-        });
+                @Override
+                public void run()
+                {
+                    mMainThreadCallback.onProgress(copyInfo);
+                }
+            });
+        }
     }
 
-    private void notifySuccess(final DownloadInfo info, final File file)
+    private void notifySuccess(DownloadInfo info, final File file)
     {
+        info.setState(DownloadState.Success);
         clearFileProcessor(info.getUrl());
+
+        final DownloadInfo copyInfo = info.copy();
         Utils.runOnMainThread(new Runnable()
         {
             @Override
             public void run()
             {
-                info.setState(DownloadState.Success);
-                mMainThreadCallback.onSuccess(info, file);
+                mMainThreadCallback.onSuccess(copyInfo, file);
             }
         });
     }
@@ -352,18 +359,20 @@ public class FDownloadManager implements IDownloadManager
         notifyError(info, error, null);
     }
 
-    private void notifyError(final DownloadInfo info, final DownloadError error, final Throwable throwable)
+    private void notifyError(DownloadInfo info, DownloadError error, Throwable throwable)
     {
+        info.setState(DownloadState.Error);
+        info.setError(error);
+        info.setThrowable(throwable);
         clearFileProcessor(info.getUrl());
+
+        final DownloadInfo copyInfo = info.copy();
         Utils.runOnMainThread(new Runnable()
         {
             @Override
             public void run()
             {
-                info.setState(DownloadState.Error);
-                info.setError(error);
-                info.setThrowable(throwable);
-                mMainThreadCallback.onError(info);
+                mMainThreadCallback.onError(copyInfo);
             }
         });
     }
