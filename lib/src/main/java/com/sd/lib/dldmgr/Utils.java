@@ -22,7 +22,7 @@ class Utils
 {
     private static final Handler HANDLER = new Handler(Looper.getMainLooper());
 
-    public static void runOnMainThread(Runnable runnable)
+    public static void postMainThread(Runnable runnable)
     {
         HANDLER.post(runnable);
     }

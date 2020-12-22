@@ -346,7 +346,7 @@ public class FDownloadManager implements IDownloadManager
         info.setState(DownloadState.Prepare);
 
         final DownloadInfo copyInfo = info.copy();
-        Utils.runOnMainThread(new Runnable()
+        Utils.postMainThread(new Runnable()
         {
             @Override
             public void run()
@@ -368,7 +368,7 @@ public class FDownloadManager implements IDownloadManager
         if (changed)
         {
             final DownloadInfo copyInfo = info.copy();
-            Utils.runOnMainThread(new Runnable()
+            Utils.postMainThread(new Runnable()
             {
                 @Override
                 public void run()
@@ -389,7 +389,7 @@ public class FDownloadManager implements IDownloadManager
         clearFileProcessor(info.getUrl());
 
         final DownloadInfo copyInfo = info.copy();
-        Utils.runOnMainThread(new Runnable()
+        Utils.postMainThread(new Runnable()
         {
             @Override
             public void run()
@@ -435,7 +435,7 @@ public class FDownloadManager implements IDownloadManager
 
         final DownloadInfo copyInfo = info.copy();
         final Collection<Callback> callbacks = new ArrayList<>(mCallbackHolder.keySet());
-        Utils.runOnMainThread(new Runnable()
+        Utils.postMainThread(new Runnable()
         {
             @Override
             public void run()
