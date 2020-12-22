@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String URL = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe";
+    private static final String URL_SMALL = "http://1251020758.vod2.myqcloud.com/8a96e57evodgzp1251020758/602d1d1a5285890800849942893/tRGP04QVdCEA.mp4";
 
     private IDownloadDirectory mDownloadDirectory;
 
@@ -86,13 +87,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final boolean addTask = FDownloadManager.getDefault().addTask(new DownloadRequest.Builder()
                         // 设置需要断点下载
                         .setPreferBreakpoint(true)
-                        .build(URL));
+                        .build(URL_SMALL));
 
                 if (addTask)
                 {
                     // 添加文件处理器
                     final IDownloadManager.FileProcessor fileProcessor = new CopyFileProcessor(mDownloadDirectory);
-                    FDownloadManager.getDefault().addFileProcessor(URL, fileProcessor);
+                    FDownloadManager.getDefault().addFileProcessor(URL_SMALL, fileProcessor);
                 }
                 break;
             case R.id.btn_cancel:
