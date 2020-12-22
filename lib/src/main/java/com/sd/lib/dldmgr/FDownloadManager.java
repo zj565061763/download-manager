@@ -137,6 +137,9 @@ public class FDownloadManager implements IDownloadManager
         if (downloadInfo == null)
             return false;
 
+        if (downloadInfo.getState().isCompleted())
+            return false;
+
         Map<FileProcessor, String> map = mProcessorHolder.get(url);
         if (map == null)
         {
