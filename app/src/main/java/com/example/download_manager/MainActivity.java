@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_cancel:
                 // 取消下载任务
                 FDownloadManager.getDefault().cancelTask(URL);
+                FDownloadManager.getDefault().cancelTask(URL_SMALL);
                 break;
             default:
                 break;
