@@ -80,6 +80,13 @@ public interface IDownloadManager
     void removeFileProcessor(String url, FileProcessor processor);
 
     /**
+     * 清空url对应的文件处理器
+     *
+     * @param url
+     */
+    void clearFileProcessor(String url);
+
+    /**
      * {@link #addTask(DownloadRequest, Callback)}
      *
      * @param url

@@ -130,7 +130,7 @@ public class FDownloadManager implements IDownloadManager
     @Override
     public synchronized boolean addFileProcessor(String url, FileProcessor processor)
     {
-        if (processor == null)
+        if (TextUtils.isEmpty(url) || processor == null)
             return false;
 
         final DownloadInfo downloadInfo = getDownloadInfo(url);
@@ -162,7 +162,7 @@ public class FDownloadManager implements IDownloadManager
     @Override
     public synchronized void removeFileProcessor(String url, FileProcessor processor)
     {
-        if (processor == null)
+        if (TextUtils.isEmpty(url) || processor == null)
             return;
 
         final Map<FileProcessor, String> map = mProcessorHolder.get(url);
@@ -176,10 +176,31 @@ public class FDownloadManager implements IDownloadManager
                 mProcessorHolder.remove(url);
 
             if (getConfig().isDebug())
+            {
                 Log.i(TAG, "removeFileProcessor url:" + url
                         + " size:" + map.size()
                         + " totalSize:" + mProcessorHolder.size()
                 );
+            }
+        }
+    }
+
+    @Override
+    public synchronized void clearFileProcessor(String url)
+    {
+        if (TextUtils.isEmpty(url))
+            return;
+
+        final Map<FileProcessor, String> map = mProcessorHolder.remove(url);
+        if (map != null)
+        {
+            map.clear();
+            if (getConfig().isDebug())
+            {
+                Log.i(TAG, "clearFileProcessor url:" + url
+                        + " totalSize:" + mProcessorHolder.size()
+                );
+            }
         }
     }
 
@@ -314,6 +335,7 @@ public class FDownloadManager implements IDownloadManager
 
     private void notifySuccess(final DownloadInfo info, final File file)
     {
+        clearFileProcessor(info.getUrl());
         Utils.runOnMainThread(new Runnable()
         {
             @Override
@@ -332,6 +354,7 @@ public class FDownloadManager implements IDownloadManager
 
     private void notifyError(final DownloadInfo info, final DownloadError error, final Throwable throwable)
     {
+        clearFileProcessor(info.getUrl());
         Utils.runOnMainThread(new Runnable()
         {
             @Override
@@ -534,11 +557,11 @@ public class FDownloadManager implements IDownloadManager
                 {
                     processor.process(downloadFile);
                 }
-                mProcessorHolder.remove(url);
 
                 if (getConfig().isDebug())
                 {
                     Log.i(TAG, "processDownloadFile finish:" + url
+                            + " size:" + map.size()
                             + " totalSize:" + mProcessorHolder.size()
                     );
                 }
