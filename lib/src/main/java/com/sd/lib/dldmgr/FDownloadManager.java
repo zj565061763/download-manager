@@ -232,7 +232,8 @@ public class FDownloadManager implements IDownloadManager
         if (TextUtils.isEmpty(url))
             return false;
 
-        if (mMapDownloadInfo.containsKey(url))
+        final boolean isDownloading = mMapDownloadInfo.containsKey(url);
+        if (isDownloading)
         {
             addCallback(callback);
             return true;
