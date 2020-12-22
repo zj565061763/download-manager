@@ -91,7 +91,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (addTask)
                 {
                     // 添加文件处理器
-                    FDownloadManager.getDefault().addFileProcessor(URL, new CopyFileProcessor(mDownloadDirectory));
+                    final IDownloadManager.FileProcessor fileProcessor = new CopyFileProcessor(mDownloadDirectory);
+                    FDownloadManager.getDefault().addFileProcessor(URL, fileProcessor);
                 }
                 break;
             case R.id.btn_cancel:
