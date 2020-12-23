@@ -131,6 +131,45 @@ class Utils
      */
     public static boolean copyFile(File fileFrom, File fileTo)
     {
+        if (!checkFile(fileFrom, fileTo))
+            return false;
+
+        FileInputStream inputStream = null;
+        FileOutputStream outputStream = null;
+        FileChannel inputChannel = null;
+        FileChannel outputChannel = null;
+        try
+        {
+            inputStream = new FileInputStream(fileFrom);
+            outputStream = new FileOutputStream(fileTo);
+
+            inputChannel = inputStream.getChannel();
+            outputChannel = outputStream.getChannel();
+
+            inputChannel.transferTo(0, inputChannel.size(), outputChannel);
+            return true;
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        } finally
+        {
+            closeQuietly(inputStream);
+            closeQuietly(outputStream);
+            closeQuietly(inputChannel);
+            closeQuietly(outputChannel);
+        }
+    }
+
+    /**
+     * 检查源文件和目标文件
+     *
+     * @param fileFrom
+     * @param fileTo
+     * @return
+     */
+    private static boolean checkFile(File fileFrom, File fileTo)
+    {
         if (fileFrom == null || !fileFrom.exists())
             return false;
 
@@ -158,32 +197,7 @@ class Utils
             if (!fileToParent.mkdirs())
                 return false;
         }
-
-        FileInputStream inputStream = null;
-        FileOutputStream outputStream = null;
-        FileChannel inputChannel = null;
-        FileChannel outputChannel = null;
-        try
-        {
-            inputStream = new FileInputStream(fileFrom);
-            outputStream = new FileOutputStream(fileTo);
-
-            inputChannel = inputStream.getChannel();
-            outputChannel = outputStream.getChannel();
-
-            inputChannel.transferTo(0, inputChannel.size(), outputChannel);
-            return true;
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-            return false;
-        } finally
-        {
-            closeQuietly(inputStream);
-            closeQuietly(outputStream);
-            closeQuietly(inputChannel);
-            closeQuietly(outputChannel);
-        }
+        return true;
     }
 
     public static void closeQuietly(Closeable closeable)
