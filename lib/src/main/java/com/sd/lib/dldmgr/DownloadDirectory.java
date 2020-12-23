@@ -6,7 +6,7 @@ import java.io.File;
 
 public class DownloadDirectory implements IDownloadDirectory
 {
-    private final File mDirectory;
+    protected final File mDirectory;
 
     private DownloadDirectory(File directory)
     {
