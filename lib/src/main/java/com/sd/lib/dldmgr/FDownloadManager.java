@@ -53,10 +53,10 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized void addCallback(Callback callback)
+    public synchronized boolean addCallback(Callback callback)
     {
         if (callback == null)
-            return;
+            return false;
 
         final String put = mCallbackHolder.put(callback, "");
         if (put == null)
@@ -64,6 +64,7 @@ public class FDownloadManager implements IDownloadManager
             if (getConfig().isDebug())
                 Log.i(TAG, "addCallback:" + callback + " size:" + mCallbackHolder.size());
         }
+        return true;
     }
 
     @Override
@@ -78,6 +79,19 @@ public class FDownloadManager implements IDownloadManager
             if (getConfig().isDebug())
                 Log.i(TAG, "removeCallback:" + callback + " size:" + mCallbackHolder.size());
         }
+    }
+
+    @Override
+    public synchronized boolean addUrlCallback(String url, Callback callback)
+    {
+        if (TextUtils.isEmpty(url) || callback == null)
+            return false;
+
+        final DownloadInfo downloadInfo = getDownloadInfo(url);
+        if (downloadInfo == null)
+            return false;
+
+        return addCallback(callback);
     }
 
     @Override

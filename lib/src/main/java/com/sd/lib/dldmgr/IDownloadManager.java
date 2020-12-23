@@ -10,8 +10,9 @@ public interface IDownloadManager
      * 添加回调对象
      *
      * @param callback
+     * @return true-添加成功或者已添加；false-添加失败
      */
-    void addCallback(Callback callback);
+    boolean addCallback(Callback callback);
 
     /**
      * 移除回调对象
@@ -19,6 +20,17 @@ public interface IDownloadManager
      * @param callback
      */
     void removeCallback(Callback callback);
+
+    /**
+     * 添加回调对象
+     * <p>
+     * 指定的url在下载状态的时候，回调对象才会被添加
+     *
+     * @param url
+     * @param callback
+     * @return true-添加成功或者已添加；false-添加失败
+     */
+    boolean addUrlCallback(String url, Callback callback);
 
     /**
      * 返回url对应的文件
