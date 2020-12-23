@@ -90,12 +90,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .setPreferBreakpoint(true)
                         .build(mUrl));
 
-                if (addTask)
-                {
-                    // 添加文件处理器，下载成功之后，拷贝文件到指定目录
-                    final IDownloadManager.FileProcessor fileProcessor = new CopyFileProcessor(mDownloadDirectory);
-                    FDownloadManager.getDefault().addFileProcessor(mUrl, fileProcessor);
-                }
+                // 添加文件处理器，下载成功之后，拷贝文件到指定目录
+                final IDownloadManager.FileProcessor fileProcessor = new CopyFileProcessor(mDownloadDirectory);
+                final boolean addFileProcessor = FDownloadManager.getDefault().addFileProcessor(mUrl, fileProcessor);
+
+                Log.i(TAG, "click download"
+                        + " addTask:" + addTask
+                        + " addFileProcessor:" + addFileProcessor);
                 break;
             case R.id.btn_cancel:
                 // 取消下载任务
