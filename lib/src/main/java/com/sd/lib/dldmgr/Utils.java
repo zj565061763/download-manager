@@ -162,6 +162,28 @@ class Utils
     }
 
     /**
+     * 移动文件
+     *
+     * @param fileFrom
+     * @param fileTo
+     * @return
+     */
+    public static boolean moveFile(File fileFrom, File fileTo)
+    {
+        if (!checkFile(fileFrom, fileTo))
+            return false;
+
+        try
+        {
+            return fileFrom.renameTo(fileTo);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * 检查源文件和目标文件
      *
      * @param fileFrom
