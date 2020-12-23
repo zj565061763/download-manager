@@ -5,11 +5,11 @@ import com.sd.lib.dldmgr.IDownloadDirectory;
 import java.io.File;
 
 /**
- * 拷贝文件处理器
+ * 移动文件处理器
  */
-public class CopyFileProcessor extends BaseFileProcessor
+public class TakeFileProcessor extends BaseFileProcessor
 {
-    public CopyFileProcessor(IDownloadDirectory directory)
+    public TakeFileProcessor(IDownloadDirectory directory)
     {
         super(directory);
     }
@@ -17,6 +17,6 @@ public class CopyFileProcessor extends BaseFileProcessor
     @Override
     public void process(File file)
     {
-        mDirectory.copyFile(file);
+        mDirectory.takeFile(file);
     }
 }
