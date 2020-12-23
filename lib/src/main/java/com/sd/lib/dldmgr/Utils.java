@@ -6,15 +6,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.webkit.MimeTypeMap;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -126,30 +123,6 @@ class Utils
     }
 
     /**
-     * 将输入流的内容拷贝到输出流
-     *
-     * @param inputStream  输入流
-     * @param outputStream 输出流
-     * @throws IOException
-     */
-    public static void copy(InputStream inputStream, OutputStream outputStream) throws IOException
-    {
-        if (!(inputStream instanceof BufferedInputStream))
-            inputStream = new BufferedInputStream(inputStream);
-
-        if (!(outputStream instanceof BufferedOutputStream))
-            outputStream = new BufferedOutputStream(outputStream);
-
-        final byte[] buffer = new byte[1024];
-        int len = 0;
-        while ((len = inputStream.read(buffer)) != -1)
-        {
-            outputStream.write(buffer, 0, len);
-        }
-        outputStream.flush();
-    }
-
-    /**
      * 拷贝文件
      *
      * @param fileFrom
@@ -186,14 +159,19 @@ class Utils
                 return false;
         }
 
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
+        FileInputStream inputStream = null;
+        FileOutputStream outputStream = null;
+        FileChannel inputChannel = null;
+        FileChannel outputChannel = null;
         try
         {
             inputStream = new FileInputStream(fileFrom);
             outputStream = new FileOutputStream(fileTo);
 
-            copy(inputStream, outputStream);
+            inputChannel = inputStream.getChannel();
+            outputChannel = outputStream.getChannel();
+
+            inputChannel.transferTo(0, inputChannel.size(), outputChannel);
             return true;
         } catch (IOException e)
         {
@@ -203,6 +181,8 @@ class Utils
         {
             closeQuietly(inputStream);
             closeQuietly(outputStream);
+            closeQuietly(inputChannel);
+            closeQuietly(outputChannel);
         }
     }
 
