@@ -217,13 +217,7 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public boolean addTask(DownloadRequest request)
-    {
-        return addTask(request, null);
-    }
-
-    @Override
-    public synchronized boolean addTask(DownloadRequest request, Callback callback)
+    public synchronized boolean addTask(DownloadRequest request)
     {
         if (request == null)
             return false;
@@ -234,10 +228,7 @@ public class FDownloadManager implements IDownloadManager
 
         final boolean isDownloading = mMapDownloadInfo.containsKey(url);
         if (isDownloading)
-        {
-            addCallback(callback);
             return true;
-        }
 
         final DownloadInfo info = new DownloadInfo(url);
 
@@ -248,9 +239,6 @@ public class FDownloadManager implements IDownloadManager
                 Log.e(TAG, "addTask error create temp file error:" + url);
 
             notifyError(info, DownloadError.CreateTempFile);
-            if (callback != null)
-                callback.onError(info);
-
             return false;
         }
 
@@ -271,7 +259,6 @@ public class FDownloadManager implements IDownloadManager
                         + " tempSize:" + mMapTempFile.size());
             }
 
-            addCallback(callback);
             notifyPrepare(info);
         } else
         {
@@ -279,8 +266,6 @@ public class FDownloadManager implements IDownloadManager
                 Log.e(TAG, "addTask error submit request failed:" + url);
 
             notifyError(info, DownloadError.SubmitFailed);
-            if (callback != null)
-                callback.onError(info);
         }
 
         return submitted;

@@ -87,7 +87,7 @@ public interface IDownloadManager
     void clearFileProcessor(String url);
 
     /**
-     * {@link #addTask(DownloadRequest, Callback)}
+     * {@link #addTask(DownloadRequest)}
      *
      * @param url
      * @return
@@ -95,21 +95,12 @@ public interface IDownloadManager
     boolean addTask(String url);
 
     /**
-     * {@link #addTask(DownloadRequest, Callback)}
-     *
-     * @param request
-     * @return
-     */
-    boolean addTask(DownloadRequest request);
-
-    /**
      * 添加下载任务
      *
      * @param request
-     * @param callback 只有任务添加成功或者已经添加的情况下，回调对象才会被添加
      * @return true-任务添加成功或者已经添加
      */
-    boolean addTask(DownloadRequest request, Callback callback);
+    boolean addTask(DownloadRequest request);
 
     /**
      * 取消下载任务
