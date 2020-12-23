@@ -97,6 +97,27 @@ public class DownloadDirectory implements IDownloadDirectory
     }
 
     @Override
+    public File takeFile(File file)
+    {
+        final File directory = mDirectory;
+        if (!Utils.checkDir(directory))
+            return file;
+
+        if (file == null || !file.exists())
+            return file;
+
+        if (file.isDirectory())
+            throw new IllegalArgumentException("file must not be a directory");
+
+        final String filename = file.getName();
+        final File newFile = new File(directory, filename);
+        if (Utils.moveFile(file, newFile))
+            return newFile;
+
+        return file;
+    }
+
+    @Override
     public synchronized int deleteFile(String ext)
     {
         if (!TextUtils.isEmpty(ext))

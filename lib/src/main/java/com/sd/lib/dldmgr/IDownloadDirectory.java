@@ -51,6 +51,14 @@ public interface IDownloadDirectory
     File copyFile(File file);
 
     /**
+     * 移动文件到当前目录
+     *
+     * @param file
+     * @return 成功-返回移动后的文件；失败-返回原文件
+     */
+    File takeFile(File file);
+
+    /**
      * 删除文件（临时文件不会被删除）
      * <p>
      * 如果指定了扩展名，则扩展名不能包含点符号：<br>
