@@ -87,11 +87,11 @@ public class FDownloadManager implements IDownloadManager
         if (TextUtils.isEmpty(url) || callback == null)
             return false;
 
-        final DownloadInfo downloadInfo = getDownloadInfo(url);
-        if (downloadInfo == null)
-            return false;
+        final boolean isDownloading = mMapDownloadInfo.containsKey(url);
+        if (isDownloading)
+            return addCallback(callback);
 
-        return addCallback(callback);
+        return false;
     }
 
     @Override
