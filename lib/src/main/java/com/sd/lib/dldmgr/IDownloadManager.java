@@ -24,7 +24,7 @@ public interface IDownloadManager
     /**
      * 添加回调对象
      * <p>
-     * 指定的url在下载状态的时候，回调对象才会被添加
+     * 指定的url任务存在的时候，回调对象才会被添加
      *
      * @param url
      * @param callback
