@@ -115,7 +115,7 @@ FDownloadManager.getDefault().deleteDownloadFile("mp4");
 
 #### 管理自定义目录
 这里的自定义是指管理某个自定义的目录，而不是把文件下载到自定义目录。<br>
-管理接口：  `IDownloadDirectory` 具体接口见文档底部或者源码
+管理接口：  `IDownloadDirectory` 具体接口见文档底部或者源码<br>
 默认实现类：`DownloadDirectory`<br>
 
 `IDownloadManager`内部使用了`DownloadDirectory`来管理下载目录
