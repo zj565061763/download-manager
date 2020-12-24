@@ -92,12 +92,24 @@ private final IDownloadManager.Callback mDownloadCallback = new IDownloadManager
 };
 ```
 
-* 文件处理器
+# 文件处理器
 有时候需要在下载成功之后，把文件拷贝或者移动到其他目录，这时候需要用到文件处理器
 
-1. CopyFileProcessor 拷贝文件处理器
-2. TakeFileProcessor 移动文件处理器
+* CopyFileProcessor 拷贝文件处理器
+* TakeFileProcessor 移动文件处理器
 
+#### 处理器接口
+```java
+/**
+ * 文件处理器
+ */
+interface FileProcessor
+{
+    void process(File file);
+}
+```
+
+#### 添加处理器
 ```java
 /**
  * 添加url对应的文件处理器，只有url正在下载的时候，处理器对象才会被添加
