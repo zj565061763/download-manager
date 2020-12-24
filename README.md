@@ -4,77 +4,42 @@
 # Gradle
 [![](https://jitpack.io/v/zj565061763/download-manager.svg)](https://jitpack.io/#zj565061763/download-manager)
 
-# Demo
+# 初始化
 ```java
-public class MainActivity extends AppCompatActivity
-{
-    private static final String TAG = MainActivity.class.getSimpleName();
+DownloadManagerConfig.init(new DownloadManagerConfig.Builder()
+        /**
+         * 设置下载目录，默认：(sd卡或者内部存储)/Android/data/包名/cache/fdownload
+         */
+        .setDownloadDirectory(getExternalCacheDir().getAbsolutePath())
+        /**
+         * 设置下载处理器，默认的下载处理器：DefaultDownloadExecutor
+         * maxPoolSize：同时下载中的最大任务数量，注意这里是指下载中的数量，最大发起数量不限制，默认：3
+         * preferBreakpoint：是否优先使用断点下载，默认：false
+         */
+        .setDownloadExecutor(new DefaultDownloadExecutor(3, true))
+        // 设置是否输出日志
+        .setDebug(true)
+        .build(this));
+```
 
-    private static final String URL = "https://dldir1.qq.com/qqfile/qq/PCQQ9.1.5/25530/QQ9.1.5.25530.exe";
+# 下载
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+* 简单下载
+```java
+// 添加下载任务
+final boolean addTask = FDownloadManager.getDefault().addTask(url);
+```
 
-        findViewById(R.id.btn_download).setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                // 添加一个下载任务
-                FDownloadManager.getDefault().addTask(URL);
-            }
-        });
-
-        // 添加下载回调
-        FDownloadManager.getDefault().addCallback(mDownloadCallback);
-    }
-
-    private final DownloadManager.Callback mDownloadCallback = new DownloadManager.Callback()
-    {
-        @Override
-        public void onPrepare(DownloadInfo info)
-        {
-            Log.i(TAG, "onPrepare:" + info.getUrl());
-        }
-
-        @Override
-        public void onProgress(DownloadInfo info)
-        {
-            final TransmitParam param = info.getTransmitParam();
-
-            // 下载进度
-            final int progress = param.getProgress();
-            // 下载速率
-            final int speed = param.getSpeedKBps();
-
-            Log.i(TAG, "onProgress:" + progress + " " + speed);
-        }
-
-        @Override
-        public void onSuccess(DownloadInfo info, File file)
-        {
-            Log.i(TAG, "onSuccess:" + info.getUrl() + "\r\n"
-                    + " file:" + file.getAbsolutePath());
-        }
-
-        @Override
-        public void onError(DownloadInfo info)
-        {
-            Log.e(TAG, "onError:" + info.getError());
-        }
-    };
-
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        // 移除下载回调
-        FDownloadManager.getDefault().removeCallback(mDownloadCallback);
-    }
-}
+* 断点下载
+```java
+// 创建下载请求对象
+final DownloadRequest downloadRequest = new DownloadRequest.Builder()
+        // 设置断点下载，true-优先断点下载；false-不使用断点下载；null-跟随初始化配置
+        .setPreferBreakpoint(true)
+        // 下载地址
+        .build(url);
+// 添加下载任务
+final boolean addTask = FDownloadManager.getDefault().addTask(downloadRequest);
 ```
 
 # 接口
