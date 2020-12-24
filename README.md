@@ -1,5 +1,10 @@
 # About
-安卓下载管理
+安卓下载管理<br>
+* 支持断点下载
+* 支持下载目录配置
+* 支持自定义底层下载处理器，例如使用okhttp等网络请求框架
+* 支持下载文件成功后预处理
+* 支持全局下载监听
 
 # Gradle
 [![](https://jitpack.io/v/zj565061763/download-manager.svg)](https://jitpack.io/#zj565061763/download-manager)
