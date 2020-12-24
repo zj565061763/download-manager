@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 // 创建下载请求对象
                 final DownloadRequest downloadRequest = new DownloadRequest.Builder()
-                        // 设置需要断点下载
+                        // 设置断点下载，true-优先断点下载；false-不使用断点下载；null-跟随初始化配置
                         .setPreferBreakpoint(true)
                         // 下载地址
                         .build(mUrl);
