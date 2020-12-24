@@ -8,11 +8,11 @@
 ```java
 DownloadManagerConfig.init(new DownloadManagerConfig.Builder()
         /**
-         * 设置下载目录，默认：(sd卡或者内部存储)/Android/data/包名/cache/fdownload
+         * 设置下载目录，如果不配置则默认路径为：(sd卡或者内部存储)/Android/data/包名/cache/fdownload
          */
         .setDownloadDirectory(getExternalCacheDir().getAbsolutePath())
         /**
-         * 设置下载处理器，默认的下载处理器：DefaultDownloadExecutor
+         * 设置下载处理器，如果不配置则默认的下载处理器为：DefaultDownloadExecutor
          * maxPoolSize：下载中的最大任务数量，默认：3（注意这里是指下载中的数量，最大发起数量不限制）
          * preferBreakpoint：是否优先使用断点下载，默认：false
          */
