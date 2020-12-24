@@ -26,13 +26,13 @@ DownloadManagerConfig.init(new DownloadManagerConfig.Builder()
 
 # 下载
 
-* 简单下载
+#### 简单下载
 ```java
 // 添加下载任务
 final boolean addTask = FDownloadManager.getDefault().addTask(url);
 ```
 
-* 断点下载
+#### 断点下载
 ```java
 // 创建下载请求对象
 final DownloadRequest downloadRequest = new DownloadRequest.Builder()
@@ -44,7 +44,7 @@ final DownloadRequest downloadRequest = new DownloadRequest.Builder()
 final boolean addTask = FDownloadManager.getDefault().addTask(downloadRequest);
 ```
 
-* 下载监听
+#### 下载监听
 ```java
 
 /**
@@ -125,13 +125,13 @@ boolean addFileProcessor(String url, FileProcessor processor);
 
 ```java
 // 获取要保存的目录
-final File directory = getExternalFilesDir("my_download");
+final File directory = context.getExternalFilesDir("my_download");
 // 创建下载目录管理对象
 final IDownloadDirectory downloadDirectory = DownloadDirectory.from(directory);
 // 创建文件拷贝处理器
 final IDownloadManager.FileProcessor copyFileProcessor = new CopyFileProcessor(downloadDirectory);
 // 添加文件处理器
-final boolean addFileProcessor = FDownloadManager.getDefault().addFileProcessor(mUrl, copyFileProcessor);
+final boolean addFileProcessor = FDownloadManager.getDefault().addFileProcessor(url, copyFileProcessor);
 ```
 
 # 接口
