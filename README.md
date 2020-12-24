@@ -92,6 +92,11 @@ private final IDownloadManager.Callback mDownloadCallback = new IDownloadManager
 };
 ```
 
+#### 取消下载
+```java
+final boolean cancelTask = FDownloadManager.getDefault().cancelTask(mUrl);
+```
+
 # 文件处理器
 有时候需要在下载成功之后，把文件拷贝或者移动到其他目录，这时候需要用到文件处理器
 
