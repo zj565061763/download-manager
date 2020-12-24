@@ -107,13 +107,12 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public DownloadInfo getDownloadInfo(String url)
+    public void deleteDownloadFile(String ext)
     {
-        final DownloadInfoWrapper wrapper = mMapDownloadInfo.get(url);
-        if (wrapper == null)
-            return null;
+        final int count = mDownloadDirectory.deleteFile(ext);
 
-        return wrapper.mDownloadInfo;
+        if (getConfig().isDebug())
+            Log.i(TAG, "deleteDownloadFile count:" + count + " ext:" + ext);
     }
 
     @Override
@@ -132,15 +131,6 @@ public class FDownloadManager implements IDownloadManager
 
         if (getConfig().isDebug())
             Log.i(TAG, "deleteTempFile count:" + count);
-    }
-
-    @Override
-    public void deleteDownloadFile(String ext)
-    {
-        final int count = mDownloadDirectory.deleteFile(ext);
-
-        if (getConfig().isDebug())
-            Log.i(TAG, "deleteDownloadFile count:" + count + " ext:" + ext);
     }
 
     @Override
@@ -221,6 +211,16 @@ public class FDownloadManager implements IDownloadManager
                 );
             }
         }
+    }
+
+    @Override
+    public DownloadInfo getDownloadInfo(String url)
+    {
+        final DownloadInfoWrapper wrapper = mMapDownloadInfo.get(url);
+        if (wrapper == null)
+            return null;
+
+        return wrapper.mDownloadInfo;
     }
 
     @Override
