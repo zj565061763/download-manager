@@ -117,7 +117,7 @@ boolean addUrlCallback(String url, Callback callback);
 
 #### 取消下载
 ```java
-final boolean cancelTask = FDownloadManager.getDefault().cancelTask(mUrl);
+final boolean cancelTask = FDownloadManager.getDefault().cancelTask(url);
 ```
 
 # 管理下载目录
