@@ -154,7 +154,7 @@ FDownloadManager.getDefault().deleteDownloadFile("mp4");
 /**
  * 文件处理器
  */
-interface FileProcessor
+public interface IFileProcessor
 {
     void process(File file);
 }
@@ -171,7 +171,7 @@ interface FileProcessor
  * @param processor
  * @return true-添加成功；false-添加失败
  */
-boolean addFileProcessor(String url, FileProcessor processor);
+boolean addFileProcessor(String url, IFileProcessor processor);
 ```
 
 ```java
@@ -180,7 +180,7 @@ final File directory = context.getExternalFilesDir("my_download");
 // 创建下载目录管理对象
 final IDownloadDirectory downloadDirectory = DownloadDirectory.from(directory);
 // 创建文件拷贝处理器
-final IDownloadManager.FileProcessor copyFileProcessor = new CopyFileProcessor(downloadDirectory);
+final IFileProcessor copyFileProcessor = new CopyFileProcessor(downloadDirectory);
 // 添加文件处理器
 final boolean addFileProcessor = FDownloadManager.getDefault().addFileProcessor(url, copyFileProcessor);
 ```
@@ -255,7 +255,7 @@ public interface IDownloadManager
      * @param processor
      * @return true-添加成功；false-添加失败
      */
-    boolean addFileProcessor(String url, FileProcessor processor);
+    boolean addFileProcessor(String url, IFileProcessor processor);
 
     /**
      * 移除url对应的文件处理器
@@ -263,7 +263,7 @@ public interface IDownloadManager
      * @param url
      * @param processor
      */
-    void removeFileProcessor(String url, FileProcessor processor);
+    void removeFileProcessor(String url, IFileProcessor processor);
 
     /**
      * 清空url对应的文件处理器
@@ -337,14 +337,6 @@ public interface IDownloadManager
          * @param info
          */
         void onError(DownloadInfo info);
-    }
-
-    /**
-     * 文件处理器
-     */
-    interface FileProcessor
-    {
-        void process(File file);
     }
 }
 ```
