@@ -13,11 +13,13 @@ DownloadManagerConfig.init(new DownloadManagerConfig.Builder()
         .setDownloadDirectory(getExternalCacheDir().getAbsolutePath())
         /**
          * 设置下载处理器，默认的下载处理器：DefaultDownloadExecutor
-         * maxPoolSize：同时下载中的最大任务数量，注意这里是指下载中的数量，最大发起数量不限制，默认：3
+         * maxPoolSize：下载中的最大任务数量，默认：3（注意这里是指下载中的数量，最大发起数量不限制）
          * preferBreakpoint：是否优先使用断点下载，默认：false
          */
-        .setDownloadExecutor(new DefaultDownloadExecutor(3, true))
-        // 设置是否输出日志
+        .setDownloadExecutor(new DefaultDownloadExecutor(3, false))
+        /**
+         * 设置是否输出日志，默认：false。日志tag：IDownloadManager
+         */
         .setDebug(true)
         .build(this));
 ```
@@ -40,6 +42,53 @@ final DownloadRequest downloadRequest = new DownloadRequest.Builder()
         .build(url);
 // 添加下载任务
 final boolean addTask = FDownloadManager.getDefault().addTask(downloadRequest);
+```
+
+* 下载监听
+```java
+
+/**
+ * 添加下载回调
+ * 由于下载回调是全局的监听，所以一些特殊业务需要在回调方法里面判断下载url和业务url是否一样
+ */
+FDownloadManager.getDefault().addCallback(mDownloadCallback);
+// 移除下载回调
+FDownloadManager.getDefault().removeCallback(mDownloadCallback);
+
+/**
+ * 下载回调
+ */
+private final IDownloadManager.Callback mDownloadCallback = new IDownloadManager.Callback()
+{
+    @Override
+    public void onPrepare(DownloadInfo info)
+    {
+        // 准备下载（已提交未开始）
+    }
+
+    @Override
+    public void onProgress(DownloadInfo info)
+    {
+        // 下载信息
+        final TransmitParam param = info.getTransmitParam();
+        // 下载进度
+        final int progress = param.getProgress();
+        // 下载速率
+        final int speed = param.getSpeedKBps();
+    }
+
+    @Override
+    public void onSuccess(DownloadInfo info, File file)
+    {
+        // 下载成功
+    }
+
+    @Override
+    public void onError(DownloadInfo info)
+    {
+        // 下载失败
+    }
+};
 ```
 
 # 接口
