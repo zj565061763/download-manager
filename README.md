@@ -87,8 +87,39 @@ private final IDownloadManager.Callback mDownloadCallback = new IDownloadManager
     public void onError(DownloadInfo info)
     {
         // 下载失败
+        final DownloadError error = info.getError();
     }
 };
+```
+
+* 文件处理器
+有时候需要在下载成功之后，把文件拷贝或者移动到其他目录，这时候需要用到文件处理器
+
+1. CopyFileProcessor 拷贝文件处理器
+2. TakeFileProcessor 移动文件处理器
+
+```java
+/**
+ * 添加url对应的文件处理器，只有url正在下载的时候，处理器对象才会被添加
+ * <p>
+ * 下载成功之后，会把文件传给处理器处理（后台线程），处理完毕之后，处理器对象会被移除
+ *
+ * @param url
+ * @param processor
+ * @return true-添加成功；false-添加失败
+ */
+boolean addFileProcessor(String url, FileProcessor processor);
+```
+
+```java
+// 获取要保存的目录
+final File directory = getExternalFilesDir("my_download");
+// 创建下载目录管理对象
+final IDownloadDirectory downloadDirectory = DownloadDirectory.from(directory);
+// 创建文件拷贝处理器
+final IDownloadManager.FileProcessor copyFileProcessor = new CopyFileProcessor(downloadDirectory);
+// 添加文件处理器
+final boolean addFileProcessor = FDownloadManager.getDefault().addFileProcessor(mUrl, copyFileProcessor);
 ```
 
 # 接口
