@@ -97,6 +97,49 @@ private final IDownloadManager.Callback mDownloadCallback = new IDownloadManager
 final boolean cancelTask = FDownloadManager.getDefault().cancelTask(mUrl);
 ```
 
+# 管理下载目录
+`IDownloadManager`对外提供了以下这些方法来管理下载目录
+```java
+/**
+ * 返回url对应的文件
+ *
+ * @param url
+ * @return null-文件不存在，不为null下载文件存在
+ */
+File getDownloadFile(String url);
+
+/**
+ * 返回url对应的缓存文件
+ *
+ * @param url
+ * @return null-文件不存在，不为null缓存文件存在
+ */
+File getTempFile(String url);
+
+/**
+ * 删除下载文件（临时文件不会被删除）
+ * <p>
+ * 如果指定了扩展名，则扩展名不能包含点符号：<br>
+ * 合法：mp3<br>
+ * 不合法：.mp3
+ *
+ * @param ext 文件扩展名(例如mp3)；null-所有下载文件；空字符串-删除扩展名为空的文件
+ */
+void deleteDownloadFile(String ext);
+
+/**
+ * 删除所有临时文件（下载中的临时文件不会被删除）
+ */
+void deleteTempFile();
+```
+
+#### 管理自定义目录
+这里的自定义是指管理某个自定义的目录，而不是把文件下载到自定义目录。<br>
+管理接口：  `IDownloadDirectory`
+默认实现类：`DownloadDirectory`<br>
+
+`IDownloadManager`内部使用了`DownloadDirectory`来管理下载目录
+
 # 文件处理器
 有时候需要在下载成功之后，把文件拷贝或者移动到其他目录，这时候需要用到文件处理器
 
