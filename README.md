@@ -98,6 +98,23 @@ private final IDownloadManager.Callback mDownloadCallback = new IDownloadManager
 };
 ```
 
+#### 监听指定url
+有的业务场景只需要监听某个或者某些下载地址，例如下载新版本的apk升级包，希望只有下载中的时候才添加回调对象，那么可以用以下方法添加回调对象。
+```java
+/**
+ * 添加回调对象
+ * <p>
+ * 指定的url任务存在的时候，回调对象才会被添加
+ *
+ * @param url
+ * @param callback
+ * @return true-添加成功或者已添加；false-添加失败
+ */
+boolean addUrlCallback(String url, Callback callback);
+```
+
+注意：此方法添加的回调对象，仍然需要在适当的时机移除掉，否则会一直持有该对象，这种场景之下用户可以在下载成功或者失败的回调里面移除当前回调对象
+
 #### 取消下载
 ```java
 final boolean cancelTask = FDownloadManager.getDefault().cancelTask(mUrl);
