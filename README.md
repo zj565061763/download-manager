@@ -118,9 +118,8 @@ File getTempFile(String url);
 
 /**
  * 删除下载文件（临时文件不会被删除）
- * <p>
- * 如果指定了扩展名，则扩展名不能包含点符号：<br>
- * 合法：mp3<br>
+ * 如果指定了扩展名，则扩展名不能包含点符号：
+ * 合法：mp3
  * 不合法：.mp3
  *
  * @param ext 文件扩展名(例如mp3)；null-所有下载文件；空字符串-删除扩展名为空的文件
@@ -205,7 +204,6 @@ public interface IDownloadManager
 
     /**
      * 添加回调对象
-     * <p>
      * 指定的url任务存在的时候，回调对象才会被添加
      *
      * @param url
@@ -232,9 +230,8 @@ public interface IDownloadManager
 
     /**
      * 删除下载文件（临时文件不会被删除）
-     * <p>
-     * 如果指定了扩展名，则扩展名不能包含点符号：<br>
-     * 合法：mp3<br>
+     * 如果指定了扩展名，则扩展名不能包含点符号：
+     * 合法：mp3
      * 不合法：.mp3
      *
      * @param ext 文件扩展名(例如mp3)；null-所有下载文件；空字符串-删除扩展名为空的文件
@@ -248,7 +245,6 @@ public interface IDownloadManager
 
     /**
      * 添加url对应的文件处理器，只有url正在下载的时候，处理器对象才会被添加
-     * <p>
      * 下载成功之后，会把文件传给处理器处理（后台线程），处理完毕之后，处理器对象会被移除
      *
      * @param url
