@@ -127,12 +127,33 @@ public interface IDownloadManager
      */
     interface Callback
     {
+        /**
+         * 准备下载（已提交未开始）
+         *
+         * @param info
+         */
         void onPrepare(DownloadInfo info);
 
+        /**
+         * 下载中
+         *
+         * @param info
+         */
         void onProgress(DownloadInfo info);
 
+        /**
+         * 下载成功
+         *
+         * @param info
+         * @param file 下载文件
+         */
         void onSuccess(DownloadInfo info, File file);
 
+        /**
+         * 下载失败
+         *
+         * @param info
+         */
         void onError(DownloadInfo info);
     }
 
