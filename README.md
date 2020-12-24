@@ -13,6 +13,7 @@ DownloadManagerConfig.init(new DownloadManagerConfig.Builder()
         .setDownloadDirectory(getExternalCacheDir().getAbsolutePath())
         /**
          * 设置下载处理器，如果不配置则默认的下载处理器为：DefaultDownloadExecutor
+         * 自定义下载处理器：IDownloadExecutor见文档底部接口或者源码
          * maxPoolSize：下载中的最大任务数量，默认：3（注意这里是指下载中的数量，最大发起数量不限制）
          * preferBreakpoint：是否优先使用断点下载，默认：false
          */
@@ -258,10 +259,10 @@ public interface IDownloadManager
     DownloadInfo getDownloadInfo(String url);
 
     /**
-     * {@link #addTask(DownloadRequest)}
+     * 添加下载任务
      *
-     * @param url
-     * @return
+     * @param url 下载地址
+     * @return true-任务添加成功或者已经添加
      */
     boolean addTask(String url);
 
@@ -409,5 +410,28 @@ public interface IDownloadDirectory
          */
         boolean intercept(File file);
     }
+}
+```
+
+```java
+public interface IDownloadExecutor
+{
+    /**
+     * 提交下载任务
+     *
+     * @param request 下载请求
+     * @param file    要保存的下载文件
+     * @param updater 下载信息更新对象
+     * @return true-提交成功，false-提交失败
+     */
+    boolean submit(DownloadRequest request, File file, IDownloadUpdater updater);
+
+    /**
+     * 取消下载任务
+     *
+     * @param url
+     * @return true-任务取消
+     */
+    boolean cancel(String url);
 }
 ```
