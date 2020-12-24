@@ -84,11 +84,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId())
         {
             case R.id.btn_download:
-                // 添加下载任务
-                final boolean addTask = FDownloadManager.getDefault().addTask(new DownloadRequest.Builder()
+
+                // 创建下载请求对象
+                final DownloadRequest downloadRequest = new DownloadRequest.Builder()
                         // 设置需要断点下载
                         .setPreferBreakpoint(true)
-                        .build(mUrl));
+                        // 下载地址
+                        .build(mUrl);
+
+                // 添加下载任务
+                final boolean addTask = FDownloadManager.getDefault().addTask(downloadRequest);
 
                 // 添加文件处理器，下载成功之后，拷贝文件到指定目录
                 final IDownloadManager.FileProcessor fileProcessor = new CopyFileProcessor(mDownloadDirectory);
@@ -96,7 +101,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 Log.i(TAG, "click download"
                         + " addTask:" + addTask
-                        + " addFileProcessor:" + addFileProcessor);
+                        + " addFileProcessor:" + addFileProcessor
+                );
                 break;
             case R.id.btn_cancel:
                 // 取消下载任务
