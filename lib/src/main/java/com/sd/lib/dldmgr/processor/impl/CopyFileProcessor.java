@@ -1,4 +1,4 @@
-package com.sd.lib.dldmgr.processor;
+package com.sd.lib.dldmgr.processor.impl;
 
 import com.sd.lib.dldmgr.IDownloadDirectory;
 

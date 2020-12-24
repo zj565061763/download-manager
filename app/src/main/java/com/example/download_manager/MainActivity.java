@@ -13,7 +13,8 @@ import com.sd.lib.dldmgr.FDownloadManager;
 import com.sd.lib.dldmgr.IDownloadDirectory;
 import com.sd.lib.dldmgr.IDownloadManager;
 import com.sd.lib.dldmgr.TransmitParam;
-import com.sd.lib.dldmgr.processor.CopyFileProcessor;
+import com.sd.lib.dldmgr.processor.IFileProcessor;
+import com.sd.lib.dldmgr.processor.impl.CopyFileProcessor;
 
 import java.io.File;
 
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final boolean addTask = FDownloadManager.getDefault().addTask(downloadRequest);
 
                 // 添加文件处理器，下载成功之后，拷贝文件到指定目录
-                final IDownloadManager.FileProcessor fileProcessor = new CopyFileProcessor(mDownloadDirectory);
+                final IFileProcessor fileProcessor = new CopyFileProcessor(mDownloadDirectory);
                 final boolean addFileProcessor = FDownloadManager.getDefault().addFileProcessor(mUrl, fileProcessor);
 
                 Log.i(TAG, "click download"

@@ -1,5 +1,7 @@
 package com.sd.lib.dldmgr;
 
+import com.sd.lib.dldmgr.processor.IFileProcessor;
+
 import java.io.File;
 
 public interface IDownloadManager
@@ -73,7 +75,7 @@ public interface IDownloadManager
      * @param processor
      * @return true-添加成功；false-添加失败
      */
-    boolean addFileProcessor(String url, FileProcessor processor);
+    boolean addFileProcessor(String url, IFileProcessor processor);
 
     /**
      * 移除url对应的文件处理器
@@ -81,7 +83,7 @@ public interface IDownloadManager
      * @param url
      * @param processor
      */
-    void removeFileProcessor(String url, FileProcessor processor);
+    void removeFileProcessor(String url, IFileProcessor processor);
 
     /**
      * 清空url对应的文件处理器
@@ -155,13 +157,5 @@ public interface IDownloadManager
          * @param info
          */
         void onError(DownloadInfo info);
-    }
-
-    /**
-     * 文件处理器
-     */
-    interface FileProcessor
-    {
-        void process(File file);
     }
 }

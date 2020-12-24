@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
+import com.sd.lib.dldmgr.processor.IFileProcessor;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class FDownloadManager implements IDownloadManager
     private final Map<File, String> mMapTempFile = new ConcurrentHashMap<>();
 
     private final Map<Callback, String> mCallbackHolder = new ConcurrentHashMap<>();
-    private final Map<String, Map<FileProcessor, String>> mProcessorHolder = new ConcurrentHashMap<>();
+    private final Map<String, Map<IFileProcessor, String>> mProcessorHolder = new ConcurrentHashMap<>();
 
     protected FDownloadManager(String directory)
     {
@@ -134,7 +135,7 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized boolean addFileProcessor(String url, FileProcessor processor)
+    public synchronized boolean addFileProcessor(String url, IFileProcessor processor)
     {
         if (TextUtils.isEmpty(url) || processor == null)
             return false;
@@ -146,7 +147,7 @@ public class FDownloadManager implements IDownloadManager
         if (downloadInfo.getState().isCompleted())
             return false;
 
-        Map<FileProcessor, String> map = mProcessorHolder.get(url);
+        Map<IFileProcessor, String> map = mProcessorHolder.get(url);
         if (map == null)
         {
             map = new ConcurrentHashMap<>();
@@ -169,12 +170,12 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized void removeFileProcessor(String url, FileProcessor processor)
+    public synchronized void removeFileProcessor(String url, IFileProcessor processor)
     {
         if (TextUtils.isEmpty(url) || processor == null)
             return;
 
-        final Map<FileProcessor, String> map = mProcessorHolder.get(url);
+        final Map<IFileProcessor, String> map = mProcessorHolder.get(url);
         if (map == null)
             return;
 
@@ -200,7 +201,7 @@ public class FDownloadManager implements IDownloadManager
         if (TextUtils.isEmpty(url))
             return;
 
-        final Map<FileProcessor, String> map = mProcessorHolder.remove(url);
+        final Map<IFileProcessor, String> map = mProcessorHolder.remove(url);
         if (map != null)
         {
             map.clear();
@@ -535,11 +536,11 @@ public class FDownloadManager implements IDownloadManager
             synchronized (FDownloadManager.this)
             {
                 final String url = mUrl;
-                final Map<FileProcessor, String> map = mProcessorHolder.get(url);
+                final Map<IFileProcessor, String> map = mProcessorHolder.get(url);
                 if (map == null)
                     return;
 
-                for (FileProcessor processor : map.keySet())
+                for (IFileProcessor processor : map.keySet())
                 {
                     processor.process(downloadFile);
                 }

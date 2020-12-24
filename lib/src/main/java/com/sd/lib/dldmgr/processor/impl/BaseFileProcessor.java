@@ -1,12 +1,12 @@
-package com.sd.lib.dldmgr.processor;
+package com.sd.lib.dldmgr.processor.impl;
 
 import com.sd.lib.dldmgr.IDownloadDirectory;
-import com.sd.lib.dldmgr.IDownloadManager;
+import com.sd.lib.dldmgr.processor.IFileProcessor;
 
 /**
  * 文件处理器
  */
-public abstract class BaseFileProcessor implements IDownloadManager.FileProcessor
+public abstract class BaseFileProcessor implements IFileProcessor
 {
     protected final IDownloadDirectory mDirectory;
 
