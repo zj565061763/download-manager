@@ -100,41 +100,22 @@ final boolean cancelTask = FDownloadManager.getDefault().cancelTask(mUrl);
 # 管理下载目录
 `IDownloadManager`对外提供了以下这些方法来管理下载目录
 ```java
-/**
- * 返回url对应的文件
- *
- * @param url
- * @return null-文件不存在，不为null下载文件存在
- */
-File getDownloadFile(String url);
+// 获取下载文件
+final File downloadFile = FDownloadManager.getDefault().getDownloadFile(url);
+// 获取缓存文件
+final File tempFile = FDownloadManager.getDefault().getTempFile(url);
 
-/**
- * 返回url对应的缓存文件
- *
- * @param url
- * @return null-文件不存在，不为null缓存文件存在
- */
-File getTempFile(String url);
-
-/**
- * 删除下载文件（临时文件不会被删除）
- * 如果指定了扩展名，则扩展名不能包含点符号：
- * 合法：mp3
- * 不合法：.mp3
- *
- * @param ext 文件扩展名(例如mp3)；null-所有下载文件；空字符串-删除扩展名为空的文件
- */
-void deleteDownloadFile(String ext);
-
-/**
- * 删除所有临时文件（下载中的临时文件不会被删除）
- */
-void deleteTempFile();
+// 删除所有临时文件（下载中的临时文件不会被删除）
+FDownloadManager.getDefault().deleteTempFile();
+// 删除下载文件（临时文件不会被删除）
+FDownloadManager.getDefault().deleteDownloadFile(null);
+// 删除mp4下载文件
+FDownloadManager.getDefault().deleteDownloadFile("mp4");
 ```
 
 #### 管理自定义目录
 这里的自定义是指管理某个自定义的目录，而不是把文件下载到自定义目录。<br>
-管理接口：  `IDownloadDirectory`
+管理接口：  `IDownloadDirectory` 具体接口见文档底部或者源码
 默认实现类：`DownloadDirectory`<br>
 
 `IDownloadManager`内部使用了`DownloadDirectory`来管理下载目录
@@ -341,6 +322,92 @@ public interface IDownloadManager
     interface FileProcessor
     {
         void process(File file);
+    }
+}
+```
+
+```java
+public interface IDownloadDirectory
+{
+    /** 临时文件扩展名 */
+    String EXT_TEMP = ".temp";
+
+    /**
+     * 检查目录是否存在
+     *
+     * @return
+     */
+    boolean checkExist();
+
+    /**
+     * 返回url对应的文件
+     *
+     * @param url
+     * @return null-文件不存在，不为null文件存在
+     */
+    File getFile(String url);
+
+    /**
+     * 返回url对应的文件
+     *
+     * @param url
+     * @param defaultFile 默认文件
+     * @return 如果文件不存在则返回默认文件
+     */
+    File getFile(String url, File defaultFile);
+
+    /**
+     * 返回url对应的缓存文件
+     *
+     * @param url
+     * @return null-文件不存在，不为null文件存在
+     */
+    File getTempFile(String url);
+
+    /**
+     * 复制文件到当前目录
+     *
+     * @param file
+     * @return 成功-返回拷贝后的文件；失败-返回原文件
+     */
+    File copyFile(File file);
+
+    /**
+     * 移动文件到当前目录
+     *
+     * @param file
+     * @return 成功-返回移动后的文件；失败-返回原文件
+     */
+    File takeFile(File file);
+
+    /**
+     * 删除文件（临时文件不会被删除）
+     * 如果指定了扩展名，则扩展名不能包含点符号：
+     * 合法：mp3
+     * 不合法：.mp3
+     *
+     * @param ext 文件扩展名(例如mp3)；null-删除所有文件；空字符串-删除扩展名为空的文件
+     * @return 返回删除的文件数量
+     */
+    int deleteFile(String ext);
+
+    /**
+     * 删除临时文件
+     *
+     * @param interceptor
+     * @return
+     */
+    int deleteTempFile(FileInterceptor interceptor);
+
+    interface FileInterceptor
+    {
+        /**
+         * 拦截文件
+         *
+         * @param file
+         * @return true-拦截
+         */
+        boolean intercept(File file);
     }
 }
 ```
