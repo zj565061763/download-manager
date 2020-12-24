@@ -238,7 +238,7 @@ public class FDownloadManager implements IDownloadManager
 
         final String url = request.getUrl();
         if (TextUtils.isEmpty(url))
-            throw new IllegalArgumentException("url is empty");
+            return false;
 
         final boolean isDownloading = mMapDownloadInfo.containsKey(url);
         if (isDownloading)
