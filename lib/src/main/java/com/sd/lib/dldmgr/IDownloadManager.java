@@ -49,19 +49,6 @@ public interface IDownloadManager
     File getTempFile(String url);
 
     /**
-     * 返回下载信息
-     *
-     * @param url
-     * @return
-     */
-    DownloadInfo getDownloadInfo(String url);
-
-    /**
-     * 删除所有临时文件（下载中的临时文件不会被删除）
-     */
-    void deleteTempFile();
-
-    /**
      * 删除下载文件（临时文件不会被删除）
      * <p>
      * 如果指定了扩展名，则扩展名不能包含点符号：<br>
@@ -71,6 +58,11 @@ public interface IDownloadManager
      * @param ext 文件扩展名(例如mp3)；null-所有下载文件；空字符串-删除扩展名为空的文件
      */
     void deleteDownloadFile(String ext);
+
+    /**
+     * 删除所有临时文件（下载中的临时文件不会被删除）
+     */
+    void deleteTempFile();
 
     /**
      * 添加url对应的文件处理器，只有url正在下载的时候，处理器对象才会被添加
@@ -97,6 +89,14 @@ public interface IDownloadManager
      * @param url
      */
     void clearFileProcessor(String url);
+
+    /**
+     * 返回下载信息
+     *
+     * @param url
+     * @return
+     */
+    DownloadInfo getDownloadInfo(String url);
 
     /**
      * {@link #addTask(DownloadRequest)}
