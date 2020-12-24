@@ -109,7 +109,7 @@ public interface IDownloadManager
     /**
      * 添加下载任务
      *
-     * @param request
+     * @param request 下载请求
      * @return true-任务添加成功或者已经添加
      */
     boolean addTask(DownloadRequest request);

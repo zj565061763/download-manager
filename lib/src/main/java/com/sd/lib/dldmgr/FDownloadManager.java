@@ -234,11 +234,11 @@ public class FDownloadManager implements IDownloadManager
     public synchronized boolean addTask(DownloadRequest request)
     {
         if (request == null)
-            return false;
+            throw new NullPointerException("request is null");
 
         final String url = request.getUrl();
         if (TextUtils.isEmpty(url))
-            return false;
+            throw new IllegalArgumentException("url is empty");
 
         final boolean isDownloading = mMapDownloadInfo.containsKey(url);
         if (isDownloading)
