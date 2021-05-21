@@ -53,14 +53,16 @@ internal object Utils {
     }
 
     fun getExt(url: String?): String {
-        var ext: String? = null
-        try {
-            ext = MimeTypeMap.getFileExtensionFromUrl(url)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        if (url == null) return ""
+
+        var ext = MimeTypeMap.getFileExtensionFromUrl(url)
+        if (ext == null || ext.isEmpty()) {
+            val lastIndex = url.lastIndexOf(".")
+            if (lastIndex > 0) {
+                ext = url.substring(lastIndex + 1)
+            }
         }
-        if (ext == null) ext = ""
-        return ext
+        return ext ?: ""
     }
 
     /**
