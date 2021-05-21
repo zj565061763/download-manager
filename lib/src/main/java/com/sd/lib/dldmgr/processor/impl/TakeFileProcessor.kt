@@ -6,9 +6,7 @@ import java.io.File
 /**
  * 移动文件处理器
  */
-class TakeFileProcessor : BaseFileProcessor {
-    constructor(directory: IDownloadDirectory) : super(directory)
-
+class TakeFileProcessor(directory: IDownloadDirectory) : BaseFileProcessor(directory) {
     override fun process(file: File) {
         directory.takeFile(file)
     }

@@ -6,9 +6,7 @@ import java.io.File
 /**
  * 拷贝文件处理器
  */
-class CopyFileProcessor : BaseFileProcessor {
-    constructor(directory: IDownloadDirectory) : super(directory)
-
+class CopyFileProcessor(directory: IDownloadDirectory) : BaseFileProcessor(directory) {
     override fun process(file: File) {
         directory.copyFile(file)
     }

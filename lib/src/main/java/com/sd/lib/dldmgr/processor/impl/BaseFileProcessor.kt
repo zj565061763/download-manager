@@ -6,12 +6,8 @@ import com.sd.lib.dldmgr.processor.IFileProcessor
 /**
  * 文件处理器
  */
-abstract class BaseFileProcessor : IFileProcessor {
-    protected val directory: IDownloadDirectory
-
-    constructor (directory: IDownloadDirectory) {
-        this.directory = directory
-    }
+abstract class BaseFileProcessor(directory: IDownloadDirectory) : IFileProcessor {
+    protected val directory: IDownloadDirectory = directory
 
     override fun hashCode(): Int {
         return directory.hashCode()
