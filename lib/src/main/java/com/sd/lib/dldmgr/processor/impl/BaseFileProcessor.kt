@@ -7,7 +7,6 @@ import com.sd.lib.dldmgr.processor.IFileProcessor
  * 文件处理器
  */
 abstract class BaseFileProcessor : IFileProcessor {
-    @JvmField
     protected val directory: IDownloadDirectory
 
     constructor (directory: IDownloadDirectory) {
