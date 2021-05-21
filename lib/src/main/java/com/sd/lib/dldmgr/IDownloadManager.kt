@@ -1,161 +1,131 @@
-package com.sd.lib.dldmgr;
+package com.sd.lib.dldmgr
 
-import com.sd.lib.dldmgr.processor.IFileProcessor;
+import com.sd.lib.dldmgr.processor.IFileProcessor
+import java.io.File
 
-import java.io.File;
-
-public interface IDownloadManager
-{
-    String TAG = IDownloadManager.class.getName();
-
+interface IDownloadManager {
     /**
      * 添加回调对象
      *
-     * @param callback
      * @return true-添加成功或者已添加；false-添加失败
      */
-    boolean addCallback(Callback callback);
+    fun addCallback(callback: Callback): Boolean
 
     /**
      * 移除回调对象
-     *
-     * @param callback
      */
-    void removeCallback(Callback callback);
+    fun removeCallback(callback: Callback)
 
     /**
-     * 添加回调对象
-     * <p>
-     * 指定的url任务存在的时候，回调对象才会被添加
+     * 添加回调对象，指定[url]任务存在的时候，回调对象才会被添加
      *
-     * @param url
-     * @param callback
      * @return true-添加成功或者已添加；false-添加失败
      */
-    boolean addUrlCallback(String url, Callback callback);
+    fun addUrlCallback(url: String?, callback: Callback): Boolean
 
     /**
-     * 返回url对应的文件
+     * 返回[url]对应的文件
      *
-     * @param url
      * @return null-文件不存在，不为null下载文件存在
      */
-    File getDownloadFile(String url);
+    fun getDownloadFile(url: String?): File?
 
     /**
-     * 返回url对应的缓存文件
+     * 返回[url]对应的缓存文件
      *
-     * @param url
      * @return null-文件不存在，不为null缓存文件存在
      */
-    File getTempFile(String url);
+    fun getTempFile(url: String?): File?
 
     /**
      * 删除下载文件（临时文件不会被删除）
-     * <p>
-     * 如果指定了扩展名，则扩展名不能包含点符号：<br>
-     * 合法：mp3<br>
-     * 不合法：.mp3
+     *
+     * 如果指定了扩展名，则扩展名不能包含点符号
+     *
+     * 合法：mp3  不合法：.mp3
      *
      * @param ext 文件扩展名(例如mp3)；null-所有下载文件；空字符串-删除扩展名为空的文件
      */
-    void deleteDownloadFile(String ext);
+    fun deleteDownloadFile(ext: String?)
 
     /**
      * 删除所有临时文件（下载中的临时文件不会被删除）
      */
-    void deleteTempFile();
+    fun deleteTempFile()
 
     /**
-     * 添加url对应的文件处理器，只有url正在下载的时候，处理器对象才会被添加
-     * <p>
+     * 添加[url]对应的文件处理器[processor]，只有url正在下载的时候，处理器对象才会被添加
      * 下载成功之后，会把文件传给处理器处理（后台线程），处理完毕之后，处理器对象会被移除
      *
-     * @param url
-     * @param processor
      * @return true-添加成功；false-添加失败
      */
-    boolean addFileProcessor(String url, IFileProcessor processor);
+    fun addFileProcessor(url: String?, processor: IFileProcessor): Boolean
 
     /**
-     * 移除url对应的文件处理器
-     *
-     * @param url
-     * @param processor
+     * 移除[url]对应的文件处理器[processor]
      */
-    void removeFileProcessor(String url, IFileProcessor processor);
+    fun removeFileProcessor(url: String?, processor: IFileProcessor)
 
     /**
-     * 清空url对应的文件处理器
-     *
-     * @param url
+     * 清空[url]对应的文件处理器
      */
-    void clearFileProcessor(String url);
+    fun clearFileProcessor(url: String?)
 
     /**
-     * 返回下载信息
-     *
-     * @param url
-     * @return
+     * 返回[url]对应的下载信息
      */
-    DownloadInfo getDownloadInfo(String url);
-
-    /**
-     * {@link #addTask(DownloadRequest)}
-     *
-     * @param url
-     * @return
-     */
-    boolean addTask(String url);
+    fun getDownloadInfo(url: String?): DownloadInfo?
 
     /**
      * 添加下载任务
      *
-     * @param request 下载请求
      * @return true-任务添加成功或者已经添加
      */
-    boolean addTask(DownloadRequest request);
+    fun addTask(url: String?): Boolean
+
+    /**
+     * 添加下载任务
+     *
+     * @return true-任务添加成功或者已经添加
+     */
+    fun addTask(request: DownloadRequest?): Boolean
 
     /**
      * 取消下载任务
      *
-     * @param url
      * @return true-任务被取消
      */
-    boolean cancelTask(String url);
+    fun cancelTask(url: String?): Boolean
 
     /**
      * 下载回调
      */
-    interface Callback
-    {
+    interface Callback {
         /**
          * 准备下载（已提交未开始）
-         *
-         * @param info
          */
-        void onPrepare(DownloadInfo info);
+        fun onPrepare(info: DownloadInfo?)
 
         /**
          * 下载中
-         *
-         * @param info
          */
-        void onProgress(DownloadInfo info);
+        fun onProgress(info: DownloadInfo?)
 
         /**
          * 下载成功
          *
-         * @param info
          * @param file 下载文件
          */
-        void onSuccess(DownloadInfo info, File file);
+        fun onSuccess(info: DownloadInfo?, file: File?)
 
         /**
          * 下载失败
-         *
-         * @param info
          */
-        void onError(DownloadInfo info);
+        fun onError(info: DownloadInfo?)
+    }
+
+    companion object {
+        @JvmField
+        val TAG = IDownloadManager::class.java.name
     }
 }
