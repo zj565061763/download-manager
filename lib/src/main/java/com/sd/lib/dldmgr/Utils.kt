@@ -77,6 +77,19 @@ internal object Utils {
     }
 
     /**
+     * 移动文件
+     */
+    fun moveFile(fileFrom: File, fileTo: File): Boolean {
+        return try {
+            delete(fileTo)
+            fileFrom.renameTo(fileTo)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    /**
      * 删除[file]文件或者目录
      */
     fun delete(file: File?): Boolean {

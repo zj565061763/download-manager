@@ -54,8 +54,7 @@ class DownloadDirectory : IDownloadDirectory {
         if (!Utils.checkDir(dir)) return file
 
         val newFile = File(dir, file.name)
-        Utils.delete(newFile)
-        return if (file.renameTo(newFile)) {
+        return if (Utils.moveFile(file, newFile)) {
             newFile
         } else {
             file
