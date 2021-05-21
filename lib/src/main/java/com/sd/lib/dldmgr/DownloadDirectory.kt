@@ -31,7 +31,7 @@ class DownloadDirectory : IDownloadDirectory {
 
     @Synchronized
     override fun copyFile(file: File): File {
-        require(!file.isDirectory) { "file must not be a directory" }
+        if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
         if (!file.exists()) return file
 
         val dir = directory
@@ -55,8 +55,9 @@ class DownloadDirectory : IDownloadDirectory {
         }
     }
 
+    @Synchronized
     override fun takeFile(file: File): File {
-        require(!file.isDirectory) { "file must not be a directory" }
+        if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
         if (!file.exists()) return file
 
         val dir = directory
@@ -143,7 +144,6 @@ class DownloadDirectory : IDownloadDirectory {
         return createUrlFile(url, ext)
     }
 
-    @Synchronized
     private fun createUrlFile(url: String, ext: String?): File? {
         if (url.isEmpty()) return null
 
