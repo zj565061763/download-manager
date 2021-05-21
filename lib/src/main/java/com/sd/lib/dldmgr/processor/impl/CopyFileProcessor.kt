@@ -1,22 +1,15 @@
-package com.sd.lib.dldmgr.processor.impl;
+package com.sd.lib.dldmgr.processor.impl
 
-import com.sd.lib.dldmgr.IDownloadDirectory;
-
-import java.io.File;
+import com.sd.lib.dldmgr.IDownloadDirectory
+import java.io.File
 
 /**
  * 拷贝文件处理器
  */
-public class CopyFileProcessor extends BaseFileProcessor
-{
-    public CopyFileProcessor(IDownloadDirectory directory)
-    {
-        super(directory);
-    }
+class CopyFileProcessor : BaseFileProcessor {
+    constructor(directory: IDownloadDirectory) : super(directory)
 
-    @Override
-    public void process(File file)
-    {
-        mDirectory.copyFile(file);
+    override fun process(file: File) {
+        directory.copyFile(file)
     }
 }

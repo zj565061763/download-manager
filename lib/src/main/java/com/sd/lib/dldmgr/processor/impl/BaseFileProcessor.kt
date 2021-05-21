@@ -1,36 +1,26 @@
-package com.sd.lib.dldmgr.processor.impl;
+package com.sd.lib.dldmgr.processor.impl
 
-import com.sd.lib.dldmgr.IDownloadDirectory;
-import com.sd.lib.dldmgr.processor.IFileProcessor;
+import com.sd.lib.dldmgr.IDownloadDirectory
+import com.sd.lib.dldmgr.processor.IFileProcessor
 
 /**
  * 文件处理器
  */
-public abstract class BaseFileProcessor implements IFileProcessor
-{
-    protected final IDownloadDirectory mDirectory;
+abstract class BaseFileProcessor : IFileProcessor {
+    @JvmField
+    protected val directory: IDownloadDirectory
 
-    public BaseFileProcessor(IDownloadDirectory directory)
-    {
-        if (directory == null)
-            throw new NullPointerException("directory is null");
-        mDirectory = directory;
+    constructor (directory: IDownloadDirectory) {
+        this.directory = directory
     }
 
-    @Override
-    public int hashCode()
-    {
-        return mDirectory.hashCode();
+    override fun hashCode(): Int {
+        return directory.hashCode()
     }
 
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (obj == this) return true;
-        if (obj == null) return false;
-        if (obj.getClass() != getClass()) return false;
-
-        final BaseFileProcessor other = (BaseFileProcessor) obj;
-        return mDirectory.equals(other.mDirectory);
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other !is BaseFileProcessor) return false
+        return directory == other.directory
     }
 }
