@@ -1,80 +1,66 @@
-package com.sd.lib.dldmgr;
+package com.sd.lib.dldmgr
 
-import android.content.Context;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.webkit.MimeTypeMap;
+import android.content.Context
+import android.os.Environment
+import android.os.Handler
+import android.os.Looper
+import android.webkit.MimeTypeMap
+import java.io.*
+import java.nio.channels.FileChannel
+import java.security.MessageDigest
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+internal object Utils {
+    private val HANDLER = Handler(Looper.getMainLooper())
 
-class Utils {
-    private static final Handler HANDLER = new Handler(Looper.getMainLooper());
-
-    public static void postMainThread(Runnable runnable) {
-        HANDLER.post(runnable);
+    @JvmStatic
+    fun postMainThread(runnable: Runnable) {
+        HANDLER.post(runnable)
     }
 
-    public static File getCacheDir(String dirName, Context context) {
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            return new File(context.getExternalCacheDir(), dirName);
+    fun getCacheDir(name: String, context: Context): File {
+        return if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
+            File(context.externalCacheDir, name)
         } else {
-            return new File(context.getCacheDir(), dirName);
+            File(context.cacheDir, name)
         }
     }
 
-    public static boolean checkDir(File dir) {
-        if (dir == null) return false;
-        if (dir.exists()) return true;
-
-        try {
-            return dir.mkdirs();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+    fun checkDir(dir: File?): Boolean {
+        if (dir == null) return false
+        if (dir.exists()) return true
+        return try {
+            dir.mkdirs()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 
-    public static String MD5(String value) {
-        try {
-            final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            messageDigest.update(value.getBytes());
-            final byte[] bytes = messageDigest.digest();
+    fun md5(value: String): String? {
+        val bytes = MessageDigest.getInstance("MD5").apply {
+            this.update(value.toByteArray())
+        }.digest()
 
-            final StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < bytes.length; i++) {
-                final String hex = Integer.toHexString(0xFF & bytes[i]);
-                if (hex.length() == 1) {
-                    sb.append('0');
-                }
-                sb.append(hex);
+        val builder = StringBuilder()
+        for (i in bytes.indices) {
+            val hex = Integer.toHexString(0xFF and bytes[i].toInt())
+            if (hex.length == 1) {
+                builder.append('0')
             }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
+            builder.append(hex)
         }
+        return builder.toString()
     }
 
-    public static String getExt(String url) {
-        String ext = null;
+    fun getExt(url: String?): String {
+        var ext: String? = null
         try {
-            ext = MimeTypeMap.getFileExtensionFromUrl(url);
-        } catch (Exception e) {
-            e.printStackTrace();
+            ext = MimeTypeMap.getFileExtensionFromUrl(url)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-        if (ext == null)
-            ext = "";
-
-        return ext;
+        if (ext == null) ext = ""
+        return ext
     }
 
     /**
@@ -83,17 +69,16 @@ class Utils {
      * @param file
      * @return
      */
-    public static boolean delete(File file) {
-        if (file == null || !file.exists()) return true;
-        if (file.isFile()) return file.delete();
-
-        final File[] files = file.listFiles();
+    fun delete(file: File?): Boolean {
+        if (file == null || !file.exists()) return true
+        if (file.isFile) return file.delete()
+        val files = file.listFiles()
         if (files != null) {
-            for (File item : files) {
-                delete(item);
+            for (item in files) {
+                delete(item)
             }
         }
-        return file.delete();
+        return file.delete()
     }
 
     /**
@@ -103,31 +88,27 @@ class Utils {
      * @param fileTo
      * @return
      */
-    public static boolean copyFile(File fileFrom, File fileTo) {
-        if (!checkFile(fileFrom, fileTo))
-            return false;
-
-        FileInputStream inputStream = null;
-        FileOutputStream outputStream = null;
-        FileChannel inputChannel = null;
-        FileChannel outputChannel = null;
-        try {
-            inputStream = new FileInputStream(fileFrom);
-            outputStream = new FileOutputStream(fileTo);
-
-            inputChannel = inputStream.getChannel();
-            outputChannel = outputStream.getChannel();
-
-            inputChannel.transferTo(0, inputChannel.size(), outputChannel);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+    fun copyFile(fileFrom: File?, fileTo: File?): Boolean {
+        if (!checkFile(fileFrom, fileTo)) return false
+        var inputStream: FileInputStream? = null
+        var outputStream: FileOutputStream? = null
+        var inputChannel: FileChannel? = null
+        var outputChannel: FileChannel? = null
+        return try {
+            inputStream = FileInputStream(fileFrom)
+            outputStream = FileOutputStream(fileTo)
+            inputChannel = inputStream.channel
+            outputChannel = outputStream.channel
+            inputChannel.transferTo(0, inputChannel.size(), outputChannel)
+            true
+        } catch (e: IOException) {
+            e.printStackTrace()
+            false
         } finally {
-            closeQuietly(inputStream);
-            closeQuietly(outputStream);
-            closeQuietly(inputChannel);
-            closeQuietly(outputChannel);
+            closeQuietly(inputStream)
+            closeQuietly(outputStream)
+            closeQuietly(inputChannel)
+            closeQuietly(outputChannel)
         }
     }
 
@@ -138,38 +119,26 @@ class Utils {
      * @param fileTo
      * @return
      */
-    private static boolean checkFile(File fileFrom, File fileTo) {
-        if (fileFrom == null || !fileFrom.exists())
-            return false;
-
-        if (fileFrom.isDirectory())
-            throw new IllegalArgumentException("fileFrom must not be a directory");
-
-        if (fileTo == null)
-            return false;
-
+    private fun checkFile(fileFrom: File?, fileTo: File?): Boolean {
+        if (fileFrom == null || !fileFrom.exists()) return false
+        require(!fileFrom.isDirectory) { "fileFrom must not be a directory" }
+        if (fileTo == null) return false
         if (fileTo.exists()) {
-            if (fileTo.isDirectory()) {
-                throw new IllegalArgumentException("fileTo must not be a directory");
-            } else {
-                if (!fileTo.delete())
-                    return false;
-            }
+            require(!fileTo.isDirectory) { "fileTo must not be a directory" }
+            if (!fileTo.delete()) return false
         }
-
-        final File fileToParent = fileTo.getParentFile();
+        val fileToParent = fileTo.parentFile
         if (fileToParent != null && !fileToParent.exists()) {
-            if (!fileToParent.mkdirs())
-                return false;
+            if (!fileToParent.mkdirs()) return false
         }
-        return true;
+        return true
     }
 
-    public static void closeQuietly(Closeable closeable) {
+    fun closeQuietly(closeable: Closeable?) {
         if (closeable != null) {
             try {
-                closeable.close();
-            } catch (Throwable ignored) {
+                closeable.close()
+            } catch (ignored: Throwable) {
             }
         }
     }

@@ -156,7 +156,7 @@ class DownloadDirectory : IDownloadDirectory {
             if (ext.startsWith(".")) ext else ".${ext}"
         }
 
-        val fileName = Utils.MD5(url) + finalExt
+        val fileName = Utils.md5(url) + finalExt
         return File(dir, fileName)
     }
 
