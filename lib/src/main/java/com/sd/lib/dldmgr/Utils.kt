@@ -66,21 +66,15 @@ internal object Utils {
     }
 
     /**
-     * 删除文件或者目录
-     *
-     * @param file
-     * @return
+     * 删除[file]文件或者目录
      */
     fun delete(file: File?): Boolean {
-        if (file == null || !file.exists()) return true
-        if (file.isFile) return file.delete()
-        val files = file.listFiles()
-        if (files != null) {
-            for (item in files) {
-                delete(item)
-            }
+        return try {
+            file?.deleteRecursively() ?: false
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
         }
-        return file.delete()
     }
 
     /**
