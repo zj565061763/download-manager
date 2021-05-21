@@ -5,8 +5,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.webkit.MimeTypeMap
-import java.io.*
-import java.nio.channels.FileChannel
+import java.io.File
 import java.security.MessageDigest
 
 internal object Utils {
@@ -54,7 +53,6 @@ internal object Utils {
 
     fun getExt(url: String?): String {
         if (url == null) return ""
-
         var ext = MimeTypeMap.getFileExtensionFromUrl(url)
         if (ext == null || ext.isEmpty()) {
             val lastIndex = url.lastIndexOf(".")
@@ -66,6 +64,19 @@ internal object Utils {
     }
 
     /**
+     * 拷贝文件
+     */
+    fun copyFile(fileFrom: File, fileTo: File): Boolean {
+        return try {
+            fileFrom.copyTo(fileTo, overwrite = true)
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    /**
      * 删除[file]文件或者目录
      */
     fun delete(file: File?): Boolean {
@@ -74,68 +85,6 @@ internal object Utils {
         } catch (e: Exception) {
             e.printStackTrace()
             return false
-        }
-    }
-
-    /**
-     * 拷贝文件
-     *
-     * @param fileFrom
-     * @param fileTo
-     * @return
-     */
-    fun copyFile(fileFrom: File?, fileTo: File?): Boolean {
-        if (!checkFile(fileFrom, fileTo)) return false
-        var inputStream: FileInputStream? = null
-        var outputStream: FileOutputStream? = null
-        var inputChannel: FileChannel? = null
-        var outputChannel: FileChannel? = null
-        return try {
-            inputStream = FileInputStream(fileFrom)
-            outputStream = FileOutputStream(fileTo)
-            inputChannel = inputStream.channel
-            outputChannel = outputStream.channel
-            inputChannel.transferTo(0, inputChannel.size(), outputChannel)
-            true
-        } catch (e: IOException) {
-            e.printStackTrace()
-            false
-        } finally {
-            closeQuietly(inputStream)
-            closeQuietly(outputStream)
-            closeQuietly(inputChannel)
-            closeQuietly(outputChannel)
-        }
-    }
-
-    /**
-     * 检查源文件和目标文件
-     *
-     * @param fileFrom
-     * @param fileTo
-     * @return
-     */
-    private fun checkFile(fileFrom: File?, fileTo: File?): Boolean {
-        if (fileFrom == null || !fileFrom.exists()) return false
-        require(!fileFrom.isDirectory) { "fileFrom must not be a directory" }
-        if (fileTo == null) return false
-        if (fileTo.exists()) {
-            require(!fileTo.isDirectory) { "fileTo must not be a directory" }
-            if (!fileTo.delete()) return false
-        }
-        val fileToParent = fileTo.parentFile
-        if (fileToParent != null && !fileToParent.exists()) {
-            if (!fileToParent.mkdirs()) return false
-        }
-        return true
-    }
-
-    fun closeQuietly(closeable: Closeable?) {
-        if (closeable != null) {
-            try {
-                closeable.close()
-            } catch (ignored: Throwable) {
-            }
         }
     }
 }
