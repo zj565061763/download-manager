@@ -1,14 +1,6 @@
-package com.sd.lib.dldmgr.exception;
+package com.sd.lib.dldmgr.exception
 
-public class DownloadHttpException extends DownloadException
-{
-    public DownloadHttpException(Throwable cause)
-    {
-        super(cause);
-    }
-
-    public DownloadHttpException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
+class DownloadHttpException : DownloadException {
+    @JvmOverloads
+    constructor(message: String? = "", cause: Throwable?) : super(message, cause)
 }
