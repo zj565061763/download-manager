@@ -1,62 +1,44 @@
-package com.sd.lib.dldmgr;
+package com.sd.lib.dldmgr
 
-public class DownloadRequest
-{
-    private final String mUrl;
-    private final Boolean mPreferBreakpoint;
+class DownloadRequest {
+    /** 下载地址 */
+    val url: String?
 
-    private DownloadRequest(Builder builder)
-    {
-        mUrl = builder.url;
-        mPreferBreakpoint = builder.preferBreakpoint;
+    /** 是否需要断点下载 */
+    val preferBreakpoint: Boolean?
+
+    private constructor(builder: Builder) {
+        url = builder.url
+        preferBreakpoint = builder.preferBreakpoint
     }
 
-    public static DownloadRequest url(String url)
-    {
-        return new Builder().build(url);
-    }
+    class Builder {
+        var url: String? = null
+            private set
 
-    /**
-     * 下载地址
-     *
-     * @return
-     */
-    public String getUrl()
-    {
-        return mUrl;
-    }
-
-    /**
-     * 是否需要断点下载
-     *
-     * @return
-     */
-    public Boolean getPreferBreakpoint()
-    {
-        return mPreferBreakpoint;
-    }
-
-    public static class Builder
-    {
-        private String url;
-        private Boolean preferBreakpoint;
+        var preferBreakpoint: Boolean? = null
+            private set
 
         /**
          * 设置是否需要断点下载
          *
-         * @param preferBreakpoint true-需要；false-不需要；null-跟随默认配置
-         * @return
+         * @param preferBreakpoint true-是  false-否  null-跟随默认配置
          */
-        public Builder setPreferBreakpoint(Boolean preferBreakpoint)
-        {
-            this.preferBreakpoint = preferBreakpoint;
-            return this;
+        fun setPreferBreakpoint(preferBreakpoint: Boolean?): Builder {
+            this.preferBreakpoint = preferBreakpoint
+            return this
         }
 
-        public DownloadRequest build(String url)
-        {
-            this.url = url;
-            return new DownloadRequest(this);
+        fun build(url: String?): DownloadRequest {
+            this.url = url
+            return DownloadRequest(this)
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun url(url: String?): DownloadRequest {
+            return Builder().build(url)
         }
     }
 }
