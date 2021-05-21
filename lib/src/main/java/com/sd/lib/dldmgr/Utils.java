@@ -23,21 +23,16 @@ class Utils {
     }
 
     public static File getCacheDir(String dirName, Context context) {
-        File dir = null;
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            dir = new File(context.getExternalCacheDir(), dirName);
+            return new File(context.getExternalCacheDir(), dirName);
         } else {
-            dir = new File(context.getCacheDir(), dirName);
+            return new File(context.getCacheDir(), dirName);
         }
-        return dir;
     }
 
     public static boolean checkDir(File dir) {
-        if (dir == null)
-            return false;
-
-        if (dir.exists())
-            return true;
+        if (dir == null) return false;
+        if (dir.exists()) return true;
 
         try {
             return dir.mkdirs();
@@ -56,9 +51,9 @@ class Utils {
             final StringBuilder sb = new StringBuilder();
             for (int i = 0; i < bytes.length; i++) {
                 final String hex = Integer.toHexString(0xFF & bytes[i]);
-                if (hex.length() == 1)
+                if (hex.length() == 1) {
                     sb.append('0');
-
+                }
                 sb.append(hex);
             }
             return sb.toString();
@@ -89,11 +84,8 @@ class Utils {
      * @return
      */
     public static boolean delete(File file) {
-        if (file == null || !file.exists())
-            return true;
-
-        if (file.isFile())
-            return file.delete();
+        if (file == null || !file.exists()) return true;
+        if (file.isFile()) return file.delete();
 
         final File[] files = file.listFiles();
         if (files != null) {
