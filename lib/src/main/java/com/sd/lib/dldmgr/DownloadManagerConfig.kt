@@ -1,150 +1,98 @@
-package com.sd.lib.dldmgr;
+package com.sd.lib.dldmgr
 
-import android.content.Context;
-import android.text.TextUtils;
-
-import com.sd.lib.dldmgr.executor.IDownloadExecutor;
-import com.sd.lib.dldmgr.executor.impl.DefaultDownloadExecutor;
-
-import java.io.File;
+import android.content.Context
+import com.sd.lib.dldmgr.executor.IDownloadExecutor
+import com.sd.lib.dldmgr.executor.impl.DefaultDownloadExecutor
 
 /**
  * 下载器配置
  */
-public class DownloadManagerConfig
-{
-    private static DownloadManagerConfig sConfig;
+class DownloadManagerConfig {
+    val isDebug: Boolean
+    val context: Context
+    val downloadDirectory: String
+    val downloadExecutor: IDownloadExecutor
 
-    private final boolean mIsDebug;
+    private constructor(builder: Builder) {
+        isDebug = builder.isDebug
+        context = builder.context!!
 
-    private final Context mContext;
-    private final IDownloadExecutor mDownloadExecutor;
-    private final String mDownloadDirectory;
-
-    private DownloadManagerConfig(Builder builder)
-    {
-        mIsDebug = builder.mIsDebug;
-        mContext = builder.mContext;
-        mDownloadExecutor = builder.mDownloadExecutor != null ? builder.mDownloadExecutor : new DefaultDownloadExecutor();
-
-        String dir = builder.mDownloadDirectory;
-        if (TextUtils.isEmpty(dir))
-        {
-            final File dirFile = Utils.getCacheDir("fdownload", mContext);
-            dir = dirFile.getAbsolutePath();
+        var dir = builder.downloadDirectory
+        if (dir == null || dir.isEmpty()) {
+            val dirFile = Utils.getCacheDir("fdownload", context)
+            dir = dirFile.absolutePath
         }
-        mDownloadDirectory = dir;
+        downloadDirectory = dir!!
+        downloadExecutor = builder.downloadExecutor ?: DefaultDownloadExecutor()
     }
 
-    /**
-     * 返回配置
-     *
-     * @return
-     */
-    public static DownloadManagerConfig get()
-    {
-        if (sConfig == null)
-            throw new RuntimeException(DownloadManagerConfig.class.getSimpleName() + "has not been init");
-        return sConfig;
-    }
+    class Builder {
+        var isDebug = false
+            private set
 
-    /**
-     * 初始化
-     *
-     * @param config
-     */
-    public static synchronized void init(DownloadManagerConfig config)
-    {
-        if (config == null)
-            throw new IllegalArgumentException("config is null");
+        var context: Context? = null
+            private set
 
-        if (sConfig != null)
-            throw new RuntimeException(DownloadManagerConfig.class.getSimpleName() + " has been init");
+        var downloadDirectory: String? = null
+            private set
 
-        config.checkConfig();
-        sConfig = config;
-    }
-
-    private void checkConfig()
-    {
-        if (mDownloadExecutor == null)
-            throw new RuntimeException(IDownloadExecutor.class.getSimpleName() + " is null");
-    }
-
-    public boolean isDebug()
-    {
-        return mIsDebug;
-    }
-
-    public Context getContext()
-    {
-        return mContext;
-    }
-
-    public IDownloadExecutor getDownloadExecutor()
-    {
-        return mDownloadExecutor;
-    }
-
-    public String getDownloadDirectory()
-    {
-        return mDownloadDirectory;
-    }
-
-    public static class Builder
-    {
-        private boolean mIsDebug = false;
-
-        private Context mContext;
-        private IDownloadExecutor mDownloadExecutor;
-        private String mDownloadDirectory;
+        var downloadExecutor: IDownloadExecutor? = null
+            private set
 
         /**
          * 设置调试模式
-         *
-         * @param debug
-         * @return
          */
-        public Builder setDebug(boolean debug)
-        {
-            mIsDebug = debug;
-            return this;
-        }
-
-        /**
-         * 设置下载执行器
-         *
-         * @param executor
-         * @return
-         */
-        public Builder setDownloadExecutor(IDownloadExecutor executor)
-        {
-            mDownloadExecutor = executor;
-            return this;
+        fun setDebug(debug: Boolean): Builder {
+            isDebug = debug
+            return this
         }
 
         /**
          * 设置下载目录
-         *
-         * @param directory
-         * @return
          */
-        public Builder setDownloadDirectory(String directory)
-        {
-            mDownloadDirectory = directory;
-            return this;
+        fun setDownloadDirectory(directory: String?): Builder {
+            downloadDirectory = directory
+            return this
         }
 
         /**
-         * 构建对象
-         *
-         * @param context
-         * @return
+         * 设置下载执行器
          */
-        public DownloadManagerConfig build(Context context)
-        {
-            mContext = context.getApplicationContext();
-            return new DownloadManagerConfig(this);
+        fun setDownloadExecutor(executor: IDownloadExecutor?): Builder {
+            downloadExecutor = executor
+            return this
+        }
+
+        fun build(context: Context): DownloadManagerConfig {
+            this.context = context.applicationContext
+            return DownloadManagerConfig(this)
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        private var _config: DownloadManagerConfig? = null
+
+        /**
+         * 返回配置
+         */
+        @JvmStatic
+        fun get(): DownloadManagerConfig {
+            return _config ?: throw RuntimeException("${DownloadManagerConfig::class.java.simpleName} has not been initialized")
+        }
+
+        /**
+         * 初始化
+         *
+         * @param config
+         */
+        @JvmStatic
+        @Synchronized
+        fun init(config: DownloadManagerConfig) {
+            if (_config != null) {
+                throw RuntimeException("${DownloadManagerConfig::class.java.simpleName} has been initialized")
+            }
+            _config = config
         }
     }
 }
