@@ -1,12 +1,10 @@
-package com.sd.lib.dldmgr.executor;
+package com.sd.lib.dldmgr.executor
 
-import com.sd.lib.dldmgr.DownloadRequest;
-import com.sd.lib.dldmgr.IDownloadUpdater;
+import com.sd.lib.dldmgr.DownloadRequest
+import com.sd.lib.dldmgr.IDownloadUpdater
+import java.io.File
 
-import java.io.File;
-
-public interface IDownloadExecutor
-{
+interface IDownloadExecutor {
     /**
      * 提交下载任务
      *
@@ -15,13 +13,12 @@ public interface IDownloadExecutor
      * @param updater 下载信息更新对象
      * @return true-提交成功，false-提交失败
      */
-    boolean submit(DownloadRequest request, File file, IDownloadUpdater updater);
+    fun submit(request: DownloadRequest, file: File, updater: IDownloadUpdater): Boolean
 
     /**
-     * 取消下载任务
+     * 取消[url]下载任务
      *
-     * @param url
      * @return true-任务取消
      */
-    boolean cancel(String url);
+    fun cancel(url: String?): Boolean
 }
