@@ -12,8 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class FDownloadManager implements IDownloadManager
-{
+public class FDownloadManager implements IDownloadManager {
     private static FDownloadManager sDefault = null;
 
     private final DownloadDirectory mDownloadDirectory;
@@ -24,22 +23,17 @@ public class FDownloadManager implements IDownloadManager
     private final Map<Callback, String> mCallbackHolder = new ConcurrentHashMap<>();
     private final Map<String, Map<IFileProcessor, String>> mProcessorHolder = new ConcurrentHashMap<>();
 
-    protected FDownloadManager(String directory)
-    {
+    protected FDownloadManager(String directory) {
         if (TextUtils.isEmpty(directory))
             throw new IllegalArgumentException("directory is empty");
 
         mDownloadDirectory = DownloadDirectory.from(new File(directory));
     }
 
-    public static FDownloadManager getDefault()
-    {
-        if (sDefault == null)
-        {
-            synchronized (FDownloadManager.class)
-            {
-                if (sDefault == null)
-                {
+    public static FDownloadManager getDefault() {
+        if (sDefault == null) {
+            synchronized (FDownloadManager.class) {
+                if (sDefault == null) {
                     final String directory = getConfig().getDownloadDirectory();
                     sDefault = new FDownloadManager(directory);
                 }
@@ -48,20 +42,17 @@ public class FDownloadManager implements IDownloadManager
         return sDefault;
     }
 
-    private static DownloadManagerConfig getConfig()
-    {
+    private static DownloadManagerConfig getConfig() {
         return DownloadManagerConfig.get();
     }
 
     @Override
-    public synchronized boolean addCallback(Callback callback)
-    {
+    public synchronized boolean addCallback(Callback callback) {
         if (callback == null)
             return false;
 
         final String put = mCallbackHolder.put(callback, "");
-        if (put == null)
-        {
+        if (put == null) {
             if (getConfig().isDebug())
                 Log.i(TAG, "addCallback:" + callback + " size:" + mCallbackHolder.size());
         }
@@ -69,22 +60,19 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized void removeCallback(Callback callback)
-    {
+    public synchronized void removeCallback(Callback callback) {
         if (callback == null)
             return;
 
         final String remove = mCallbackHolder.remove(callback);
-        if (remove != null)
-        {
+        if (remove != null) {
             if (getConfig().isDebug())
                 Log.i(TAG, "removeCallback:" + callback + " size:" + mCallbackHolder.size());
         }
     }
 
     @Override
-    public synchronized boolean addUrlCallback(String url, Callback callback)
-    {
+    public synchronized boolean addUrlCallback(String url, Callback callback) {
         if (TextUtils.isEmpty(url) || callback == null)
             return false;
 
@@ -96,20 +84,17 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public File getDownloadFile(String url)
-    {
+    public File getDownloadFile(String url) {
         return mDownloadDirectory.getFile(url);
     }
 
     @Override
-    public File getTempFile(String url)
-    {
+    public File getTempFile(String url) {
         return mDownloadDirectory.getTempFile(url);
     }
 
     @Override
-    public void deleteDownloadFile(String ext)
-    {
+    public void deleteDownloadFile(String ext) {
         final int count = mDownloadDirectory.deleteFile(ext);
 
         if (getConfig().isDebug())
@@ -117,13 +102,10 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public void deleteTempFile()
-    {
-        final int count = mDownloadDirectory.deleteTempFile(new IDownloadDirectory.FileInterceptor()
-        {
+    public void deleteTempFile() {
+        final int count = mDownloadDirectory.deleteTempFile(new IDownloadDirectory.FileInterceptor() {
             @Override
-            public boolean intercept(File file)
-            {
+            public boolean intercept(File file) {
                 if (mMapTempFile.containsKey(file))
                     return true;
                 return false;
@@ -135,8 +117,7 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized boolean addFileProcessor(String url, IFileProcessor processor)
-    {
+    public synchronized boolean addFileProcessor(String url, IFileProcessor processor) {
         if (TextUtils.isEmpty(url) || processor == null)
             return false;
 
@@ -148,17 +129,14 @@ public class FDownloadManager implements IDownloadManager
             return false;
 
         Map<IFileProcessor, String> map = mProcessorHolder.get(url);
-        if (map == null)
-        {
+        if (map == null) {
             map = new ConcurrentHashMap<>();
             mProcessorHolder.put(url, map);
         }
 
         final String put = map.put(processor, "");
-        if (put == null)
-        {
-            if (getConfig().isDebug())
-            {
+        if (put == null) {
+            if (getConfig().isDebug()) {
                 Log.i(TAG, "addFileProcessor url:" + url
                         + " processor:" + processor
                         + " size:" + map.size()
@@ -170,8 +148,7 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized void removeFileProcessor(String url, IFileProcessor processor)
-    {
+    public synchronized void removeFileProcessor(String url, IFileProcessor processor) {
         if (TextUtils.isEmpty(url) || processor == null)
             return;
 
@@ -180,13 +157,11 @@ public class FDownloadManager implements IDownloadManager
             return;
 
         final String remove = map.remove(processor);
-        if (remove != null)
-        {
+        if (remove != null) {
             if (map.isEmpty())
                 mProcessorHolder.remove(url);
 
-            if (getConfig().isDebug())
-            {
+            if (getConfig().isDebug()) {
                 Log.i(TAG, "removeFileProcessor url:" + url
                         + " size:" + map.size()
                         + " totalSize:" + mProcessorHolder.size()
@@ -196,17 +171,14 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized void clearFileProcessor(String url)
-    {
+    public synchronized void clearFileProcessor(String url) {
         if (TextUtils.isEmpty(url))
             return;
 
         final Map<IFileProcessor, String> map = mProcessorHolder.remove(url);
-        if (map != null)
-        {
+        if (map != null) {
             map.clear();
-            if (getConfig().isDebug())
-            {
+            if (getConfig().isDebug()) {
                 Log.i(TAG, "clearFileProcessor url:" + url
                         + " totalSize:" + mProcessorHolder.size()
                 );
@@ -215,8 +187,7 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public DownloadInfo getDownloadInfo(String url)
-    {
+    public DownloadInfo getDownloadInfo(String url) {
         final DownloadInfoWrapper wrapper = mMapDownloadInfo.get(url);
         if (wrapper == null)
             return null;
@@ -225,15 +196,13 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public boolean addTask(final String url)
-    {
+    public boolean addTask(final String url) {
         final DownloadRequest downloadRequest = DownloadRequest.url(url);
         return addTask(downloadRequest);
     }
 
     @Override
-    public synchronized boolean addTask(DownloadRequest request)
-    {
+    public synchronized boolean addTask(DownloadRequest request) {
         if (request == null)
             throw new NullPointerException("request is null");
 
@@ -248,8 +217,7 @@ public class FDownloadManager implements IDownloadManager
         final DownloadInfo info = new DownloadInfo(url);
 
         final File tempFile = mDownloadDirectory.newUrlTempFile(url);
-        if (tempFile == null)
-        {
+        if (tempFile == null) {
             if (getConfig().isDebug())
                 Log.e(TAG, "addTask error create temp file error:" + url);
 
@@ -259,14 +227,12 @@ public class FDownloadManager implements IDownloadManager
 
         final IDownloadUpdater downloadUpdater = new InternalDownloadUpdater(info, tempFile);
         final boolean submitted = getConfig().getDownloadExecutor().submit(request, tempFile, downloadUpdater);
-        if (submitted)
-        {
+        if (submitted) {
             final DownloadInfoWrapper wrapper = new DownloadInfoWrapper(info, tempFile);
             mMapDownloadInfo.put(url, wrapper);
             mMapTempFile.put(tempFile, url);
 
-            if (getConfig().isDebug())
-            {
+            if (getConfig().isDebug()) {
                 Log.i(TAG, "addTask"
                         + " url:" + url
                         + " path:" + tempFile.getAbsolutePath()
@@ -275,8 +241,7 @@ public class FDownloadManager implements IDownloadManager
             }
 
             notifyPrepare(info);
-        } else
-        {
+        } else {
             if (getConfig().isDebug())
                 Log.e(TAG, "addTask error submit request failed:" + url);
 
@@ -287,16 +252,13 @@ public class FDownloadManager implements IDownloadManager
     }
 
     @Override
-    public synchronized boolean cancelTask(String url)
-    {
+    public synchronized boolean cancelTask(String url) {
         if (TextUtils.isEmpty(url))
             return false;
 
         final boolean isDownloading = mMapDownloadInfo.containsKey(url);
-        if (isDownloading)
-        {
-            if (getConfig().isDebug())
-            {
+        if (isDownloading) {
+            if (getConfig().isDebug()) {
                 Log.i(TAG, "cancelTask start"
                         + " url:" + url);
             }
@@ -304,10 +266,8 @@ public class FDownloadManager implements IDownloadManager
 
         final boolean result = getConfig().getDownloadExecutor().cancel(url);
 
-        if (isDownloading)
-        {
-            if (getConfig().isDebug())
-            {
+        if (isDownloading) {
+            if (getConfig().isDebug()) {
                 Log.i(TAG, "cancelTask finish"
                         + " result:" + result
                         + " url:" + url);
@@ -323,15 +283,12 @@ public class FDownloadManager implements IDownloadManager
      * @param url
      * @return
      */
-    private synchronized DownloadInfoWrapper removeDownloadInfo(String url)
-    {
+    private synchronized DownloadInfoWrapper removeDownloadInfo(String url) {
         final DownloadInfoWrapper wrapper = mMapDownloadInfo.remove(url);
-        if (wrapper != null)
-        {
+        if (wrapper != null) {
             mMapTempFile.remove(wrapper.mTempFile);
 
-            if (getConfig().isDebug())
-            {
+            if (getConfig().isDebug()) {
                 Log.i(TAG, "removeDownloadInfo"
                         + " url:" + url
                         + " size:" + mMapDownloadInfo.size()
@@ -341,41 +298,29 @@ public class FDownloadManager implements IDownloadManager
         return wrapper;
     }
 
-    private void notifyPrepare(DownloadInfo info)
-    {
-        info.setState(DownloadState.Prepare);
-
+    private void notifyPrepare(DownloadInfo info) {
+        info.notifyPrepare();
         final DownloadInfo copyInfo = info.copy();
-        Utils.postMainThread(new Runnable()
-        {
+        Utils.postMainThread(new Runnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 final Collection<Callback> callbacks = mCallbackHolder.keySet();
-                for (Callback item : callbacks)
-                {
+                for (Callback item : callbacks) {
                     item.onPrepare(copyInfo);
                 }
             }
         });
     }
 
-    private void notifyProgress(DownloadInfo info, long total, long current)
-    {
-        info.setState(DownloadState.Downloading);
-
-        final boolean changed = info.getTransmitParam().transmit(total, current);
-        if (changed)
-        {
+    private void notifyProgress(DownloadInfo info, long total, long current) {
+        final boolean changed = info.notifyDownloading(total, current);
+        if (changed) {
             final DownloadInfo copyInfo = info.copy();
-            Utils.postMainThread(new Runnable()
-            {
+            Utils.postMainThread(new Runnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     final Collection<Callback> callbacks = mCallbackHolder.keySet();
-                    for (Callback item : callbacks)
-                    {
+                    for (Callback item : callbacks) {
                         item.onProgress(copyInfo);
                     }
                 }
@@ -383,32 +328,26 @@ public class FDownloadManager implements IDownloadManager
         }
     }
 
-    private void notifySuccess(DownloadInfo info, final File file)
-    {
-        info.setState(DownloadState.Success);
+    private void notifySuccess(DownloadInfo info, final File file) {
+        info.notifySuccess();
         clearFileProcessor(info.getUrl());
 
         final DownloadInfo copyInfo = info.copy();
-        Utils.postMainThread(new Runnable()
-        {
+        Utils.postMainThread(new Runnable() {
             @Override
-            public void run()
-            {
-                if (getConfig().isDebug())
-                {
+            public void run() {
+                if (getConfig().isDebug()) {
                     Log.i(TAG, "notify callback onSuccess"
                             + " url:" + copyInfo.getUrl()
                             + " file:" + file.getAbsolutePath());
                 }
 
-                synchronized (FDownloadManager.this)
-                {
+                synchronized (FDownloadManager.this) {
                     // 移除下载信息
                     removeDownloadInfo(copyInfo.getUrl());
 
                     final Collection<Callback> callbacks = mCallbackHolder.keySet();
-                    for (Callback item : callbacks)
-                    {
+                    for (Callback item : callbacks) {
                         item.onSuccess(copyInfo, file);
                     }
                 }
@@ -416,55 +355,45 @@ public class FDownloadManager implements IDownloadManager
         });
     }
 
-    private void notifyError(DownloadInfo info, DownloadError error)
-    {
+    private void notifyError(DownloadInfo info, DownloadError error) {
         notifyError(info, error, null);
     }
 
-    private synchronized void notifyError(DownloadInfo info, DownloadError error, Throwable throwable)
-    {
+    private synchronized void notifyError(DownloadInfo info, DownloadError error, Throwable throwable) {
         /**
          * 由于外部可能取消任务后立即重新开始任务，所以这边立即移除下载信息，避免重新开始任务无效
          */
         removeDownloadInfo(info.getUrl());
 
-        info.setState(DownloadState.Error);
-        info.setError(error);
-        info.setThrowable(throwable);
+        info.notifyError(error, throwable);
         clearFileProcessor(info.getUrl());
 
         final DownloadInfo copyInfo = info.copy();
         final Collection<Callback> callbacks = new ArrayList<>(mCallbackHolder.keySet());
-        Utils.postMainThread(new Runnable()
-        {
+        Utils.postMainThread(new Runnable() {
             @Override
-            public void run()
-            {
-                if (getConfig().isDebug())
-                {
+            public void run() {
+                if (getConfig().isDebug()) {
                     Log.i(TAG, "notify callback onError"
                             + " url:" + copyInfo.getUrl()
                             + " error:" + copyInfo.getError());
                 }
 
-                for (Callback item : callbacks)
-                {
+                for (Callback item : callbacks) {
                     item.onError(copyInfo);
                 }
             }
         });
     }
 
-    private final class InternalDownloadUpdater implements IDownloadUpdater
-    {
+    private final class InternalDownloadUpdater implements IDownloadUpdater {
         private final DownloadInfo mInfo;
         private final File mTempFile;
 
         private final String mUrl;
         private volatile boolean mCompleted = false;
 
-        public InternalDownloadUpdater(DownloadInfo info, File tempFile)
-        {
+        public InternalDownloadUpdater(DownloadInfo info, File tempFile) {
             if (info == null)
                 throw new IllegalArgumentException("info is null for updater");
 
@@ -477,8 +406,7 @@ public class FDownloadManager implements IDownloadManager
         }
 
         @Override
-        public void notifyProgress(long total, long current)
-        {
+        public void notifyProgress(long total, long current) {
             if (mCompleted)
                 return;
 
@@ -486,8 +414,7 @@ public class FDownloadManager implements IDownloadManager
         }
 
         @Override
-        public void notifySuccess()
-        {
+        public void notifySuccess() {
             if (mCompleted)
                 return;
 
@@ -496,8 +423,7 @@ public class FDownloadManager implements IDownloadManager
             if (getConfig().isDebug())
                 Log.i(TAG, IDownloadUpdater.class.getSimpleName() + " download success:" + mUrl);
 
-            if (!mTempFile.exists())
-            {
+            if (!mTempFile.exists()) {
                 if (getConfig().isDebug())
                     Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error temp file not exists:" + mUrl);
 
@@ -506,8 +432,7 @@ public class FDownloadManager implements IDownloadManager
             }
 
             final File downloadFile = mDownloadDirectory.newUrlFile(mUrl);
-            if (downloadFile == null)
-            {
+            if (downloadFile == null) {
                 if (getConfig().isDebug())
                     Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error create download file:" + mUrl);
 
@@ -518,12 +443,10 @@ public class FDownloadManager implements IDownloadManager
             if (downloadFile.exists())
                 downloadFile.delete();
 
-            if (mTempFile.renameTo(downloadFile))
-            {
+            if (mTempFile.renameTo(downloadFile)) {
                 processDownloadFile(downloadFile);
                 FDownloadManager.this.notifySuccess(mInfo, downloadFile);
-            } else
-            {
+            } else {
                 if (getConfig().isDebug())
                     Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error rename temp file to download file:" + mUrl);
 
@@ -531,22 +454,18 @@ public class FDownloadManager implements IDownloadManager
             }
         }
 
-        private void processDownloadFile(File downloadFile)
-        {
-            synchronized (FDownloadManager.this)
-            {
+        private void processDownloadFile(File downloadFile) {
+            synchronized (FDownloadManager.this) {
                 final String url = mUrl;
                 final Map<IFileProcessor, String> map = mProcessorHolder.get(url);
                 if (map == null)
                     return;
 
-                for (IFileProcessor processor : map.keySet())
-                {
+                for (IFileProcessor processor : map.keySet()) {
                     processor.process(downloadFile);
                 }
 
-                if (getConfig().isDebug())
-                {
+                if (getConfig().isDebug()) {
                     Log.i(TAG, "processDownloadFile finish:" + url
                             + " size:" + map.size()
                             + " totalSize:" + mProcessorHolder.size()
@@ -556,8 +475,7 @@ public class FDownloadManager implements IDownloadManager
         }
 
         @Override
-        public void notifyError(Exception e, String details)
-        {
+        public void notifyError(Exception e, String details) {
             if (mCompleted)
                 return;
 
@@ -567,8 +485,7 @@ public class FDownloadManager implements IDownloadManager
                 Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download error:" + mUrl + " " + e);
 
             DownloadError error = DownloadError.Other;
-            if (e instanceof DownloadHttpException)
-            {
+            if (e instanceof DownloadHttpException) {
                 error = DownloadError.Http;
             }
 
@@ -576,8 +493,7 @@ public class FDownloadManager implements IDownloadManager
         }
 
         @Override
-        public void notifyCancel()
-        {
+        public void notifyCancel() {
             if (mCompleted)
                 return;
 
@@ -590,13 +506,11 @@ public class FDownloadManager implements IDownloadManager
         }
     }
 
-    private static final class DownloadInfoWrapper
-    {
+    private static final class DownloadInfoWrapper {
         private final DownloadInfo mDownloadInfo;
         private final File mTempFile;
 
-        public DownloadInfoWrapper(DownloadInfo downloadInfo, File tempFile)
-        {
+        public DownloadInfoWrapper(DownloadInfo downloadInfo, File tempFile) {
             if (downloadInfo == null)
                 throw new IllegalArgumentException("downloadInfo is null");
 

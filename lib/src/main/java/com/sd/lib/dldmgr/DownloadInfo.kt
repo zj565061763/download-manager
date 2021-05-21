@@ -1,70 +1,69 @@
-package com.sd.lib.dldmgr;
+package com.sd.lib.dldmgr
 
-public class DownloadInfo
-{
-    private final String mUrl;
+class DownloadInfo {
+    val url: String
 
-    private volatile DownloadState mState;
-    private DownloadError mError;
-    private Throwable mThrowable;
+    @Volatile
+    var state: DownloadState = DownloadState.None
+        private set
 
-    private TransmitParam mTransmitParam = new TransmitParam();
+    var error: DownloadError? = null
+        private set
 
-    DownloadInfo(String url)
-    {
-        if (url == null)
-            throw new NullPointerException("url is null");
+    var throwable: Throwable? = null
+        private set
 
-        mUrl = url;
+    var transmitParam = TransmitParam()
+        private set
+
+    internal constructor(url: String) {
+        this.url = url
     }
 
-    public DownloadInfo copy()
-    {
-        final DownloadInfo info = new DownloadInfo(mUrl);
-        info.mState = mState;
-        info.mError = mError;
-        info.mThrowable = mThrowable;
-        info.mTransmitParam = mTransmitParam.copy();
-        return info;
+    /**
+     * 准备状态
+     */
+    fun notifyPrepare() {
+        assert(state == DownloadState.None)
+        state = DownloadState.Prepare
     }
 
-    public String getUrl()
-    {
-        return mUrl;
+    /**
+     * 下载中
+     */
+    fun notifyDownloading(total: Long, current: Long): Boolean {
+        assert(state != DownloadState.Success && state != DownloadState.Error)
+        state = DownloadState.Downloading
+        return transmitParam.transmit(total, current)
     }
 
-    public DownloadState getState()
-    {
-        return mState;
+    /**
+     * 下载成功
+     */
+    fun notifySuccess() {
+        assert(state != DownloadState.Success && state != DownloadState.Error)
+        state = DownloadState.Success
     }
 
-    public DownloadError getError()
-    {
-        return mError;
+    /**
+     * 下载失败
+     */
+    fun notifyError(error: DownloadError, throwable: Throwable?) {
+        assert(state != DownloadState.Success && state != DownloadState.Error)
+        state = DownloadState.Error
+        this.error = error
+        this.throwable = throwable
     }
 
-    public Throwable getThrowable()
-    {
-        return mThrowable;
-    }
-
-    public TransmitParam getTransmitParam()
-    {
-        return mTransmitParam;
-    }
-
-    void setState(DownloadState state)
-    {
-        mState = state;
-    }
-
-    void setError(DownloadError error)
-    {
-        mError = error;
-    }
-
-    void setThrowable(Throwable throwable)
-    {
-        mThrowable = throwable;
+    /**
+     * 拷贝对象
+     */
+    fun copy(): DownloadInfo {
+        return DownloadInfo(url).apply {
+            this.state = this@DownloadInfo.state
+            this.error = this@DownloadInfo.error
+            this.throwable = this@DownloadInfo.throwable
+            this.transmitParam = this@DownloadInfo.transmitParam.copy()
+        }
     }
 }

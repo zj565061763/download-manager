@@ -1,6 +1,9 @@
 package com.sd.lib.dldmgr
 
 enum class DownloadState {
+    /** 初始状态 */
+    None,
+
     /** 准备下载 */
     Prepare,
 
