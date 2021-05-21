@@ -475,7 +475,7 @@ public class FDownloadManager implements IDownloadManager {
         }
 
         @Override
-        public void notifyError(Exception e, String details) {
+        public void notifyError(Exception e) {
             if (mCompleted)
                 return;
 

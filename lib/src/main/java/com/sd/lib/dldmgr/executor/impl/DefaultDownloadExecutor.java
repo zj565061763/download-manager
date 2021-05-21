@@ -124,7 +124,7 @@ public class DefaultDownloadExecutor implements IDownloadExecutor
                         downloadNormal(httpRequest, file, updater);
                     } else
                     {
-                        updater.notifyError(new DownloadHttpException(null), null);
+                        updater.notifyError(new DownloadHttpException(null));
                     }
                 } catch (Exception e)
                 {
@@ -143,7 +143,7 @@ public class DefaultDownloadExecutor implements IDownloadExecutor
                         }
                     }
 
-                    updater.notifyError(new DownloadHttpException(throwable), null);
+                    updater.notifyError(new DownloadHttpException(throwable));
                 } finally
                 {
                     mMapTask.remove(url);

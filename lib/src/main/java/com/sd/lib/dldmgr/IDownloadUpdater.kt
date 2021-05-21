@@ -1,30 +1,26 @@
-package com.sd.lib.dldmgr;
+package com.sd.lib.dldmgr
 
-public interface IDownloadUpdater
-{
+interface IDownloadUpdater {
     /**
      * 通知下载进度
      *
      * @param total   总量
      * @param current 当前传输的数量
      */
-    void notifyProgress(long total, long current);
+    fun notifyProgress(total: Long, current: Long)
 
     /**
      * 通知下载成功
      */
-    void notifySuccess();
+    fun notifySuccess()
 
     /**
      * 通知下载错误
-     *
-     * @param e
-     * @param details
      */
-    void notifyError(Exception e, String details);
+    fun notifyError(e: Exception)
 
     /**
      * 通知下载被取消
      */
-    void notifyCancel();
+    fun notifyCancel()
 }
