@@ -15,57 +15,46 @@ import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-class Utils
-{
+class Utils {
     private static final Handler HANDLER = new Handler(Looper.getMainLooper());
 
-    public static void postMainThread(Runnable runnable)
-    {
+    public static void postMainThread(Runnable runnable) {
         HANDLER.post(runnable);
     }
 
-    public static File getCacheDir(String dirName, Context context)
-    {
+    public static File getCacheDir(String dirName, Context context) {
         File dir = null;
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
-        {
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             dir = new File(context.getExternalCacheDir(), dirName);
-        } else
-        {
+        } else {
             dir = new File(context.getCacheDir(), dirName);
         }
         return dir;
     }
 
-    public static boolean checkDir(File dir)
-    {
+    public static boolean checkDir(File dir) {
         if (dir == null)
             return false;
 
         if (dir.exists())
             return true;
 
-        try
-        {
+        try {
             return dir.mkdirs();
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public static String MD5(String value)
-    {
-        try
-        {
+    public static String MD5(String value) {
+        try {
             final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.update(value.getBytes());
             final byte[] bytes = messageDigest.digest();
 
             final StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < bytes.length; i++)
-            {
+            for (int i = 0; i < bytes.length; i++) {
                 final String hex = Integer.toHexString(0xFF & bytes[i]);
                 if (hex.length() == 1)
                     sb.append('0');
@@ -73,21 +62,17 @@ class Utils
                 sb.append(hex);
             }
             return sb.toString();
-        } catch (NoSuchAlgorithmException e)
-        {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static String getExt(String url)
-    {
+    public static String getExt(String url) {
         String ext = null;
-        try
-        {
+        try {
             ext = MimeTypeMap.getFileExtensionFromUrl(url);
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -103,8 +88,7 @@ class Utils
      * @param file
      * @return
      */
-    public static boolean delete(File file)
-    {
+    public static boolean delete(File file) {
         if (file == null || !file.exists())
             return true;
 
@@ -112,10 +96,8 @@ class Utils
             return file.delete();
 
         final File[] files = file.listFiles();
-        if (files != null)
-        {
-            for (File item : files)
-            {
+        if (files != null) {
+            for (File item : files) {
                 delete(item);
             }
         }
@@ -129,8 +111,7 @@ class Utils
      * @param fileTo
      * @return
      */
-    public static boolean copyFile(File fileFrom, File fileTo)
-    {
+    public static boolean copyFile(File fileFrom, File fileTo) {
         if (!checkFile(fileFrom, fileTo))
             return false;
 
@@ -138,8 +119,7 @@ class Utils
         FileOutputStream outputStream = null;
         FileChannel inputChannel = null;
         FileChannel outputChannel = null;
-        try
-        {
+        try {
             inputStream = new FileInputStream(fileFrom);
             outputStream = new FileOutputStream(fileTo);
 
@@ -148,38 +128,14 @@ class Utils
 
             inputChannel.transferTo(0, inputChannel.size(), outputChannel);
             return true;
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             return false;
-        } finally
-        {
+        } finally {
             closeQuietly(inputStream);
             closeQuietly(outputStream);
             closeQuietly(inputChannel);
             closeQuietly(outputChannel);
-        }
-    }
-
-    /**
-     * 移动文件
-     *
-     * @param fileFrom
-     * @param fileTo
-     * @return
-     */
-    public static boolean moveFile(File fileFrom, File fileTo)
-    {
-        if (!checkFile(fileFrom, fileTo))
-            return false;
-
-        try
-        {
-            return fileFrom.renameTo(fileTo);
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-            return false;
         }
     }
 
@@ -190,8 +146,7 @@ class Utils
      * @param fileTo
      * @return
      */
-    private static boolean checkFile(File fileFrom, File fileTo)
-    {
+    private static boolean checkFile(File fileFrom, File fileTo) {
         if (fileFrom == null || !fileFrom.exists())
             return false;
 
@@ -201,36 +156,28 @@ class Utils
         if (fileTo == null)
             return false;
 
-        if (fileTo.exists())
-        {
-            if (fileTo.isDirectory())
-            {
+        if (fileTo.exists()) {
+            if (fileTo.isDirectory()) {
                 throw new IllegalArgumentException("fileTo must not be a directory");
-            } else
-            {
+            } else {
                 if (!fileTo.delete())
                     return false;
             }
         }
 
         final File fileToParent = fileTo.getParentFile();
-        if (fileToParent != null && !fileToParent.exists())
-        {
+        if (fileToParent != null && !fileToParent.exists()) {
             if (!fileToParent.mkdirs())
                 return false;
         }
         return true;
     }
 
-    public static void closeQuietly(Closeable closeable)
-    {
-        if (closeable != null)
-        {
-            try
-            {
+    public static void closeQuietly(Closeable closeable) {
+        if (closeable != null) {
+            try {
                 closeable.close();
-            } catch (Throwable ignored)
-            {
+            } catch (Throwable ignored) {
             }
         }
     }
