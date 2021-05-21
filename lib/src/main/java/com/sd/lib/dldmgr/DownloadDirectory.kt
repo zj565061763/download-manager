@@ -1,248 +1,183 @@
-package com.sd.lib.dldmgr;
+package com.sd.lib.dldmgr
 
-import android.text.TextUtils;
+import com.sd.lib.dldmgr.directory.IDownloadDirectory
+import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
+import java.io.File
 
-import com.sd.lib.dldmgr.directory.IDownloadDirectory;
+class DownloadDirectory : IDownloadDirectory {
+    protected val directory: File
 
-import java.io.File;
-
-public class DownloadDirectory implements IDownloadDirectory
-{
-    protected final File mDirectory;
-
-    private DownloadDirectory(File directory)
-    {
-        // 此处不检查目录对象是否为null
-        mDirectory = directory;
+    private constructor(directory: File?) {
+        this.directory = directory ?: File("path")
     }
 
-    public static DownloadDirectory from(File directory)
-    {
-        return new DownloadDirectory(directory);
+    override fun checkExist(): Boolean {
+        return Utils.checkDir(directory)
     }
 
-    @Override
-    public boolean checkExist()
-    {
-        return Utils.checkDir(mDirectory);
+    override fun getFile(url: String?): File? {
+        val file = newUrlFile(url) ?: return null
+        return if (file.exists()) file else null
     }
 
-    @Override
-    public File getFile(String url)
-    {
-        final File file = newUrlFile(url);
-        if (file == null)
-            return null;
-
-        return file.exists() ? file : null;
+    override fun getFile(url: String?, defaultFile: File): File {
+        return getFile(url) ?: defaultFile
     }
 
-    @Override
-    public File getFile(String url, File defaultFile)
-    {
-        final File file = getFile(url);
-        return file != null ? file : defaultFile;
+    override fun getTempFile(url: String?): File? {
+        val file = newUrlTempFile(url) ?: return null
+        return if (file.exists()) file else null
     }
 
-    @Override
-    public File getTempFile(String url)
-    {
-        final File file = newUrlTempFile(url);
-        if (file == null)
-            return null;
+    @Synchronized
+    override fun copyFile(file: File): File {
+        require(!file.isDirectory) { "file must not be a directory" }
+        if (!file.exists()) return file
 
-        return file.exists() ? file : null;
-    }
+        val dir = directory
+        if (!Utils.checkDir(dir)) return file
 
-    File newUrlFile(String url)
-    {
-        if (TextUtils.isEmpty(url))
-            return null;
-
-        final String ext = Utils.getExt(url);
-        return createUrlFile(url, ext);
-    }
-
-    File newUrlTempFile(String url)
-    {
-        if (TextUtils.isEmpty(url))
-            return null;
-
-        final String ext = EXT_TEMP;
-        return createUrlFile(url, ext);
-    }
-
-    @Override
-    public synchronized File copyFile(File file)
-    {
-        final File directory = mDirectory;
-        if (!Utils.checkDir(directory))
-            return file;
-
-        if (file == null || !file.exists())
-            return file;
-
-        if (file.isDirectory())
-            throw new IllegalArgumentException("file must not be a directory");
-
-        final String filename = file.getName();
-        final File tempFile = new File(directory, filename + EXT_TEMP);
-        if (Utils.copyFile(file, tempFile))
-        {
-            final File copyFile = new File(directory, filename);
-            Utils.delete(copyFile);
-
-            if (tempFile.renameTo(copyFile))
-                return copyFile;
-        }
-        return file;
-    }
-
-    @Override
-    public File takeFile(File file)
-    {
-        final File directory = mDirectory;
-        if (!Utils.checkDir(directory))
-            return file;
-
-        if (file == null || !file.exists())
-            return file;
-
-        if (file.isDirectory())
-            throw new IllegalArgumentException("file must not be a directory");
-
-        final String filename = file.getName();
-        final File newFile = new File(directory, filename);
-        if (Utils.moveFile(file, newFile))
-            return newFile;
-
-        return file;
-    }
-
-    @Override
-    public synchronized int deleteFile(String ext)
-    {
-        if (!TextUtils.isEmpty(ext))
-        {
-            if (ext.startsWith("."))
-                throw new IllegalArgumentException("Illegal ext start with dot:" + ext);
+        val filename = file.name
+        val tempFile = File(dir, filename + IDownloadDirectory.EXT_TEMP)
+        Utils.delete(tempFile)
+        if (!Utils.copyFile(file, tempFile)) {
+            // 拷贝失败
+            return file
         }
 
-        final File[] files = getAllFile();
-        if (files == null || files.length <= 0)
-            return 0;
+        val copyFile = File(dir, filename)
+        Utils.delete(copyFile)
 
-        int count = 0;
-        boolean delete = false;
-        for (File file : files)
-        {
-            final String name = file.getName();
-            if (name.endsWith(EXT_TEMP))
-                continue;
+        return if (tempFile.renameTo(copyFile)) {
+            copyFile
+        } else {
+            file
+        }
+    }
 
-            if (ext == null)
-            {
-                delete = true;
-            } else
-            {
-                final String itemExt = Utils.getExt(file.getAbsolutePath());
-                if (ext.equals(itemExt))
-                    delete = true;
+    override fun takeFile(file: File): File {
+        require(!file.isDirectory) { "file must not be a directory" }
+        if (!file.exists()) return file
+
+        val dir = directory
+        if (!Utils.checkDir(dir)) return file
+
+        val filename = file.name
+        val newFile = File(dir, filename)
+        Utils.delete(newFile)
+
+        return if (file.renameTo(newFile)) {
+            newFile
+        } else {
+            file
+        }
+    }
+
+    @Synchronized
+    override fun deleteFile(ext: String?): Int {
+        if (ext != null && ext.startsWith(".")) {
+            throw IllegalArgumentException("ext should not start with dot ${ext}")
+        }
+
+        val files = getAllFile()
+        if (files == null || files.isEmpty()) return 0
+
+        var count = 0
+        var delete = false
+        for (file in files) {
+            val name = file.name
+            if (name.endsWith(IDownloadDirectory.EXT_TEMP)) continue
+
+            if (ext == null) {
+                delete = true
+            } else {
+                val itemExt = Utils.getExt(file.absolutePath)
+                if (ext == itemExt) delete = true
             }
 
-            if (delete)
-            {
-                if (Utils.delete(file))
-                    count++;
+            if (delete && Utils.delete(file)) {
+                count++
             }
         }
-        return count;
+        return count
     }
 
-    @Override
-    public synchronized int deleteTempFile(FileInterceptor interceptor)
-    {
-        final File[] files = getAllFile();
-        if (files == null || files.length <= 0)
-            return 0;
+    @Synchronized
+    override fun deleteTempFile(interceptor: FileInterceptor?): Int {
+        val files = getAllFile()
+        if (files == null || files.isEmpty()) return 0
 
-        int count = 0;
-        for (File file : files)
-        {
-            if (interceptor != null && interceptor.intercept(file))
-                continue;
-
-            final String name = file.getName();
-            if (name.endsWith(EXT_TEMP))
-            {
-                if (Utils.delete(file))
-                    count++;
+        var count = 0
+        for (file in files) {
+            if (interceptor != null && interceptor.intercept(file)) {
+                continue
+            }
+            if (file.name.endsWith(IDownloadDirectory.EXT_TEMP)) {
+                if (Utils.delete(file)) count++
             }
         }
-        return count;
+        return count
     }
 
-    private File[] getAllFile()
-    {
-        final File directory = mDirectory;
-        if (!Utils.checkDir(directory))
-            return null;
+    private fun getAllFile(): Array<File>? {
+        val dir = directory
+        if (!Utils.checkDir(dir)) return null
 
-        final File[] files = directory.listFiles();
-        if (files == null || files.length <= 0)
-            return null;
-
-        return files;
+        val files = dir.listFiles()
+        return if (files == null || files.isEmpty()) null else files
     }
 
-    private synchronized File createUrlFile(String url, String ext)
-    {
-        if (TextUtils.isEmpty(url))
-            return null;
+    fun newUrlFile(url: String?): File? {
+        if (url == null || url.isEmpty()) {
+            return null
+        }
+        val ext = Utils.getExt(url)
+        return createUrlFile(url, ext)
+    }
 
-        final File directory = mDirectory;
-        if (!Utils.checkDir(directory))
-            return null;
+    fun newUrlTempFile(url: String?): File? {
+        if (url == null || url.isEmpty()) {
+            return null
+        }
+        val ext = IDownloadDirectory.EXT_TEMP
+        return createUrlFile(url, ext)
+    }
 
-        if (TextUtils.isEmpty(ext))
-        {
-            ext = "";
-        } else
-        {
-            if (!ext.startsWith("."))
-                ext = "." + ext;
+    @Synchronized
+    private fun createUrlFile(url: String, ext: String?): File? {
+        if (url.isEmpty()) return null
+
+        val dir = directory
+        if (!Utils.checkDir(dir)) return null
+
+        val finalExt = if (ext == null || ext.isEmpty()) {
+            ""
+        } else {
+            if (ext.startsWith(".")) ext else ".${ext}"
         }
 
-        final String fileName = Utils.MD5(url) + ext;
-        return new File(directory, fileName);
+        val fileName = Utils.MD5(url) + finalExt
+        return File(dir, fileName)
     }
 
-    @Override
-    public int hashCode()
-    {
-        return mDirectory != null ? mDirectory.hashCode() : super.hashCode();
+    override fun hashCode(): Int {
+        return directory.hashCode()
     }
 
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (obj == this) return true;
-        if (obj == null) return false;
-        if (obj.getClass() != getClass()) return false;
-
-        if (mDirectory == null)
-            return super.equals(obj);
-
-        final DownloadDirectory other = (DownloadDirectory) obj;
-        return mDirectory.equals(other.mDirectory);
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other !is DownloadDirectory) return false
+        return directory == other.directory
     }
 
-    @Override
-    public String toString()
-    {
-        return "{" +
-                "mDirectory=" + mDirectory +
-                " hash=" + super.toString() +
-                "}";
+    override fun toString(): String {
+        return directory.toString()
+    }
+
+    companion object {
+        @JvmStatic
+        fun from(directory: File?): DownloadDirectory {
+            return DownloadDirectory(directory)
+        }
     }
 }
