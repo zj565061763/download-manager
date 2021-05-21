@@ -1,6 +1,6 @@
 package com.sd.lib.dldmgr.processor.impl
 
-import com.sd.lib.dldmgr.IDownloadDirectory
+import com.sd.lib.dldmgr.directory.IDownloadDirectory
 import com.sd.lib.dldmgr.processor.IFileProcessor
 
 /**
