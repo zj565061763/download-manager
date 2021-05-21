@@ -88,7 +88,7 @@ interface IDownloadManager {
      *
      * @return true-任务添加成功或者已经添加
      */
-    fun addTask(request: DownloadRequest?): Boolean
+    fun addTask(request: DownloadRequest): Boolean
 
     /**
      * 取消下载任务
@@ -104,24 +104,24 @@ interface IDownloadManager {
         /**
          * 准备下载（已提交未开始）
          */
-        fun onPrepare(info: DownloadInfo?)
+        fun onPrepare(info: DownloadInfo)
 
         /**
          * 下载中
          */
-        fun onProgress(info: DownloadInfo?)
+        fun onProgress(info: DownloadInfo)
 
         /**
          * 下载成功
          *
          * @param file 下载文件
          */
-        fun onSuccess(info: DownloadInfo?, file: File?)
+        fun onSuccess(info: DownloadInfo, file: File)
 
         /**
          * 下载失败
          */
-        fun onError(info: DownloadInfo?)
+        fun onError(info: DownloadInfo)
     }
 
     companion object {
