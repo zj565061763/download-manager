@@ -2,6 +2,8 @@ package com.sd.lib.dldmgr;
 
 import android.text.TextUtils;
 
+import com.sd.lib.dldmgr.directory.IDownloadDirectory;
+
 import java.io.File;
 
 public class DownloadDirectory implements IDownloadDirectory

@@ -3,6 +3,7 @@ package com.sd.lib.dldmgr;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.sd.lib.dldmgr.directory.IDownloadDirectory;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
 import com.sd.lib.dldmgr.processor.IFileProcessor;
 

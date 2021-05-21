@@ -10,7 +10,7 @@ import com.sd.lib.dldmgr.DownloadDirectory;
 import com.sd.lib.dldmgr.DownloadInfo;
 import com.sd.lib.dldmgr.DownloadRequest;
 import com.sd.lib.dldmgr.FDownloadManager;
-import com.sd.lib.dldmgr.IDownloadDirectory;
+import com.sd.lib.dldmgr.directory.IDownloadDirectory;
 import com.sd.lib.dldmgr.IDownloadManager;
 import com.sd.lib.dldmgr.TransmitParam;
 import com.sd.lib.dldmgr.processor.IFileProcessor;
