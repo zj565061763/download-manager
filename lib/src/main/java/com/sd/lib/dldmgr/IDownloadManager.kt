@@ -1,6 +1,5 @@
 package com.sd.lib.dldmgr
 
-import com.sd.lib.dldmgr.processor.IFileProcessor
 import java.io.File
 
 interface IDownloadManager {
@@ -52,24 +51,6 @@ interface IDownloadManager {
      * 删除所有临时文件（下载中的临时文件不会被删除）
      */
     fun deleteTempFile()
-
-    /**
-     * 添加[url]对应的文件处理器[processor]，只有url正在下载的时候，处理器对象才会被添加
-     * 下载成功之后，会把文件传给处理器处理（后台线程），处理完毕之后，处理器对象会被移除
-     *
-     * @return true-添加成功；false-添加失败
-     */
-    fun addFileProcessor(url: String?, processor: IFileProcessor): Boolean
-
-    /**
-     * 移除[url]对应的文件处理器[processor]
-     */
-    fun removeFileProcessor(url: String?, processor: IFileProcessor)
-
-    /**
-     * 清空[url]对应的文件处理器
-     */
-    fun clearFileProcessor(url: String?)
 
     /**
      * 返回[url]对应的下载信息

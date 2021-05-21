@@ -10,16 +10,13 @@ import com.sd.lib.dldmgr.DownloadDirectory;
 import com.sd.lib.dldmgr.DownloadInfo;
 import com.sd.lib.dldmgr.DownloadRequest;
 import com.sd.lib.dldmgr.FDownloadManager;
-import com.sd.lib.dldmgr.directory.IDownloadDirectory;
 import com.sd.lib.dldmgr.IDownloadManager;
 import com.sd.lib.dldmgr.TransmitParam;
-import com.sd.lib.dldmgr.processor.IFileProcessor;
-import com.sd.lib.dldmgr.processor.impl.CopyFileProcessor;
+import com.sd.lib.dldmgr.directory.IDownloadDirectory;
 
 import java.io.File;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener
-{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String URL = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe";
@@ -29,8 +26,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private IDownloadDirectory mDownloadDirectory;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -41,17 +37,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FDownloadManager.getDefault().addCallback(mDownloadCallback);
     }
 
-    private final IDownloadManager.Callback mDownloadCallback = new IDownloadManager.Callback()
-    {
+    private final IDownloadManager.Callback mDownloadCallback = new IDownloadManager.Callback() {
         @Override
-        public void onPrepare(DownloadInfo info)
-        {
+        public void onPrepare(DownloadInfo info) {
             Log.i(TAG, "onPrepare:" + info.getUrl() + " state:" + info.getState());
         }
 
         @Override
-        public void onProgress(DownloadInfo info)
-        {
+        public void onProgress(DownloadInfo info) {
             final TransmitParam param = info.getTransmitParam();
 
             // 下载进度
@@ -63,16 +56,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         @Override
-        public void onSuccess(DownloadInfo info, File file)
-        {
+        public void onSuccess(DownloadInfo info, File file) {
             Log.i(TAG, "onSuccess:" + info.getUrl() + "\r\n"
                     + " file:" + file.getAbsolutePath()
                     + " state:" + info.getState());
+
+            long start = System.currentTimeMillis();
+            mDownloadDirectory.copyFile(file);
+            Log.i(TAG, "process file time:" + (System.currentTimeMillis() - start));
         }
 
         @Override
-        public void onError(DownloadInfo info)
-        {
+        public void onError(DownloadInfo info) {
             Log.e(TAG, "onError:" + info.getError()
                     + " throwable:" + info.getThrowable()
                     + " state:" + info.getState());
@@ -80,10 +75,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
 
     @Override
-    public void onClick(View v)
-    {
-        switch (v.getId())
-        {
+    public void onClick(View v) {
+        switch (v.getId()) {
             case R.id.btn_download:
 
                 // 创建下载请求对象
@@ -95,15 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 // 添加下载任务
                 final boolean addTask = FDownloadManager.getDefault().addTask(downloadRequest);
-
-                // 添加文件处理器，下载成功之后，拷贝文件到指定目录
-                final IFileProcessor fileProcessor = new CopyFileProcessor(mDownloadDirectory);
-                final boolean addFileProcessor = FDownloadManager.getDefault().addFileProcessor(mUrl, fileProcessor);
-
-                Log.i(TAG, "click download"
-                        + " addTask:" + addTask
-                        + " addFileProcessor:" + addFileProcessor
-                );
+                Log.i(TAG, "click download addTask:" + addTask);
                 break;
             case R.id.btn_cancel:
                 // 取消下载任务
@@ -115,8 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onDestroy()
-    {
+    protected void onDestroy() {
         super.onDestroy();
         // 移除下载回调
         FDownloadManager.getDefault().removeCallback(mDownloadCallback);

@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.sd.lib.dldmgr.directory.IDownloadDirectory;
 import com.sd.lib.dldmgr.exception.DownloadHttpException;
-import com.sd.lib.dldmgr.processor.IFileProcessor;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ public class FDownloadManager implements IDownloadManager {
     private final Map<File, String> mMapTempFile = new ConcurrentHashMap<>();
 
     private final Map<Callback, String> mCallbackHolder = new ConcurrentHashMap<>();
-    private final Map<String, Map<IFileProcessor, String>> mProcessorHolder = new ConcurrentHashMap<>();
 
     protected FDownloadManager(String directory) {
         if (TextUtils.isEmpty(directory))
@@ -115,76 +113,6 @@ public class FDownloadManager implements IDownloadManager {
 
         if (getConfig().isDebug())
             Log.i(TAG, "deleteTempFile count:" + count);
-    }
-
-    @Override
-    public synchronized boolean addFileProcessor(String url, IFileProcessor processor) {
-        if (TextUtils.isEmpty(url) || processor == null)
-            return false;
-
-        final DownloadInfo downloadInfo = getDownloadInfo(url);
-        if (downloadInfo == null)
-            return false;
-
-        if (downloadInfo.getState().isCompleted())
-            return false;
-
-        Map<IFileProcessor, String> map = mProcessorHolder.get(url);
-        if (map == null) {
-            map = new ConcurrentHashMap<>();
-            mProcessorHolder.put(url, map);
-        }
-
-        final String put = map.put(processor, "");
-        if (put == null) {
-            if (getConfig().isDebug()) {
-                Log.i(TAG, "addFileProcessor url:" + url
-                        + " processor:" + processor
-                        + " size:" + map.size()
-                        + " totalSize:" + mProcessorHolder.size()
-                );
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public synchronized void removeFileProcessor(String url, IFileProcessor processor) {
-        if (TextUtils.isEmpty(url) || processor == null)
-            return;
-
-        final Map<IFileProcessor, String> map = mProcessorHolder.get(url);
-        if (map == null)
-            return;
-
-        final String remove = map.remove(processor);
-        if (remove != null) {
-            if (map.isEmpty())
-                mProcessorHolder.remove(url);
-
-            if (getConfig().isDebug()) {
-                Log.i(TAG, "removeFileProcessor url:" + url
-                        + " size:" + map.size()
-                        + " totalSize:" + mProcessorHolder.size()
-                );
-            }
-        }
-    }
-
-    @Override
-    public synchronized void clearFileProcessor(String url) {
-        if (TextUtils.isEmpty(url))
-            return;
-
-        final Map<IFileProcessor, String> map = mProcessorHolder.remove(url);
-        if (map != null) {
-            map.clear();
-            if (getConfig().isDebug()) {
-                Log.i(TAG, "clearFileProcessor url:" + url
-                        + " totalSize:" + mProcessorHolder.size()
-                );
-            }
-        }
     }
 
     @Override
@@ -331,8 +259,6 @@ public class FDownloadManager implements IDownloadManager {
 
     private void notifySuccess(DownloadInfo info, final File file) {
         info.notifySuccess();
-        clearFileProcessor(info.getUrl());
-
         final DownloadInfo copyInfo = info.copy();
         Utils.postMainThread(new Runnable() {
             @Override
@@ -367,8 +293,6 @@ public class FDownloadManager implements IDownloadManager {
         removeDownloadInfo(info.getUrl());
 
         info.notifyError(error, throwable);
-        clearFileProcessor(info.getUrl());
-
         final DownloadInfo copyInfo = info.copy();
         final Collection<Callback> callbacks = new ArrayList<>(mCallbackHolder.keySet());
         Utils.postMainThread(new Runnable() {
@@ -445,33 +369,12 @@ public class FDownloadManager implements IDownloadManager {
                 downloadFile.delete();
 
             if (mTempFile.renameTo(downloadFile)) {
-                processDownloadFile(downloadFile);
                 FDownloadManager.this.notifySuccess(mInfo, downloadFile);
             } else {
                 if (getConfig().isDebug())
                     Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error rename temp file to download file:" + mUrl);
 
                 FDownloadManager.this.notifyError(mInfo, DownloadError.RenameFile);
-            }
-        }
-
-        private void processDownloadFile(File downloadFile) {
-            synchronized (FDownloadManager.this) {
-                final String url = mUrl;
-                final Map<IFileProcessor, String> map = mProcessorHolder.get(url);
-                if (map == null)
-                    return;
-
-                for (IFileProcessor processor : map.keySet()) {
-                    processor.process(downloadFile);
-                }
-
-                if (getConfig().isDebug()) {
-                    Log.i(TAG, "processDownloadFile finish:" + url
-                            + " size:" + map.size()
-                            + " totalSize:" + mProcessorHolder.size()
-                    );
-                }
             }
         }
 
