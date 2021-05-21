@@ -39,7 +39,6 @@ class DownloadDirectory : IDownloadDirectory {
 
         val filename = file.name
         val tempFile = File(dir, filename + IDownloadDirectory.EXT_TEMP)
-        Utils.delete(tempFile)
         if (!Utils.copyFile(file, tempFile)) {
             // 拷贝失败
             return file
@@ -63,8 +62,7 @@ class DownloadDirectory : IDownloadDirectory {
         val dir = directory
         if (!Utils.checkDir(dir)) return file
 
-        val filename = file.name
-        val newFile = File(dir, filename)
+        val newFile = File(dir, file.name)
         Utils.delete(newFile)
 
         return if (file.renameTo(newFile)) {
