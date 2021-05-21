@@ -31,8 +31,8 @@ class DownloadDirectory : IDownloadDirectory {
 
     @Synchronized
     override fun copyFile(file: File): File {
-        if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
         if (!file.exists()) return file
+        if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
 
         val dir = directory
         if (!Utils.checkDir(dir)) return file
@@ -56,8 +56,8 @@ class DownloadDirectory : IDownloadDirectory {
 
     @Synchronized
     override fun takeFile(file: File): File {
-        if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
         if (!file.exists()) return file
+        if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
 
         val dir = directory
         if (!Utils.checkDir(dir)) return file
