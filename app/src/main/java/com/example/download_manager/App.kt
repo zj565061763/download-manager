@@ -1,18 +1,16 @@
-package com.example.download_manager;
+package com.example.download_manager
 
-import android.app.Application;
+import android.app.Application
+import com.sd.lib.dldmgr.DownloadManagerConfig
+import com.sd.lib.dldmgr.DownloadManagerConfig.Companion.init
 
-import com.sd.lib.dldmgr.DownloadManagerConfig;
-
-public class App extends Application
-{
-    @Override
-    public void onCreate()
-    {
-        super.onCreate();
-
-        DownloadManagerConfig.init(new DownloadManagerConfig.Builder()
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        init(
+            DownloadManagerConfig.Builder()
                 .setDebug(true)
-                .build(this));
+                .build(this)
+        )
     }
 }
