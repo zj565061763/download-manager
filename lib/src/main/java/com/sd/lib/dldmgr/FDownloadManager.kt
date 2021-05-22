@@ -12,6 +12,7 @@ class FDownloadManager : IDownloadManager {
 
     private val _mapDownloadInfo: MutableMap<String, DownloadInfoWrapper> = ConcurrentHashMap()
     private val _mapTempFile: MutableMap<File, String> = ConcurrentHashMap()
+
     private val _callbackHolder: MutableMap<IDownloadManager.Callback, String> = ConcurrentHashMap()
 
     protected constructor(directory: String) {
@@ -111,8 +112,7 @@ class FDownloadManager : IDownloadManager {
             return false
         }
 
-        val wrapper = DownloadInfoWrapper(info, tempFile)
-        _mapDownloadInfo[url] = wrapper
+        _mapDownloadInfo[url] = DownloadInfoWrapper(info, tempFile)
         _mapTempFile[tempFile] = url
         if (config.isDebug) {
             Log.i(
@@ -174,13 +174,12 @@ class FDownloadManager : IDownloadManager {
 
     private fun notifyProgress(info: DownloadInfo, total: Long, current: Long) {
         val changed = info.notifyDownloading(total, current)
-        if (changed) {
-            val copyInfo = info.copy()
-            Utils.postMainThread {
-                val callbacks: Collection<IDownloadManager.Callback> = _callbackHolder.keys
-                for (item in callbacks) {
-                    item.onProgress(copyInfo)
-                }
+        if (!changed) return
+
+        val copyInfo = info.copy()
+        Utils.postMainThread {
+            for (item in _callbackHolder.keys) {
+                item.onProgress(copyInfo)
             }
         }
     }
@@ -190,44 +189,28 @@ class FDownloadManager : IDownloadManager {
         val copyInfo = info.copy()
         Utils.postMainThread {
             if (config.isDebug) {
-                Log.i(
-                    IDownloadManager.TAG, "notify callback onSuccess"
-                            + " url:" + copyInfo.url
-                            + " file:" + file.absolutePath
-                )
+                Log.i(IDownloadManager.TAG, "notify callback onSuccess url:${copyInfo.url} file:${file.absolutePath}")
             }
             synchronized(this@FDownloadManager) {
-
-                // 移除下载信息
                 removeDownloadInfo(copyInfo.url)
-                val callbacks: Collection<IDownloadManager.Callback> = _callbackHolder.keys
-                for (item in callbacks) {
+                for (item in _callbackHolder.keys) {
                     item.onSuccess(copyInfo, file)
                 }
             }
         }
     }
 
-    private fun notifyError(info: DownloadInfo, error: DownloadError) {
-        notifyError(info, error, null)
-    }
-
     @Synchronized
-    private fun notifyError(info: DownloadInfo, error: DownloadError, throwable: Throwable?) {
-        /**
-         * 由于外部可能取消任务后立即重新开始任务，所以这边立即移除下载信息，避免重新开始任务无效
-         */
+    private fun notifyError(info: DownloadInfo, error: DownloadError, throwable: Throwable? = null) {
+        // 立即移除下载信息，避免重新开始任务无效
         removeDownloadInfo(info.url)
+
         info.notifyError(error, throwable)
         val copyInfo = info.copy()
-        val callbacks: Collection<IDownloadManager.Callback> = ArrayList(_callbackHolder.keys)
+        val callbacks = _callbackHolder.keys.toTypedArray()
         Utils.postMainThread {
             if (config.isDebug) {
-                Log.i(
-                    IDownloadManager.TAG, "notify callback onError"
-                            + " url:" + copyInfo.url
-                            + " error:" + copyInfo.error
-                )
+                Log.i(IDownloadManager.TAG, "notify callback onError url:${copyInfo.url} error:${copyInfo.error}")
             }
             for (item in callbacks) {
                 item.onError(copyInfo)
