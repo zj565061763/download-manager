@@ -1,21 +1,20 @@
 package com.sd.lib.dldmgr.utils
 
 import com.sd.lib.dldmgr.IDownloadManager
-import java.util.concurrent.ConcurrentHashMap
 
 internal class UrlCallbackHolder {
-    private val _mapCallback: MutableMap<String, MutableMap<IDownloadManager.Callback, String>> = HashMap()
+    private val _mapCallback: MutableMap<String, MutableSet<IDownloadManager.Callback>> = HashMap()
     private val _mapCallbackUrl: MutableMap<IDownloadManager.Callback, String> = HashMap()
 
     @Synchronized
     fun add(url: String, callback: IDownloadManager.Callback) {
         var holder = _mapCallback[url]
         if (holder == null) {
-            holder = ConcurrentHashMap()
+            holder = HashSet()
             _mapCallback[url] = holder
         }
 
-        if (holder.put(callback, "") == null) {
+        if (holder.add(callback)) {
             _mapCallbackUrl[callback] = url
         }
     }
@@ -29,12 +28,12 @@ internal class UrlCallbackHolder {
         if (holder.isEmpty()) {
             _mapCallback.remove(url)
         }
-        return remove != null
+        return remove
     }
 
     @Synchronized
     fun removeUrl(url: String): Array<IDownloadManager.Callback>? {
         var holder = _mapCallback.remove(url) ?: return null
-        return holder.keys.toTypedArray()
+        return holder.toTypedArray()
     }
 }
