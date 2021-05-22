@@ -1,209 +1,154 @@
-package com.sd.lib.dldmgr;
+package com.sd.lib.dldmgr
 
-import android.text.TextUtils;
-import android.util.Log;
+import android.text.TextUtils
+import android.util.Log
+import com.sd.lib.dldmgr.Utils.postMainThread
+import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
+import com.sd.lib.dldmgr.exception.DownloadHttpException
+import java.io.File
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
-import com.sd.lib.dldmgr.directory.IDownloadDirectory;
-import com.sd.lib.dldmgr.exception.DownloadHttpException;
+class FDownloadManager : IDownloadManager {
+    private val _downloadDirectory: DownloadDirectory
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+    private val _mapDownloadInfo: MutableMap<String, DownloadInfoWrapper> = ConcurrentHashMap()
+    private val _mapTempFile: MutableMap<File, String> = ConcurrentHashMap()
+    private val _callbackHolder: MutableMap<IDownloadManager.Callback, String> = ConcurrentHashMap()
 
-public class FDownloadManager implements IDownloadManager {
-    private static FDownloadManager sDefault = null;
-
-    private final DownloadDirectory mDownloadDirectory;
-
-    private final Map<String, DownloadInfoWrapper> mMapDownloadInfo = new ConcurrentHashMap<>();
-    private final Map<File, String> mMapTempFile = new ConcurrentHashMap<>();
-
-    private final Map<Callback, String> mCallbackHolder = new ConcurrentHashMap<>();
-
-    protected FDownloadManager(String directory) {
-        if (TextUtils.isEmpty(directory))
-            throw new IllegalArgumentException("directory is empty");
-
-        mDownloadDirectory = DownloadDirectory.from(new File(directory));
+    protected constructor(directory: String) {
+        if (directory.isEmpty()) throw IllegalArgumentException("directory is empty")
+        _downloadDirectory = DownloadDirectory.from(File(directory))
     }
 
-    public static FDownloadManager getDefault() {
-        if (sDefault == null) {
-            synchronized (FDownloadManager.class) {
-                if (sDefault == null) {
-                    final String directory = getConfig().getDownloadDirectory();
-                    sDefault = new FDownloadManager(directory);
-                }
-            }
-        }
-        return sDefault;
-    }
-
-    private static DownloadManagerConfig getConfig() {
-        return DownloadManagerConfig.get();
-    }
-
-    @Override
-    public synchronized boolean addCallback(Callback callback) {
-        if (callback == null)
-            return false;
-
-        final String put = mCallbackHolder.put(callback, "");
+    @Synchronized
+    override fun addCallback(callback: IDownloadManager.Callback): Boolean {
+        val put = _callbackHolder.put(callback, "")
         if (put == null) {
-            if (getConfig().isDebug())
-                Log.i(TAG, "addCallback:" + callback + " size:" + mCallbackHolder.size());
+            if (config.isDebug) {
+                Log.i(IDownloadManager.TAG, "addCallback:${callback} size:${_callbackHolder.size}")
+            }
         }
-        return true;
+        return true
     }
 
-    @Override
-    public synchronized void removeCallback(Callback callback) {
-        if (callback == null)
-            return;
-
-        final String remove = mCallbackHolder.remove(callback);
+    @Synchronized
+    override fun removeCallback(callback: IDownloadManager.Callback) {
+        val remove = _callbackHolder.remove(callback)
         if (remove != null) {
-            if (getConfig().isDebug())
-                Log.i(TAG, "removeCallback:" + callback + " size:" + mCallbackHolder.size());
+            if (config.isDebug) {
+                Log.i(IDownloadManager.TAG, "removeCallback:${callback} size:${_callbackHolder.size}")
+            }
         }
     }
 
-    @Override
-    public synchronized boolean addUrlCallback(String url, Callback callback) {
-        if (TextUtils.isEmpty(url) || callback == null)
-            return false;
-
-        final boolean isDownloading = mMapDownloadInfo.containsKey(url);
-        if (isDownloading)
-            return addCallback(callback);
-
-        return false;
+    @Synchronized
+    override fun addUrlCallback(url: String?, callback: IDownloadManager.Callback): Boolean {
+        if (url == null || url.isEmpty()) return false
+        val isDownloading = _mapDownloadInfo.containsKey(url)
+        return if (isDownloading) addCallback(callback) else false
     }
 
-    @Override
-    public File getDownloadFile(String url) {
-        return mDownloadDirectory.getFile(url);
+    override fun getDownloadFile(url: String?): File? {
+        return _downloadDirectory.getFile(url)
     }
 
-    @Override
-    public File getTempFile(String url) {
-        return mDownloadDirectory.getTempFile(url);
+    override fun getTempFile(url: String?): File? {
+        return _downloadDirectory.getTempFile(url)
     }
 
-    @Override
-    public void deleteDownloadFile(String ext) {
-        final int count = mDownloadDirectory.deleteFile(ext);
-
-        if (getConfig().isDebug())
-            Log.i(TAG, "deleteDownloadFile count:" + count + " ext:" + ext);
+    override fun deleteDownloadFile(ext: String?) {
+        val count = _downloadDirectory.deleteFile(ext)
+        if (config.isDebug) {
+            Log.i(IDownloadManager.TAG, "deleteDownloadFile count:${count} ext:${ext}")
+        }
     }
 
-    @Override
-    public void deleteTempFile() {
-        final int count = mDownloadDirectory.deleteTempFile(new IDownloadDirectory.FileInterceptor() {
-            @Override
-            public boolean intercept(File file) {
-                if (mMapTempFile.containsKey(file))
-                    return true;
-                return false;
+    override fun deleteTempFile() {
+        val count = _downloadDirectory.deleteTempFile(object : FileInterceptor {
+            override fun intercept(file: File): Boolean {
+                return _mapTempFile.containsKey(file)
             }
-        });
-
-        if (getConfig().isDebug())
-            Log.i(TAG, "deleteTempFile count:" + count);
+        })
+        if (config.isDebug) {
+            Log.i(IDownloadManager.TAG, "deleteTempFile count:${count}")
+        }
     }
 
-    @Override
-    public DownloadInfo getDownloadInfo(String url) {
-        final DownloadInfoWrapper wrapper = mMapDownloadInfo.get(url);
-        if (wrapper == null)
-            return null;
-
-        return wrapper.mDownloadInfo;
+    override fun getDownloadInfo(url: String?): DownloadInfo? {
+        val wrapper = _mapDownloadInfo[url] ?: return null
+        return wrapper.downloadInfo
     }
 
-    @Override
-    public boolean addTask(final String url) {
-        final DownloadRequest downloadRequest = DownloadRequest.url(url);
-        return addTask(downloadRequest);
+    override fun addTask(url: String?): Boolean {
+        val downloadRequest = DownloadRequest.url(url)
+        return addTask(downloadRequest)
     }
 
-    @Override
-    public synchronized boolean addTask(DownloadRequest request) {
-        if (request == null)
-            throw new NullPointerException("request is null");
+    @Synchronized
+    override fun addTask(request: DownloadRequest): Boolean {
+        val url = request.url
+        if (url == null || url.isEmpty()) return false
 
-        final String url = request.getUrl();
-        if (TextUtils.isEmpty(url))
-            return false;
+        val isDownloading = _mapDownloadInfo.containsKey(url)
+        if (isDownloading) return true
 
-        final boolean isDownloading = mMapDownloadInfo.containsKey(url);
-        if (isDownloading)
-            return true;
-
-        final DownloadInfo info = new DownloadInfo(url);
-
-        final File tempFile = mDownloadDirectory.newUrlTempFile(url);
+        val info = DownloadInfo(url)
+        val tempFile = _downloadDirectory.newUrlTempFile(url)
         if (tempFile == null) {
-            if (getConfig().isDebug())
-                Log.e(TAG, "addTask error create temp file error:" + url);
-
-            notifyError(info, DownloadError.CreateTempFile);
-            return false;
-        }
-
-        final IDownloadUpdater downloadUpdater = new InternalDownloadUpdater(info, tempFile);
-        final boolean submitted = getConfig().getDownloadExecutor().submit(request, tempFile, downloadUpdater);
-        if (submitted) {
-            final DownloadInfoWrapper wrapper = new DownloadInfoWrapper(info, tempFile);
-            mMapDownloadInfo.put(url, wrapper);
-            mMapTempFile.put(tempFile, url);
-
-            if (getConfig().isDebug()) {
-                Log.i(TAG, "addTask"
-                        + " url:" + url
-                        + " path:" + tempFile.getAbsolutePath()
-                        + " size:" + mMapDownloadInfo.size()
-                        + " tempSize:" + mMapTempFile.size());
+            if (config.isDebug) {
+                Log.e(IDownloadManager.TAG, "addTask error create temp file failed:${url}")
             }
-
-            notifyPrepare(info);
-        } else {
-            if (getConfig().isDebug())
-                Log.e(TAG, "addTask error submit request failed:" + url);
-
-            notifyError(info, DownloadError.SubmitFailed);
+            notifyError(info, DownloadError.CreateTempFile)
+            return false
         }
 
-        return submitted;
+        val downloadUpdater = InternalDownloadUpdater(info, tempFile)
+        val submitted = config.downloadExecutor.submit(request, tempFile, downloadUpdater)
+        if (!submitted) {
+            if (config.isDebug) {
+                Log.e(IDownloadManager.TAG, "addTask error submit request failed:${url}")
+            }
+            notifyError(info, DownloadError.SubmitFailed)
+            return false
+        }
+
+        val wrapper = DownloadInfoWrapper(info, tempFile)
+        _mapDownloadInfo[url] = wrapper
+        _mapTempFile[tempFile] = url
+        if (config.isDebug) {
+            Log.i(
+                IDownloadManager.TAG, "addTask url:${url} temp:${tempFile.absolutePath}" +
+                        " size:${_mapDownloadInfo.size} tempSize:${_mapTempFile.size}"
+            )
+        }
+        notifyPrepare(info)
+        return true
     }
 
-    @Override
-    public synchronized boolean cancelTask(String url) {
-        if (TextUtils.isEmpty(url))
-            return false;
-
-        final boolean isDownloading = mMapDownloadInfo.containsKey(url);
+    @Synchronized
+    override fun cancelTask(url: String?): Boolean {
+        if (TextUtils.isEmpty(url)) return false
+        val isDownloading = _mapDownloadInfo.containsKey(url)
         if (isDownloading) {
-            if (getConfig().isDebug()) {
-                Log.i(TAG, "cancelTask start"
-                        + " url:" + url);
+            if (config.isDebug) {
+                Log.i(
+                    IDownloadManager.TAG, "cancelTask start"
+                            + " url:" + url
+                )
             }
         }
-
-        final boolean result = getConfig().getDownloadExecutor().cancel(url);
-
+        val result = config.downloadExecutor.cancel(url)
         if (isDownloading) {
-            if (getConfig().isDebug()) {
-                Log.i(TAG, "cancelTask finish"
-                        + " result:" + result
-                        + " url:" + url);
+            if (config.isDebug) {
+                Log.i(
+                    IDownloadManager.TAG, "cancelTask finish"
+                            + " result:" + result
+                            + " url:" + url
+                )
             }
         }
-
-        return result;
+        return result
     }
 
     /**
@@ -212,217 +157,187 @@ public class FDownloadManager implements IDownloadManager {
      * @param url
      * @return
      */
-    private synchronized DownloadInfoWrapper removeDownloadInfo(String url) {
-        final DownloadInfoWrapper wrapper = mMapDownloadInfo.remove(url);
+    @Synchronized
+    private fun removeDownloadInfo(url: String): DownloadInfoWrapper? {
+        val wrapper = _mapDownloadInfo.remove(url)
         if (wrapper != null) {
-            mMapTempFile.remove(wrapper.mTempFile);
-
-            if (getConfig().isDebug()) {
-                Log.i(TAG, "removeDownloadInfo"
-                        + " url:" + url
-                        + " size:" + mMapDownloadInfo.size()
-                        + " tempSize:" + mMapTempFile.size());
+            _mapTempFile.remove(wrapper.tempFile)
+            if (config.isDebug) {
+                Log.i(
+                    IDownloadManager.TAG, "removeDownloadInfo"
+                            + " url:" + url
+                            + " size:" + _mapDownloadInfo.size
+                            + " tempSize:" + _mapTempFile.size
+                )
             }
         }
-        return wrapper;
+        return wrapper
     }
 
-    private void notifyPrepare(DownloadInfo info) {
-        info.notifyPrepare();
-        final DownloadInfo copyInfo = info.copy();
-        Utils.postMainThread(new Runnable() {
-            @Override
-            public void run() {
-                final Collection<Callback> callbacks = mCallbackHolder.keySet();
-                for (Callback item : callbacks) {
-                    item.onPrepare(copyInfo);
-                }
+    private fun notifyPrepare(info: DownloadInfo) {
+        info.notifyPrepare()
+        val copyInfo = info.copy()
+        postMainThread {
+            val callbacks: Collection<IDownloadManager.Callback> = _callbackHolder.keys
+            for (item in callbacks) {
+                item.onPrepare(copyInfo)
             }
-        });
+        }
     }
 
-    private void notifyProgress(DownloadInfo info, long total, long current) {
-        final boolean changed = info.notifyDownloading(total, current);
+    private fun notifyProgress(info: DownloadInfo, total: Long, current: Long) {
+        val changed = info.notifyDownloading(total, current)
         if (changed) {
-            final DownloadInfo copyInfo = info.copy();
-            Utils.postMainThread(new Runnable() {
-                @Override
-                public void run() {
-                    final Collection<Callback> callbacks = mCallbackHolder.keySet();
-                    for (Callback item : callbacks) {
-                        item.onProgress(copyInfo);
-                    }
+            val copyInfo = info.copy()
+            postMainThread {
+                val callbacks: Collection<IDownloadManager.Callback> = _callbackHolder.keys
+                for (item in callbacks) {
+                    item.onProgress(copyInfo)
                 }
-            });
+            }
         }
     }
 
-    private void notifySuccess(DownloadInfo info, final File file) {
-        info.notifySuccess();
-        final DownloadInfo copyInfo = info.copy();
-        Utils.postMainThread(new Runnable() {
-            @Override
-            public void run() {
-                if (getConfig().isDebug()) {
-                    Log.i(TAG, "notify callback onSuccess"
-                            + " url:" + copyInfo.getUrl()
-                            + " file:" + file.getAbsolutePath());
-                }
+    private fun notifySuccess(info: DownloadInfo, file: File) {
+        info.notifySuccess()
+        val copyInfo = info.copy()
+        postMainThread {
+            if (config.isDebug) {
+                Log.i(
+                    IDownloadManager.TAG, "notify callback onSuccess"
+                            + " url:" + copyInfo.url
+                            + " file:" + file.absolutePath
+                )
+            }
+            synchronized(this@FDownloadManager) {
 
-                synchronized (FDownloadManager.this) {
-                    // 移除下载信息
-                    removeDownloadInfo(copyInfo.getUrl());
-
-                    final Collection<Callback> callbacks = mCallbackHolder.keySet();
-                    for (Callback item : callbacks) {
-                        item.onSuccess(copyInfo, file);
-                    }
+                // 移除下载信息
+                removeDownloadInfo(copyInfo.url)
+                val callbacks: Collection<IDownloadManager.Callback> = _callbackHolder.keys
+                for (item in callbacks) {
+                    item.onSuccess(copyInfo, file)
                 }
             }
-        });
+        }
     }
 
-    private void notifyError(DownloadInfo info, DownloadError error) {
-        notifyError(info, error, null);
+    private fun notifyError(info: DownloadInfo, error: DownloadError) {
+        notifyError(info, error, null)
     }
 
-    private synchronized void notifyError(DownloadInfo info, DownloadError error, Throwable throwable) {
+    @Synchronized
+    private fun notifyError(info: DownloadInfo, error: DownloadError, throwable: Throwable?) {
         /**
          * 由于外部可能取消任务后立即重新开始任务，所以这边立即移除下载信息，避免重新开始任务无效
          */
-        removeDownloadInfo(info.getUrl());
-
-        info.notifyError(error, throwable);
-        final DownloadInfo copyInfo = info.copy();
-        final Collection<Callback> callbacks = new ArrayList<>(mCallbackHolder.keySet());
-        Utils.postMainThread(new Runnable() {
-            @Override
-            public void run() {
-                if (getConfig().isDebug()) {
-                    Log.i(TAG, "notify callback onError"
-                            + " url:" + copyInfo.getUrl()
-                            + " error:" + copyInfo.getError());
-                }
-
-                for (Callback item : callbacks) {
-                    item.onError(copyInfo);
-                }
+        removeDownloadInfo(info.url)
+        info.notifyError(error, throwable)
+        val copyInfo = info.copy()
+        val callbacks: Collection<IDownloadManager.Callback> = ArrayList(_callbackHolder.keys)
+        postMainThread {
+            if (config.isDebug) {
+                Log.i(
+                    IDownloadManager.TAG, "notify callback onError"
+                            + " url:" + copyInfo.url
+                            + " error:" + copyInfo.error
+                )
             }
-        });
+            for (item in callbacks) {
+                item.onError(copyInfo)
+            }
+        }
     }
 
-    private final class InternalDownloadUpdater implements IDownloadUpdater {
-        private final DownloadInfo mInfo;
-        private final File mTempFile;
+    private inner class InternalDownloadUpdater(info: DownloadInfo?, tempFile: File?) : IDownloadUpdater {
+        private val mInfo: DownloadInfo
+        private val mTempFile: File
+        private val mUrl: String
 
-        private final String mUrl;
-        private volatile boolean mCompleted = false;
-
-        public InternalDownloadUpdater(DownloadInfo info, File tempFile) {
-            if (info == null)
-                throw new IllegalArgumentException("info is null for updater");
-
-            if (tempFile == null)
-                throw new IllegalArgumentException("tempFile is null for updater");
-
-            mInfo = info;
-            mTempFile = tempFile;
-            mUrl = info.getUrl();
+        @Volatile
+        private var mCompleted = false
+        override fun notifyProgress(total: Long, current: Long) {
+            if (mCompleted) return
+            this@FDownloadManager.notifyProgress(mInfo, total, current)
         }
 
-        @Override
-        public void notifyProgress(long total, long current) {
-            if (mCompleted)
-                return;
-
-            FDownloadManager.this.notifyProgress(mInfo, total, current);
-        }
-
-        @Override
-        public void notifySuccess() {
-            if (mCompleted)
-                return;
-
-            mCompleted = true;
-
-            if (getConfig().isDebug())
-                Log.i(TAG, IDownloadUpdater.class.getSimpleName() + " download success:" + mUrl);
-
+        override fun notifySuccess() {
+            if (mCompleted) return
+            mCompleted = true
+            if (config.isDebug) Log.i(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download success:" + mUrl)
             if (!mTempFile.exists()) {
-                if (getConfig().isDebug())
-                    Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error temp file not exists:" + mUrl);
-
-                FDownloadManager.this.notifyError(mInfo, DownloadError.TempFileNotExists);
-                return;
+                if (config.isDebug) Log.e(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download success error temp file not exists:" + mUrl)
+                this@FDownloadManager.notifyError(mInfo, DownloadError.TempFileNotExists)
+                return
             }
-
-            final File downloadFile = mDownloadDirectory.newUrlFile(mUrl);
+            val downloadFile = _downloadDirectory.newUrlFile(mUrl)
             if (downloadFile == null) {
-                if (getConfig().isDebug())
-                    Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error create download file:" + mUrl);
-
-                FDownloadManager.this.notifyError(mInfo, DownloadError.CreateDownloadFile);
-                return;
+                if (config.isDebug) Log.e(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download success error create download file:" + mUrl)
+                this@FDownloadManager.notifyError(mInfo, DownloadError.CreateDownloadFile)
+                return
             }
-
-            if (downloadFile.exists())
-                downloadFile.delete();
-
+            if (downloadFile.exists()) downloadFile.delete()
             if (mTempFile.renameTo(downloadFile)) {
-                FDownloadManager.this.notifySuccess(mInfo, downloadFile);
+                this@FDownloadManager.notifySuccess(mInfo, downloadFile)
             } else {
-                if (getConfig().isDebug())
-                    Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download success error rename temp file to download file:" + mUrl);
-
-                FDownloadManager.this.notifyError(mInfo, DownloadError.RenameFile);
+                if (config.isDebug) Log.e(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download success error rename temp file to download file:" + mUrl)
+                this@FDownloadManager.notifyError(mInfo, DownloadError.RenameFile)
             }
         }
 
-        @Override
-        public void notifyError(Exception e) {
-            if (mCompleted)
-                return;
-
-            mCompleted = true;
-
-            if (getConfig().isDebug())
-                Log.e(TAG, IDownloadUpdater.class.getSimpleName() + " download error:" + mUrl + " " + e);
-
-            DownloadError error = DownloadError.Other;
-            if (e instanceof DownloadHttpException) {
-                error = DownloadError.Http;
+        override fun notifyError(e: Exception) {
+            if (mCompleted) return
+            mCompleted = true
+            if (config.isDebug) Log.e(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download error:" + mUrl + " " + e)
+            var error = DownloadError.Other
+            if (e is DownloadHttpException) {
+                error = DownloadError.Http
             }
-
-            FDownloadManager.this.notifyError(mInfo, error, e);
+            this@FDownloadManager.notifyError(mInfo, error, e)
         }
 
-        @Override
-        public void notifyCancel() {
-            if (mCompleted)
-                return;
+        override fun notifyCancel() {
+            if (mCompleted) return
+            mCompleted = true
+            if (config.isDebug) Log.i(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download cancel:" + mUrl)
+            this@FDownloadManager.notifyError(mInfo, DownloadError.Cancel)
+        }
 
-            mCompleted = true;
-
-            if (getConfig().isDebug())
-                Log.i(TAG, IDownloadUpdater.class.getSimpleName() + " download cancel:" + mUrl);
-
-            FDownloadManager.this.notifyError(mInfo, DownloadError.Cancel);
+        init {
+            requireNotNull(info) { "info is null for updater" }
+            requireNotNull(tempFile) { "tempFile is null for updater" }
+            mInfo = info
+            mTempFile = tempFile
+            mUrl = info.url
         }
     }
 
-    private static final class DownloadInfoWrapper {
-        private final DownloadInfo mDownloadInfo;
-        private final File mTempFile;
+    companion object {
+        private var sDefault: FDownloadManager? = null
 
-        public DownloadInfoWrapper(DownloadInfo downloadInfo, File tempFile) {
-            if (downloadInfo == null)
-                throw new IllegalArgumentException("downloadInfo is null");
+        @JvmStatic
+        val default: FDownloadManager?
+            get() {
+                if (sDefault == null) {
+                    synchronized(FDownloadManager::class.java) {
+                        if (sDefault == null) {
+                            val directory = config.downloadDirectory
+                            sDefault = FDownloadManager(directory)
+                        }
+                    }
+                }
+                return sDefault
+            }
+        private val config: DownloadManagerConfig
+            private get() = get()
+    }
+}
 
-            if (tempFile == null)
-                throw new IllegalArgumentException("tempFile is null");
+private class DownloadInfoWrapper {
+    val downloadInfo: DownloadInfo
+    val tempFile: File
 
-            mDownloadInfo = downloadInfo;
-            mTempFile = tempFile;
-        }
+    constructor(downloadInfo: DownloadInfo, tempFile: File) {
+        this.downloadInfo = downloadInfo
+        this.tempFile = tempFile
     }
 }

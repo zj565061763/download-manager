@@ -69,7 +69,7 @@ interface IDownloadDirectory {
          *
          * @return true-拦截
          */
-        fun intercept(file: File?): Boolean
+        fun intercept(file: File): Boolean
     }
 
     companion object {
