@@ -4,7 +4,7 @@
 * 下载目录配置
 * 自定义底层下载处理器，例如使用okhttp等网络请求框架
 * 指定url下载监听
-* 全局下载监听
+* 所有url下载监听
 
 # Gradle
 [![](https://jitpack.io/v/zj565061763/download-manager.svg)](https://jitpack.io/#zj565061763/download-manager)
