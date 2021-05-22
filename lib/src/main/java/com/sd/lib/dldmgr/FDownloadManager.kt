@@ -3,6 +3,7 @@ package com.sd.lib.dldmgr
 import android.util.Log
 import com.sd.lib.dldmgr.directory.DownloadDirectory
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
+import com.sd.lib.dldmgr.exception.DownloadException
 import com.sd.lib.dldmgr.exception.DownloadHttpException
 import java.io.File
 import java.util.*
@@ -296,7 +297,7 @@ class FDownloadManager : IDownloadManager {
             if (e is DownloadHttpException) {
                 error = DownloadError.Http
             }
-            this@FDownloadManager.notifyError(_iDownloadInfo, error, e)
+            this@FDownloadManager.notifyError(_iDownloadInfo, error, DownloadException.wrap(e))
         }
 
         override fun notifyCancel() {
