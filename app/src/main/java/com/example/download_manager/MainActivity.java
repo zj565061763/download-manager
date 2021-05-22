@@ -6,12 +6,13 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.sd.lib.dldmgr.directory.DownloadDirectory;
+import com.example.download_manager.databinding.ActivityMainBinding;
 import com.sd.lib.dldmgr.DownloadInfo;
 import com.sd.lib.dldmgr.DownloadRequest;
 import com.sd.lib.dldmgr.FDownloadManager;
 import com.sd.lib.dldmgr.IDownloadManager;
 import com.sd.lib.dldmgr.TransmitParam;
+import com.sd.lib.dldmgr.directory.DownloadDirectory;
 import com.sd.lib.dldmgr.directory.IDownloadDirectory;
 
 import java.io.File;
@@ -22,22 +23,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String URL = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe";
     private static final String URL_SMALL = "http://1251020758.vod2.myqcloud.com/8a96e57evodgzp1251020758/602d1d1a5285890800849942893/tRGP04QVdCEA.mp4";
 
+    private ActivityMainBinding _binding;
     private final String mUrl = URL_SMALL;
-    private IDownloadDirectory mDownloadDirectory;
+    private IDownloadDirectory _downloadDirectory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        _binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(_binding.getRoot());
 
         // 可以自定义下载文件保存目录
-        mDownloadDirectory = DownloadDirectory.from(getExternalFilesDir("my_download"));
+        _downloadDirectory = DownloadDirectory.from(getExternalFilesDir("my_download"));
 
         // 添加下载回调
-        FDownloadManager.getDefault().addCallback(mDownloadCallback);
+        FDownloadManager.getDefault().addCallback(_downloadCallback);
     }
 
-    private final IDownloadManager.Callback mDownloadCallback = new IDownloadManager.Callback() {
+    private final IDownloadManager.Callback _downloadCallback = new IDownloadManager.Callback() {
         @Override
         public void onPrepare(DownloadInfo info) {
             Log.i(TAG, "onPrepare:" + info.getUrl() + " state:" + info.getState());
@@ -62,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     + " state:" + info.getState());
 
             long start = System.currentTimeMillis();
-            mDownloadDirectory.copyFile(file);
+            _downloadDirectory.copyFile(file);
             Log.i(TAG, "process file time:" + (System.currentTimeMillis() - start));
         }
 
@@ -103,13 +106,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         // 移除下载回调
-        FDownloadManager.getDefault().removeCallback(mDownloadCallback);
+        FDownloadManager.getDefault().removeCallback(_downloadCallback);
         // 删除所有临时文件（下载中的临时文件不会被删除）
         FDownloadManager.getDefault().deleteTempFile();
         // 删除下载文件（临时文件不会被删除）
         FDownloadManager.getDefault().deleteDownloadFile(null);
 
-        mDownloadDirectory.deleteTempFile(null);
-        mDownloadDirectory.deleteFile(null);
+        _downloadDirectory.deleteTempFile(null);
+        _downloadDirectory.deleteFile(null);
     }
 }
