@@ -8,7 +8,7 @@ internal class UrlCallbackHolder {
     private val _mapCallbackUrl: MutableMap<IDownloadManager.Callback, String> = HashMap()
 
     @Synchronized
-    fun add(url: String, callback: IDownloadManager.Callback) {
+    fun add(url: String, callback: IDownloadManager.Callback): Boolean {
         var holder = _mapCallback[url]
         if (holder == null) {
             holder = ConcurrentHashMap()
@@ -18,13 +18,18 @@ internal class UrlCallbackHolder {
         if (holder.put(callback, "") == null) {
             _mapCallbackUrl[callback] = url
         }
+        return true
     }
 
     @Synchronized
-    fun remove(callback: IDownloadManager.Callback): Boolean {
-        val url = _mapCallbackUrl.remove(callback) ?: return false
-        var holder = _mapCallback[url]
-        return holder?.remove(callback) != null
+    fun remove(callback: IDownloadManager.Callback) {
+        val url = _mapCallbackUrl.remove(callback) ?: return
+        var holder = _mapCallback[url] ?: return
+
+        holder.remove(callback)
+        if (holder.isEmpty()) {
+            _mapCallback.remove(url)
+        }
     }
 
     @Synchronized
