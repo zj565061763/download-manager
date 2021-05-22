@@ -25,14 +25,14 @@ interface IDownloadManager {
     /**
      * 返回[url]对应的文件
      *
-     * @return null-文件不存在，不为null下载文件存在
+     * @return null-文件不存在；不为null-下载文件存在
      */
     fun getDownloadFile(url: String?): File?
 
     /**
      * 返回[url]对应的缓存文件
      *
-     * @return null-文件不存在，不为null缓存文件存在
+     * @return null-文件不存在；不为null-缓存文件存在
      */
     fun getTempFile(url: String?): File?
 

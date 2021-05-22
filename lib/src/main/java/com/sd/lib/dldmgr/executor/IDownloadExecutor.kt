@@ -11,7 +11,7 @@ interface IDownloadExecutor {
      * @param request 下载请求
      * @param file    要保存的下载文件
      * @param updater 下载信息更新对象
-     * @return true-提交成功，false-提交失败
+     * @return true-提交成功；false-提交失败
      */
     fun submit(request: DownloadRequest, file: File, updater: IDownloadUpdater): Boolean
 
