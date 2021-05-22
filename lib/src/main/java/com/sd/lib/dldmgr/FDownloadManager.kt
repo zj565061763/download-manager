@@ -16,8 +16,8 @@ class FDownloadManager : IDownloadManager {
     private val _mapDownloadInfo: MutableMap<String, DownloadInfoWrapper> = ConcurrentHashMap()
     private val _mapTempFile: MutableMap<File, String> = ConcurrentHashMap()
 
-    private val _callbackHolder: MutableMap<IDownloadManager.Callback, String> by lazy { ConcurrentHashMap() }
-    private val _urlCallbackHolder by lazy { UrlCallbackHolder() }
+    private val _callbackHolder: MutableMap<IDownloadManager.Callback, String> = ConcurrentHashMap()
+    private val _urlCallbackHolder = UrlCallbackHolder()
 
     protected constructor(directory: String) {
         if (directory.isEmpty()) throw IllegalArgumentException("directory is empty")
@@ -37,12 +37,12 @@ class FDownloadManager : IDownloadManager {
 
     @Synchronized
     override fun removeCallback(callback: IDownloadManager.Callback) {
-        val remove = _callbackHolder.remove(callback)
-        if (remove != null) {
+        if (_callbackHolder.remove(callback) != null) {
             if (config.isDebug) {
                 Log.i(IDownloadManager.TAG, "removeCallback:${callback} size:${_callbackHolder.size}")
             }
         }
+        _urlCallbackHolder.remove(callback)
     }
 
     @Synchronized
