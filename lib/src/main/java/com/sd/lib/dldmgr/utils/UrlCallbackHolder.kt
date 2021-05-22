@@ -8,6 +8,15 @@ internal class UrlCallbackHolder {
 
     @Synchronized
     fun add(url: String, callback: IDownloadManager.Callback) {
+        val cacheUrl = _mapCallbackUrl[callback]
+        if (url == cacheUrl) {
+            // 对象已经添加过了
+            return
+        }
+
+        // 如果对象之前监听的是别的url，需要先移除，一个对象只允许监听一个url
+        remove(callback)
+
         var holder = _mapCallback[url]
         if (holder == null) {
             holder = HashSet()
