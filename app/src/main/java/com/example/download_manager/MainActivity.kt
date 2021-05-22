@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                 // 添加下载任务
                 val addTask = FDownloadManager.default.addTask(downloadRequest)
-                Log.i(TAG, "click download addTask:$addTask")
+                Log.i(TAG, "click download addTask:${addTask}")
             }
             _binding.btnCancel -> {
                 // 取消下载任务
