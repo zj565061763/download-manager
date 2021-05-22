@@ -5,6 +5,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.webkit.MimeTypeMap
+import com.sd.lib.dldmgr.directory.IDownloadDirectory
 import java.io.File
 import java.security.MessageDigest
 
@@ -35,7 +36,7 @@ internal object Utils {
         }
     }
 
-    fun md5(value: String): String? {
+    fun md5(value: String): String {
         val bytes = MessageDigest.getInstance("MD5").apply {
             this.update(value.toByteArray())
         }.digest()
@@ -68,8 +69,9 @@ internal object Utils {
      */
     fun copyFile(fileFrom: File, fileTo: File): Boolean {
         return try {
-            fileFrom.copyTo(fileTo, overwrite = true)
-            true
+            val fileTemp = File(fileTo.absolutePath + IDownloadDirectory.EXT_TEMP)
+            fileFrom.copyTo(fileTemp, overwrite = true)
+            return moveFile(fileTemp, fileTo)
         } catch (e: Exception) {
             e.printStackTrace()
             false
