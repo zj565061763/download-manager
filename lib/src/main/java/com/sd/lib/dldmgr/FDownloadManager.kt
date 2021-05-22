@@ -188,11 +188,11 @@ class FDownloadManager : IDownloadManager {
         info.notifySuccess()
         val copyInfo = info.copy()
         Utils.postMainThread {
-            if (config.isDebug) {
-                Log.i(IDownloadManager.TAG, "notify callback onSuccess url:${copyInfo.url} file:${file.absolutePath}")
-            }
             synchronized(this@FDownloadManager) {
                 removeDownloadInfo(copyInfo.url)
+                if (config.isDebug) {
+                    Log.i(IDownloadManager.TAG, "notify callback onSuccess url:${copyInfo.url} file:${file.absolutePath}")
+                }
                 for (item in _callbackHolder.keys) {
                     item.onSuccess(copyInfo, file)
                 }
