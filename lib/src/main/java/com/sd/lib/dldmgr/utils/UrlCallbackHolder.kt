@@ -1,5 +1,7 @@
 package com.sd.lib.dldmgr.utils
 
+import android.util.Log
+import com.sd.lib.dldmgr.DownloadManagerConfig
 import com.sd.lib.dldmgr.IDownloadManager
 
 internal class UrlCallbackHolder {
@@ -26,6 +28,13 @@ internal class UrlCallbackHolder {
         if (holder.add(callback)) {
             _mapCallbackUrl[callback] = url
         }
+
+        if (DownloadManagerConfig.get().isDebug) {
+            Log.i(
+                UrlCallbackHolder::class.java.simpleName, "add url:${url} callback:${callback}"
+                        + " sizeUrl:${_mapCallback.size} sizeCallback:${_mapCallbackUrl.size}"
+            )
+        }
     }
 
     @Synchronized
@@ -36,6 +45,15 @@ internal class UrlCallbackHolder {
         val remove = holder.remove(callback)
         if (holder.isEmpty()) {
             _mapCallback.remove(url)
+        }
+
+        if (remove) {
+            if (DownloadManagerConfig.get().isDebug) {
+                Log.i(
+                    UrlCallbackHolder::class.java.simpleName, "remove url:${url} callback:${callback}"
+                            + " sizeUrl:${_mapCallback.size} sizeCallback:${_mapCallbackUrl.size}"
+                )
+            }
         }
         return remove
     }
