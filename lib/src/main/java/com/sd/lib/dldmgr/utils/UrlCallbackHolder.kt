@@ -73,7 +73,7 @@ internal class UrlCallbackHolder {
 
         if (DownloadManagerConfig.get().isDebug) {
             Log.i(
-                UrlCallbackHolder::class.java.simpleName, "removeUrl url:${url} callbackSize:${callbacks.size}"
+                UrlCallbackHolder::class.java.simpleName, "removeUrl url:${url} callbackSize:${holder.size}"
                         + " sizeUrl:${_mapCallback.size} sizeCallback:${_mapCallbackUrl.size}"
             )
         }
