@@ -12,7 +12,6 @@ import java.security.MessageDigest
 internal object Utils {
     private val HANDLER = Handler(Looper.getMainLooper())
 
-    @JvmStatic
     fun postMainThread(runnable: Runnable) {
         HANDLER.post(runnable)
     }
