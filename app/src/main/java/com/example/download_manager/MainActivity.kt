@@ -1,118 +1,102 @@
-package com.example.download_manager;
+package com.example.download_manager
 
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import com.example.download_manager.databinding.ActivityMainBinding
+import com.sd.lib.dldmgr.DownloadInfo
+import com.sd.lib.dldmgr.DownloadRequest
+import com.sd.lib.dldmgr.FDownloadManager
+import com.sd.lib.dldmgr.IDownloadManager
+import com.sd.lib.dldmgr.directory.DownloadDirectory
+import com.sd.lib.dldmgr.directory.IDownloadDirectory
+import java.io.File
 
-import androidx.appcompat.app.AppCompatActivity;
+class MainActivity : AppCompatActivity(), View.OnClickListener {
+    private lateinit var _binding: ActivityMainBinding
 
-import com.example.download_manager.databinding.ActivityMainBinding;
-import com.sd.lib.dldmgr.DownloadInfo;
-import com.sd.lib.dldmgr.DownloadRequest;
-import com.sd.lib.dldmgr.FDownloadManager;
-import com.sd.lib.dldmgr.IDownloadManager;
-import com.sd.lib.dldmgr.TransmitParam;
-import com.sd.lib.dldmgr.directory.DownloadDirectory;
-import com.sd.lib.dldmgr.directory.IDownloadDirectory;
+    private val _url = URL_SMALL
+    private lateinit var _downloadDirectory: IDownloadDirectory
 
-import java.io.File;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        _binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(_binding.root)
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private static final String TAG = MainActivity.class.getSimpleName();
-
-    private static final String URL = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe";
-    private static final String URL_SMALL = "http://1251020758.vod2.myqcloud.com/8a96e57evodgzp1251020758/602d1d1a5285890800849942893/tRGP04QVdCEA.mp4";
-
-    private ActivityMainBinding _binding;
-    private final String mUrl = URL_SMALL;
-    private IDownloadDirectory _downloadDirectory;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        _binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(_binding.getRoot());
-
-        // 可以自定义下载文件保存目录
-        _downloadDirectory = DownloadDirectory.from(getExternalFilesDir("my_download"));
+        // 创建一个目录，下载成功后可以拷贝到该目录
+        _downloadDirectory = DownloadDirectory.from(getExternalFilesDir("my_download"))
 
         // 添加下载回调
-        FDownloadManager.getDefault().addCallback(_downloadCallback);
+        FDownloadManager.default.addCallback(_downloadCallback)
     }
 
-    private final IDownloadManager.Callback _downloadCallback = new IDownloadManager.Callback() {
-        @Override
-        public void onPrepare(DownloadInfo info) {
-            Log.i(TAG, "onPrepare:" + info.getUrl() + " state:" + info.getState());
+    /**
+     * 下载回调
+     */
+    private val _downloadCallback: IDownloadManager.Callback = object : IDownloadManager.Callback {
+        override fun onPrepare(info: DownloadInfo) {
+            Log.i(TAG, "onPrepare:${info.url} state:${info.state}")
         }
 
-        @Override
-        public void onProgress(DownloadInfo info) {
-            final TransmitParam param = info.getTransmitParam();
-
+        override fun onProgress(info: DownloadInfo) {
+            // 下载参数
+            val param = info.transmitParam
             // 下载进度
-            final int progress = param.getProgress();
+            val progress = param.progress
             // 下载速率
-            final int speed = param.getSpeedKBps();
-
-            Log.i(TAG, "onProgress:" + progress + " " + speed + " state:" + info.getState());
+            val speed = param.speedKBps
+            Log.i(TAG, "onProgress:${progress} ${speed} state:${info.state}")
         }
 
-        @Override
-        public void onSuccess(DownloadInfo info, File file) {
-            Log.i(TAG, "onSuccess:" + info.getUrl() + "\r\n"
-                    + " file:" + file.getAbsolutePath()
-                    + " state:" + info.getState());
+        override fun onSuccess(info: DownloadInfo, file: File) {
+            Log.i(TAG, "onSuccess:${info.url} file:${file.absolutePath} state:${info.state}")
 
-            long start = System.currentTimeMillis();
-            _downloadDirectory.copyFile(file);
-            Log.i(TAG, "process file time:" + (System.currentTimeMillis() - start));
+            val start = System.currentTimeMillis()
+            _downloadDirectory.copyFile(file)
+            Log.i(TAG, "process file time:${(System.currentTimeMillis() - start)}")
         }
 
-        @Override
-        public void onError(DownloadInfo info) {
-            Log.e(TAG, "onError:" + info.getError()
-                    + " throwable:" + info.getThrowable()
-                    + " state:" + info.getState());
+        override fun onError(info: DownloadInfo) {
+            Log.e(TAG, "onError:${info.error} throwable:${info.throwable} state:${info.state}")
         }
-    };
+    }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_download:
-
+    override fun onClick(v: View) {
+        when (v) {
+            _binding.btnDownload -> {
                 // 创建下载请求对象
-                final DownloadRequest downloadRequest = new DownloadRequest.Builder()
-                        // 设置断点下载，true-优先断点下载；false-不使用断点下载；null-跟随初始化配置
-                        .setPreferBreakpoint(true)
-                        // 下载地址
-                        .build(mUrl);
+                val downloadRequest = DownloadRequest.Builder() // 设置断点下载，true-优先断点下载；false-不使用断点下载；null-跟随初始化配置
+                    .setPreferBreakpoint(true) // 下载地址
+                    .build(_url)
 
                 // 添加下载任务
-                final boolean addTask = FDownloadManager.getDefault().addTask(downloadRequest);
-                Log.i(TAG, "click download addTask:" + addTask);
-                break;
-            case R.id.btn_cancel:
+                val addTask = FDownloadManager.default.addTask(downloadRequest)
+                Log.i(TAG, "click download addTask:$addTask")
+            }
+            _binding.btnCancel -> {
                 // 取消下载任务
-                FDownloadManager.getDefault().cancelTask(mUrl);
-                break;
-            default:
-                break;
+                FDownloadManager.default.cancelTask(_url)
+            }
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    override fun onDestroy() {
+        super.onDestroy()
         // 移除下载回调
-        FDownloadManager.getDefault().removeCallback(_downloadCallback);
+        FDownloadManager.default.removeCallback(_downloadCallback)
         // 删除所有临时文件（下载中的临时文件不会被删除）
-        FDownloadManager.getDefault().deleteTempFile();
+        FDownloadManager.default.deleteTempFile()
         // 删除下载文件（临时文件不会被删除）
-        FDownloadManager.getDefault().deleteDownloadFile(null);
+        FDownloadManager.default.deleteDownloadFile(null)
 
-        _downloadDirectory.deleteTempFile(null);
-        _downloadDirectory.deleteFile(null);
+        _downloadDirectory.deleteTempFile(null)
+        _downloadDirectory.deleteFile(null)
+    }
+
+    companion object {
+        private val TAG = MainActivity::class.java.simpleName
+        private const val URL_BIG = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe"
+        private const val URL_SMALL = "http://1251020758.vod2.myqcloud.com/8a96e57evodgzp1251020758/602d1d1a5285890800849942893/tRGP04QVdCEA.mp4"
     }
 }
