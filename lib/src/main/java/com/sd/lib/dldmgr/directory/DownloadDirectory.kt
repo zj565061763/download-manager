@@ -1,6 +1,6 @@
-package com.sd.lib.dldmgr
+package com.sd.lib.dldmgr.directory
 
-import com.sd.lib.dldmgr.directory.IDownloadDirectory
+import com.sd.lib.dldmgr.Utils
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import java.io.File
 
@@ -115,7 +115,7 @@ class DownloadDirectory : IDownloadDirectory {
         return if (files == null || files.isEmpty()) null else files
     }
 
-    fun newUrlFile(url: String?): File? {
+    internal fun newUrlFile(url: String?): File? {
         if (url == null || url.isEmpty()) {
             return null
         }
@@ -123,7 +123,7 @@ class DownloadDirectory : IDownloadDirectory {
         return createUrlFile(url, ext)
     }
 
-    fun newUrlTempFile(url: String?): File? {
+    internal fun newUrlTempFile(url: String?): File? {
         if (url == null || url.isEmpty()) {
             return null
         }

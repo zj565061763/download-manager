@@ -6,7 +6,7 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.sd.lib.dldmgr.DownloadDirectory;
+import com.sd.lib.dldmgr.directory.DownloadDirectory;
 import com.sd.lib.dldmgr.DownloadInfo;
 import com.sd.lib.dldmgr.DownloadRequest;
 import com.sd.lib.dldmgr.FDownloadManager;

@@ -1,6 +1,7 @@
 package com.sd.lib.dldmgr
 
 import android.util.Log
+import com.sd.lib.dldmgr.directory.DownloadDirectory
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import com.sd.lib.dldmgr.exception.DownloadHttpException
 import java.io.File
