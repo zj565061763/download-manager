@@ -1,7 +1,6 @@
 package com.sd.lib.dldmgr
 
 import android.util.Log
-import com.sd.lib.dldmgr.Utils.postMainThread
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import com.sd.lib.dldmgr.exception.DownloadHttpException
 import java.io.File
@@ -166,9 +165,8 @@ class FDownloadManager : IDownloadManager {
     private fun notifyPrepare(info: DownloadInfo) {
         info.notifyPrepare()
         val copyInfo = info.copy()
-        postMainThread {
-            val callbacks: Collection<IDownloadManager.Callback> = _callbackHolder.keys
-            for (item in callbacks) {
+        Utils.postMainThread {
+            for (item in _callbackHolder.keys) {
                 item.onPrepare(copyInfo)
             }
         }
@@ -178,7 +176,7 @@ class FDownloadManager : IDownloadManager {
         val changed = info.notifyDownloading(total, current)
         if (changed) {
             val copyInfo = info.copy()
-            postMainThread {
+            Utils.postMainThread {
                 val callbacks: Collection<IDownloadManager.Callback> = _callbackHolder.keys
                 for (item in callbacks) {
                     item.onProgress(copyInfo)
@@ -190,7 +188,7 @@ class FDownloadManager : IDownloadManager {
     private fun notifySuccess(info: DownloadInfo, file: File) {
         info.notifySuccess()
         val copyInfo = info.copy()
-        postMainThread {
+        Utils.postMainThread {
             if (config.isDebug) {
                 Log.i(
                     IDownloadManager.TAG, "notify callback onSuccess"
@@ -223,7 +221,7 @@ class FDownloadManager : IDownloadManager {
         info.notifyError(error, throwable)
         val copyInfo = info.copy()
         val callbacks: Collection<IDownloadManager.Callback> = ArrayList(_callbackHolder.keys)
-        postMainThread {
+        Utils.postMainThread {
             if (config.isDebug) {
                 Log.i(
                     IDownloadManager.TAG, "notify callback onError"
@@ -301,23 +299,15 @@ class FDownloadManager : IDownloadManager {
     }
 
     companion object {
-        private var sDefault: FDownloadManager? = null
+        @JvmStatic
+        val default: FDownloadManager by lazy {
+            val directory = config.downloadDirectory
+            FDownloadManager(directory)
+        }
 
         @JvmStatic
-        val default: FDownloadManager?
-            get() {
-                if (sDefault == null) {
-                    synchronized(FDownloadManager::class.java) {
-                        if (sDefault == null) {
-                            val directory = config.downloadDirectory
-                            sDefault = FDownloadManager(directory)
-                        }
-                    }
-                }
-                return sDefault
-            }
         private val config: DownloadManagerConfig
-            private get() = get()
+            get() = DownloadManagerConfig.get()
     }
 }
 
