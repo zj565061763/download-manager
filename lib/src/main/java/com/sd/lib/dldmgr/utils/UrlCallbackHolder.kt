@@ -59,6 +59,12 @@ internal class UrlCallbackHolder {
     }
 
     @Synchronized
+    fun getUrl(url: String): Array<IDownloadManager.Callback>? {
+        var holder = _mapCallback[url] ?: return null
+        return holder.toTypedArray()
+    }
+
+    @Synchronized
     fun removeUrl(url: String): Array<IDownloadManager.Callback>? {
         var holder = _mapCallback.remove(url) ?: return null
         val callbacks = holder.toTypedArray()
