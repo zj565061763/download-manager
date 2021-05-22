@@ -5,7 +5,7 @@ import com.sd.lib.dldmgr.DownloadManagerConfig
 import com.sd.lib.dldmgr.IDownloadManager
 
 internal class UrlCallbackHolder {
-    private val _mapCallback: MutableMap<String, MutableSet<IDownloadManager.Callback>> = HashMap()
+    private val _mapCallback: MutableMap<String, MutableCollection<IDownloadManager.Callback>> = HashMap()
     private val _mapCallbackUrl: MutableMap<IDownloadManager.Callback, String> = HashMap()
 
     @Synchronized
@@ -65,10 +65,9 @@ internal class UrlCallbackHolder {
     }
 
     @Synchronized
-    fun removeUrl(url: String): Array<IDownloadManager.Callback>? {
+    fun removeUrl(url: String): Collection<IDownloadManager.Callback>? {
         var holder = _mapCallback.remove(url) ?: return null
-        val callbacks = holder.toTypedArray()
-        for (callback in callbacks) {
+        for (callback in holder) {
             _mapCallbackUrl.remove(callback)
         }
 
@@ -78,6 +77,6 @@ internal class UrlCallbackHolder {
                         + " sizeUrl:${_mapCallback.size} sizeCallback:${_mapCallbackUrl.size}"
             )
         }
-        return callbacks
+        return holder
     }
 }

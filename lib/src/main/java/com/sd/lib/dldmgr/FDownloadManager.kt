@@ -176,6 +176,12 @@ class FDownloadManager : IDownloadManager {
             for (item in _callbackHolder.keys) {
                 item.onPrepare(copyInfo)
             }
+
+            _urlCallbackHolder.getUrl(copyInfo.url)?.let {
+                for (item in it) {
+                    item.onPrepare(copyInfo)
+                }
+            }
         }
     }
 
@@ -187,6 +193,12 @@ class FDownloadManager : IDownloadManager {
         Utils.postMainThread {
             for (item in _callbackHolder.keys) {
                 item.onProgress(copyInfo)
+            }
+
+            _urlCallbackHolder.getUrl(copyInfo.url)?.let {
+                for (item in it) {
+                    item.onProgress(copyInfo)
+                }
             }
         }
     }
@@ -203,6 +215,12 @@ class FDownloadManager : IDownloadManager {
                 for (item in _callbackHolder.keys) {
                     item.onSuccess(copyInfo, file)
                 }
+
+                _urlCallbackHolder.removeUrl(copyInfo.url)?.let {
+                    for (item in it) {
+                        item.onSuccess(copyInfo, file)
+                    }
+                }
             }
         }
     }
@@ -211,16 +229,23 @@ class FDownloadManager : IDownloadManager {
     private fun notifyError(info: DownloadInfo, error: DownloadError, throwable: Throwable? = null) {
         // 立即移除下载信息，避免重新开始任务无效
         removeDownloadInfo(info.url)
-
         info.notifyError(error, throwable)
         val copyInfo = info.copy()
+
         val callbacks = _callbackHolder.keys.toTypedArray()
+        val urlCallbacks = _urlCallbackHolder.removeUrl(copyInfo.url)
         Utils.postMainThread {
             if (config.isDebug) {
                 Log.i(IDownloadManager.TAG, "notify callback onError url:${copyInfo.url} error:${copyInfo.error}")
             }
             for (item in callbacks) {
                 item.onError(copyInfo)
+            }
+
+            urlCallbacks?.let {
+                for (item in it) {
+                    item.onError(copyInfo)
+                }
             }
         }
     }
