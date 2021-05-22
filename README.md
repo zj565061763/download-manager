@@ -31,7 +31,7 @@ DownloadManagerConfig.init(new DownloadManagerConfig.Builder()
 ```
 
 # 接口
-```
+```kotlin
 interface IDownloadManager {
     /**
      * 添加回调对象，可以监听所有的下载任务
@@ -139,8 +139,8 @@ interface IDownloadManager {
 }
 ```
 
-# 支持自定义底层下载处理器
-```
+# 自定义底层下载
+```kotlin
 interface IDownloadExecutor {
     /**
      * 提交下载任务
