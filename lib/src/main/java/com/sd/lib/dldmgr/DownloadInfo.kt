@@ -23,7 +23,7 @@ class DownloadInfo {
     /**
      * 准备状态
      */
-    fun notifyPrepare() {
+    internal fun notifyPrepare() {
         assert(state == DownloadState.None)
         state = DownloadState.Prepare
     }
@@ -31,7 +31,7 @@ class DownloadInfo {
     /**
      * 下载中
      */
-    fun notifyDownloading(total: Long, current: Long): Boolean {
+    internal fun notifyDownloading(total: Long, current: Long): Boolean {
         assert(state != DownloadState.Success && state != DownloadState.Error)
         state = DownloadState.Downloading
         return transmitParam.transmit(total, current)
@@ -40,7 +40,7 @@ class DownloadInfo {
     /**
      * 下载成功
      */
-    fun notifySuccess() {
+    internal fun notifySuccess() {
         assert(state != DownloadState.Success && state != DownloadState.Error)
         state = DownloadState.Success
     }
@@ -48,7 +48,7 @@ class DownloadInfo {
     /**
      * 下载失败
      */
-    fun notifyError(error: DownloadError, throwable: Throwable?) {
+    internal fun notifyError(error: DownloadError, throwable: Throwable?) {
         assert(state != DownloadState.Success && state != DownloadState.Error)
         state = DownloadState.Error
         this.error = error
@@ -58,7 +58,7 @@ class DownloadInfo {
     /**
      * 拷贝对象
      */
-    fun copy(): DownloadInfo {
+    internal fun copy(): DownloadInfo {
         return DownloadInfo(url).apply {
             this.state = this@DownloadInfo.state
             this.error = this@DownloadInfo.error
