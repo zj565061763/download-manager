@@ -14,7 +14,7 @@ internal class UrlCallbackHolder {
             return
         }
 
-        // 如果对象之前监听的是别的url，需要先移除，一个对象只允许监听一个url
+        // 如果对象之前监听的是别的url，需要先移除，因为一个对象只允许监听一个url
         remove(callback)
 
         var holder = _mapCallback[url]
