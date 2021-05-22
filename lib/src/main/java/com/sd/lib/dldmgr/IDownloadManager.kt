@@ -4,7 +4,7 @@ import java.io.File
 
 interface IDownloadManager {
     /**
-     * 添加回调对象
+     * 添加回调对象，可以监听所有的下载任务
      *
      * @return true-添加成功或者已添加；false-添加失败
      */
@@ -16,7 +16,9 @@ interface IDownloadManager {
     fun removeCallback(callback: Callback)
 
     /**
-     * 添加回调对象，指定[url]任务存在的时候，回调对象才会被添加
+     * 添加回调对象，监听指定[url]的任务，如果任务不存在则回调对象不会被添加。
+     *
+     * 如果添加成功，则任务结束之后会自动移除回调对象
      *
      * @return true-添加成功或者已添加；false-添加失败
      */

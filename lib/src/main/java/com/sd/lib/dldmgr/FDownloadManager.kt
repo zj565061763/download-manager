@@ -5,6 +5,7 @@ import com.sd.lib.dldmgr.directory.DownloadDirectory
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import com.sd.lib.dldmgr.exception.DownloadException
 import com.sd.lib.dldmgr.exception.DownloadHttpException
+import com.sd.lib.dldmgr.utils.UrlCallbackHolder
 import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -15,7 +16,8 @@ class FDownloadManager : IDownloadManager {
     private val _mapDownloadInfo: MutableMap<String, DownloadInfoWrapper> = ConcurrentHashMap()
     private val _mapTempFile: MutableMap<File, String> = ConcurrentHashMap()
 
-    private val _callbackHolder: MutableMap<IDownloadManager.Callback, String> = ConcurrentHashMap()
+    private val _callbackHolder: MutableMap<IDownloadManager.Callback, String> by lazy { ConcurrentHashMap() }
+    private val _urlCallbackHolder by lazy { UrlCallbackHolder() }
 
     protected constructor(directory: String) {
         if (directory.isEmpty()) throw IllegalArgumentException("directory is empty")
@@ -47,7 +49,10 @@ class FDownloadManager : IDownloadManager {
     override fun addUrlCallback(url: String?, callback: IDownloadManager.Callback): Boolean {
         if (url == null || url.isEmpty()) return false
         val isDownloading = _mapDownloadInfo.containsKey(url)
-        return if (isDownloading) addCallback(callback) else false
+        if (!isDownloading) return false
+
+        _urlCallbackHolder.add(url, callback)
+        return true
     }
 
     override fun getDownloadFile(url: String?): File? {
