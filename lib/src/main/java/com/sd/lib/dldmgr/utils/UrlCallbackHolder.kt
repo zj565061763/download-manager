@@ -21,14 +21,15 @@ internal class UrlCallbackHolder {
     }
 
     @Synchronized
-    fun remove(callback: IDownloadManager.Callback) {
-        val url = _mapCallbackUrl.remove(callback) ?: return
-        var holder = _mapCallback[url] ?: return
+    fun remove(callback: IDownloadManager.Callback): Boolean {
+        val url = _mapCallbackUrl.remove(callback) ?: return false
+        var holder = _mapCallback[url] ?: return false
 
-        holder.remove(callback)
+        val remove = holder.remove(callback)
         if (holder.isEmpty()) {
             _mapCallback.remove(url)
         }
+        return remove != null
     }
 
     @Synchronized
