@@ -1,6 +1,5 @@
 package com.sd.lib.dldmgr
 
-import android.text.TextUtils
 import android.util.Log
 import com.sd.lib.dldmgr.Utils.postMainThread
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
@@ -128,24 +127,19 @@ class FDownloadManager : IDownloadManager {
 
     @Synchronized
     override fun cancelTask(url: String?): Boolean {
-        if (TextUtils.isEmpty(url)) return false
+        if (url == null || url.isEmpty()) return false
         val isDownloading = _mapDownloadInfo.containsKey(url)
         if (isDownloading) {
             if (config.isDebug) {
-                Log.i(
-                    IDownloadManager.TAG, "cancelTask start"
-                            + " url:" + url
-                )
+                Log.i(IDownloadManager.TAG, "cancelTask start url:${url}")
             }
         }
+
         val result = config.downloadExecutor.cancel(url)
+
         if (isDownloading) {
             if (config.isDebug) {
-                Log.i(
-                    IDownloadManager.TAG, "cancelTask finish"
-                            + " result:" + result
-                            + " url:" + url
-                )
+                Log.i(IDownloadManager.TAG, "cancelTask finish result:${result} url:${url}")
             }
         }
         return result
@@ -153,9 +147,6 @@ class FDownloadManager : IDownloadManager {
 
     /**
      * 任务结束，移除下载信息
-     *
-     * @param url
-     * @return
      */
     @Synchronized
     private fun removeDownloadInfo(url: String): DownloadInfoWrapper? {
@@ -164,10 +155,8 @@ class FDownloadManager : IDownloadManager {
             _mapTempFile.remove(wrapper.tempFile)
             if (config.isDebug) {
                 Log.i(
-                    IDownloadManager.TAG, "removeDownloadInfo"
-                            + " url:" + url
-                            + " size:" + _mapDownloadInfo.size
-                            + " tempSize:" + _mapTempFile.size
+                    IDownloadManager.TAG, "removeDownloadInfo url:${url}" +
+                            " size:${_mapDownloadInfo.size} tempSize:" + _mapTempFile.size
                 )
             }
         }
