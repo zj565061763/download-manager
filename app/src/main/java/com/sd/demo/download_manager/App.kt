@@ -1,4 +1,4 @@
-package com.example.download_manager
+package com.sd.demo.download_manager
 
 import android.app.Application
 import com.sd.lib.dldmgr.DownloadManagerConfig

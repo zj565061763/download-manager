@@ -1,10 +1,10 @@
-package com.example.download_manager
+package com.sd.demo.download_manager
 
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.example.download_manager.databinding.ActivityMainBinding
+import com.sd.demo.download_manager.databinding.ActivityMainBinding
 import com.sd.lib.dldmgr.DownloadInfo
 import com.sd.lib.dldmgr.DownloadRequest
 import com.sd.lib.dldmgr.FDownloadManager
