@@ -219,66 +219,94 @@ class FDownloadManager : IDownloadManager {
         }
     }
 
-    private inner class InternalDownloadUpdater(info: DownloadInfo?, tempFile: File?) : IDownloadUpdater {
-        private val mInfo: DownloadInfo
-        private val mTempFile: File
-        private val mUrl: String
+    private inner class InternalDownloadUpdater : IDownloadUpdater {
+        private val _iUrl: String
+        private val _iDownloadInfo: DownloadInfo
+        private val _iTempFile: File
 
         @Volatile
-        private var mCompleted = false
+        private var _iCompleted = false
+
+        constructor(info: DownloadInfo, tempFile: File) {
+            _iUrl = info.url
+            _iDownloadInfo = info
+            _iTempFile = tempFile
+        }
+
         override fun notifyProgress(total: Long, current: Long) {
-            if (mCompleted) return
-            this@FDownloadManager.notifyProgress(mInfo, total, current)
+            if (_iCompleted) return
+            this@FDownloadManager.notifyProgress(_iDownloadInfo, total, current)
         }
 
         override fun notifySuccess() {
-            if (mCompleted) return
-            mCompleted = true
-            if (config.isDebug) Log.i(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download success:" + mUrl)
-            if (!mTempFile.exists()) {
-                if (config.isDebug) Log.e(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download success error temp file not exists:" + mUrl)
-                this@FDownloadManager.notifyError(mInfo, DownloadError.TempFileNotExists)
+            if (_iCompleted) return
+            _iCompleted = true
+
+            if (config.isDebug) {
+                Log.i(
+                    IDownloadManager.TAG,
+                    "${IDownloadUpdater::class.java.simpleName} download success ${_iUrl}"
+                )
+            }
+
+            if (!_iTempFile.exists()) {
+                if (config.isDebug) {
+                    Log.e(
+                        IDownloadManager.TAG,
+                        "${IDownloadUpdater::class.java.simpleName} download success error temp file not exists ${_iUrl}"
+                    )
+                }
+                this@FDownloadManager.notifyError(_iDownloadInfo, DownloadError.TempFileNotExists)
                 return
             }
-            val downloadFile = _downloadDirectory.newUrlFile(mUrl)
+
+            val downloadFile = _downloadDirectory.newUrlFile(_iUrl)
             if (downloadFile == null) {
-                if (config.isDebug) Log.e(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download success error create download file:" + mUrl)
-                this@FDownloadManager.notifyError(mInfo, DownloadError.CreateDownloadFile)
+                if (config.isDebug) {
+                    Log.e(
+                        IDownloadManager.TAG,
+                        "${IDownloadUpdater::class.java.simpleName} download success error create download file ${_iUrl}"
+                    )
+                }
+                this@FDownloadManager.notifyError(_iDownloadInfo, DownloadError.CreateDownloadFile)
                 return
             }
-            if (downloadFile.exists()) downloadFile.delete()
-            if (mTempFile.renameTo(downloadFile)) {
-                this@FDownloadManager.notifySuccess(mInfo, downloadFile)
+
+            if (Utils.moveFile(_iTempFile, downloadFile)) {
+                this@FDownloadManager.notifySuccess(_iDownloadInfo, downloadFile)
             } else {
-                if (config.isDebug) Log.e(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download success error rename temp file to download file:" + mUrl)
-                this@FDownloadManager.notifyError(mInfo, DownloadError.RenameFile)
+                if (config.isDebug) Log.e(
+                    IDownloadManager.TAG,
+                    "${IDownloadUpdater::class.java.simpleName} download success error rename temp file to download file ${_iUrl}"
+                )
+                this@FDownloadManager.notifyError(_iDownloadInfo, DownloadError.RenameFile)
             }
         }
 
         override fun notifyError(e: Exception) {
-            if (mCompleted) return
-            mCompleted = true
-            if (config.isDebug) Log.e(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download error:" + mUrl + " " + e)
+            if (_iCompleted) return
+            _iCompleted = true
+
+            if (config.isDebug) Log.e(
+                IDownloadManager.TAG,
+                "${IDownloadUpdater::class.java.simpleName} download error:${e} ${_iUrl}"
+            )
+
             var error = DownloadError.Other
             if (e is DownloadHttpException) {
                 error = DownloadError.Http
             }
-            this@FDownloadManager.notifyError(mInfo, error, e)
+            this@FDownloadManager.notifyError(_iDownloadInfo, error, e)
         }
 
         override fun notifyCancel() {
-            if (mCompleted) return
-            mCompleted = true
-            if (config.isDebug) Log.i(IDownloadManager.TAG, IDownloadUpdater::class.java.simpleName + " download cancel:" + mUrl)
-            this@FDownloadManager.notifyError(mInfo, DownloadError.Cancel)
-        }
+            if (_iCompleted) return
+            _iCompleted = true
 
-        init {
-            requireNotNull(info) { "info is null for updater" }
-            requireNotNull(tempFile) { "tempFile is null for updater" }
-            mInfo = info
-            mTempFile = tempFile
-            mUrl = info.url
+            if (config.isDebug) {
+                Log.i(IDownloadManager.TAG, "${IDownloadUpdater::class.java.simpleName} download cancel ${_iUrl}")
+            }
+            this@FDownloadManager.notifyError(_iDownloadInfo, DownloadError.Cancel)
         }
     }
 
