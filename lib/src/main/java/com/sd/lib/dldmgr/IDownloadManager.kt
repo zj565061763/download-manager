@@ -16,7 +16,7 @@ interface IDownloadManager {
     fun removeCallback(callback: Callback)
 
     /**
-     * 添加回调对象，监听指定[url]的任务，如果任务不存在则回调对象不会被添加。
+     * 添加回调对象，监听指定[url]的任务，如果任务不存在则回调对象不会被添加
      *
      * 如果添加成功，则任务结束之后会自动移除回调对象
      *
