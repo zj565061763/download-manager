@@ -50,8 +50,8 @@ class FDownloadManager : IDownloadManager {
     @Synchronized
     override fun addUrlCallback(url: String?, callback: IDownloadManager.Callback): Boolean {
         if (url == null || url.isEmpty()) return false
-        val isDownloading = _mapDownloadInfo.containsKey(url)
-        if (!isDownloading) return false
+        val hasTask = _mapDownloadInfo.containsKey(url)
+        if (!hasTask) return false
 
         _urlCallbackHolder.add(url, callback)
         return true
