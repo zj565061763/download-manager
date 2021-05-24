@@ -20,7 +20,7 @@ class DownloadDirectory : IDownloadDirectory {
         return if (file.exists()) file else null
     }
 
-    override fun getFile(url: String?, defaultFile: File): File {
+    override fun getFile(url: String?, defaultFile: File?): File? {
         return getFile(url) ?: defaultFile
     }
 

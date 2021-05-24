@@ -21,7 +21,7 @@ interface IDownloadDirectory {
     /**
      * 返回[url]对应的文件，如果文件不存在则返回[defaultFile]
      */
-    fun getFile(url: String?, defaultFile: File): File
+    fun getFile(url: String?, defaultFile: File?): File?
 
     /**
      * 返回[url]对应的缓存文件
