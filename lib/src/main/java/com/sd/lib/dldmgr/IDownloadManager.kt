@@ -81,6 +81,11 @@ interface IDownloadManager {
     fun cancelTask(url: String?): Boolean
 
     /**
+     * 监听任务
+     */
+    suspend fun awaitTask(url: String, callback: Callback? = null): File?
+
+    /**
      * 下载回调
      */
     interface Callback {
@@ -105,6 +110,16 @@ interface IDownloadManager {
          * 下载失败
          */
         fun onError(info: DownloadInfo)
+    }
+
+    abstract class CallbackAdapter : Callback {
+        override fun onPrepare(info: DownloadInfo) {}
+
+        override fun onProgress(info: DownloadInfo) {}
+
+        override fun onSuccess(info: DownloadInfo, file: File) {}
+
+        override fun onError(info: DownloadInfo) {}
     }
 
     companion object {

@@ -11,6 +11,9 @@ import com.sd.lib.dldmgr.FDownloadManager
 import com.sd.lib.dldmgr.IDownloadManager
 import com.sd.lib.dldmgr.directory.DownloadDirectory
 import com.sd.lib.dldmgr.directory.IDownloadDirectory
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.io.File
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -18,6 +21,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private val _url = URL_SMALL
     private lateinit var _downloadDirectory: IDownloadDirectory
+
+    private val _mainScope = MainScope()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,6 +78,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 // 添加下载任务
                 val addTask = FDownloadManager.default.addTask(downloadRequest)
                 Log.i(TAG, "click download addTask:${addTask}")
+
+                if (addTask) {
+                    _mainScope.launch {
+                        val file = FDownloadManager.default.awaitTask(_url)
+                        Log.i(TAG, "awaitTask file:${file}")
+                    }
+                }
             }
             _binding.btnCancel -> {
                 // 取消下载任务
@@ -83,6 +95,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        _mainScope.cancel()
+
         // 移除下载回调
         FDownloadManager.default.removeCallback(_downloadCallback)
         // 删除所有临时文件（下载中的临时文件不会被删除）

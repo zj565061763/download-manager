@@ -9,6 +9,8 @@ import com.sd.lib.dldmgr.utils.UrlCallbackHolder
 import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class FDownloadManager : IDownloadManager {
     private val _downloadDirectory: DownloadDirectory
@@ -151,6 +153,35 @@ class FDownloadManager : IDownloadManager {
             }
         }
         return result
+    }
+
+    override suspend fun awaitTask(url: String, callback: IDownloadManager.Callback?): File? {
+        return suspendCoroutine { continuation ->
+            val add = addUrlCallback(url, object : IDownloadManager.Callback {
+                override fun onPrepare(info: DownloadInfo) {
+                    callback?.onPrepare(info)
+                }
+
+                override fun onProgress(info: DownloadInfo) {
+                    callback?.onProgress(info)
+                }
+
+                override fun onSuccess(info: DownloadInfo, file: File) {
+                    callback?.onSuccess(info, file)
+                    continuation.resume(file)
+                }
+
+                override fun onError(info: DownloadInfo) {
+                    callback?.onError(info)
+                    continuation.resume(null)
+                }
+            })
+            if (add) {
+                // 等待任务完成
+            } else {
+                continuation.resume(null)
+            }
+        }
     }
 
     /**
