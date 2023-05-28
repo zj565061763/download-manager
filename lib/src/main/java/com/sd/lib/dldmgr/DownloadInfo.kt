@@ -1,7 +1,6 @@
 package com.sd.lib.dldmgr
 
-class DownloadInfo {
-    val url: String
+class DownloadInfo internal constructor(val url: String) {
 
     @Volatile
     var state: DownloadState = DownloadState.None
@@ -15,10 +14,6 @@ class DownloadInfo {
 
     var transmitParam = TransmitParam()
         private set
-
-    internal constructor(url: String) {
-        this.url = url
-    }
 
     /**
      * 准备状态
