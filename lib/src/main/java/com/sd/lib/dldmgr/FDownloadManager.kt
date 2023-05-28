@@ -69,14 +69,12 @@ object FDownloadManager : IDownloadManager {
     }
 
     override fun addTask(url: String?): Boolean {
-        val downloadRequest = DownloadRequest.url(url)
-        return addTask(downloadRequest)
+        return addTask(DownloadRequest.Builder().build(url))
     }
 
     @Synchronized
     override fun addTask(request: DownloadRequest): Boolean {
         val url = request.url
-        if (url.isNullOrEmpty()) return false
 
         val isDownloading = _mapDownloadInfo.containsKey(url)
         if (isDownloading) return true

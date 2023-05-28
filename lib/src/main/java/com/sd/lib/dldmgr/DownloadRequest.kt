@@ -1,22 +1,22 @@
 package com.sd.lib.dldmgr
 
-class DownloadRequest {
+class DownloadRequest private constructor(builder: Builder) {
     /** 下载地址 */
-    val url: String?
+    val url: String
 
     /** 是否需要断点下载 */
     val preferBreakpoint: Boolean?
 
-    private constructor(builder: Builder) {
+    init {
         url = builder.url
         preferBreakpoint = builder.preferBreakpoint
     }
 
     class Builder {
-        var url: String? = null
+        internal lateinit var url: String
             private set
 
-        var preferBreakpoint: Boolean? = null
+        internal var preferBreakpoint: Boolean? = null
             private set
 
         /**
@@ -24,21 +24,14 @@ class DownloadRequest {
          *
          * @param preferBreakpoint true-是；false-否；null-跟随默认配置
          */
-        fun setPreferBreakpoint(preferBreakpoint: Boolean?): Builder {
+        fun setPreferBreakpoint(preferBreakpoint: Boolean?) = apply {
             this.preferBreakpoint = preferBreakpoint
-            return this
         }
 
         fun build(url: String?): DownloadRequest {
+            require(!url.isNullOrEmpty()) { "url is null or empty" }
             this.url = url
             return DownloadRequest(this)
-        }
-    }
-
-    companion object {
-        @JvmStatic
-        fun url(url: String?): DownloadRequest {
-            return Builder().build(url)
         }
     }
 }
