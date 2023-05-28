@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
         _downloadDirectory = DownloadDirectory.from(getExternalFilesDir("my_download"))
 
         // 添加下载回调
-        FDownloadManager.default.addCallback(_downloadCallback)
+        FDownloadManager.addCallback(_downloadCallback)
     }
 
     private fun download() {
@@ -60,12 +60,12 @@ class MainActivity : ComponentActivity() {
             .build(URL)
 
         // 添加下载任务
-        val addTask = FDownloadManager.default.addTask(downloadRequest)
+        val addTask = FDownloadManager.addTask(downloadRequest)
         logMsg { "click download addTask:${addTask}" }
 
         if (addTask) {
             _mainScope.launch {
-                val file = FDownloadManager.default.awaitTask(URL)
+                val file = FDownloadManager.awaitTask(URL)
                 logMsg { "awaitTask file:${file}" }
             }
         }
@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
 
     private fun cancelDownload() {
         // 取消下载任务
-        FDownloadManager.default.cancelTask(URL)
+        FDownloadManager.cancelTask(URL)
     }
 
     /**
@@ -114,11 +114,11 @@ class MainActivity : ComponentActivity() {
         _mainScope.cancel()
 
         // 移除下载回调
-        FDownloadManager.default.removeCallback(_downloadCallback)
+        FDownloadManager.removeCallback(_downloadCallback)
         // 删除所有临时文件（下载中的临时文件不会被删除）
-        FDownloadManager.default.deleteTempFile()
+        FDownloadManager.deleteTempFile()
         // 删除下载文件（临时文件不会被删除）
-        FDownloadManager.default.deleteDownloadFile(null)
+        FDownloadManager.deleteDownloadFile(null)
 
         _downloadDirectory.deleteTempFile(null)
         _downloadDirectory.deleteFile(null)

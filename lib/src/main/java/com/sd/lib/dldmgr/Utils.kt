@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.webkit.MimeTypeMap
 import com.sd.lib.dldmgr.directory.IDownloadDirectory
 import java.io.File
@@ -100,5 +101,11 @@ internal object Utils {
             e.printStackTrace()
             return false
         }
+    }
+}
+
+internal inline fun logMsg(block: () -> String) {
+    if (DownloadManagerConfig.get().isDebug) {
+        Log.i("FDownloadManager", block())
     }
 }

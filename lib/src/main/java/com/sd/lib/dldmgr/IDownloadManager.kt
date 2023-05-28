@@ -5,24 +5,13 @@ import java.io.File
 interface IDownloadManager {
     /**
      * 添加回调对象，可以监听所有的下载任务
-     *
-     * @return true-添加成功或者已添加；false-添加失败
      */
-    fun addCallback(callback: Callback): Boolean
+    fun addCallback(callback: Callback)
 
     /**
      * 移除回调对象
      */
     fun removeCallback(callback: Callback)
-
-    /**
-     * 添加回调对象，监听指定[url]的任务，如果任务不存在则回调对象不会被添加
-     *
-     * 如果添加成功，则任务结束之后会自动移除回调对象
-     *
-     * @return true-添加成功或者已添加；false-添加失败
-     */
-    fun addUrlCallback(url: String?, callback: Callback): Boolean
 
     /**
      * 返回[url]对应的文件
@@ -112,7 +101,7 @@ interface IDownloadManager {
         fun onError(info: DownloadInfo)
     }
 
-    abstract class CallbackAdapter : Callback {
+    abstract class EmptyCallback : Callback {
         override fun onPrepare(info: DownloadInfo) {}
 
         override fun onProgress(info: DownloadInfo) {}
@@ -120,10 +109,5 @@ interface IDownloadManager {
         override fun onSuccess(info: DownloadInfo, file: File) {}
 
         override fun onError(info: DownloadInfo) {}
-    }
-
-    companion object {
-        @JvmField
-        val TAG = IDownloadManager::class.java.name
     }
 }

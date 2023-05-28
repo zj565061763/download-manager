@@ -3,64 +3,54 @@ package com.sd.lib.dldmgr
 import android.content.Context
 import com.sd.lib.dldmgr.executor.IDownloadExecutor
 import com.sd.lib.dldmgr.executor.impl.DefaultDownloadExecutor
+import java.io.File
 
 /**
  * 下载器配置
  */
-class DownloadManagerConfig {
-    val isDebug: Boolean
-    val context: Context
-    val downloadDirectory: String
-    val downloadExecutor: IDownloadExecutor
+class DownloadManagerConfig private constructor(builder: Builder) {
+    internal val isDebug: Boolean
+    internal val downloadDirectory: File
+    internal val downloadExecutor: IDownloadExecutor
 
-    private constructor(builder: Builder) {
+    init {
         isDebug = builder.isDebug
-        context = builder.context!!
-
-        var dir = builder.downloadDirectory
-        if (dir == null || dir.isEmpty()) {
-            val dirFile = Utils.getCacheDir("fdownload", context)
-            dir = dirFile.absolutePath
-        }
-        downloadDirectory = dir!!
+        downloadDirectory = builder.downloadDirectory ?: Utils.getCacheDir("fdownload", builder.context)
         downloadExecutor = builder.downloadExecutor ?: DefaultDownloadExecutor()
     }
 
     class Builder {
-        var isDebug = false
+        internal lateinit var context: Context
             private set
 
-        var context: Context? = null
+        internal var isDebug = false
             private set
 
-        var downloadDirectory: String? = null
+        internal var downloadDirectory: File? = null
             private set
 
-        var downloadExecutor: IDownloadExecutor? = null
+        internal var downloadExecutor: IDownloadExecutor? = null
             private set
 
         /**
-         * 设置调试模式
+         * 调试模式
          */
-        fun setDebug(debug: Boolean): Builder {
-            isDebug = debug
-            return this
+        fun setDebug(debug: Boolean) = apply {
+            this.isDebug = debug
         }
 
         /**
-         * 设置下载目录
+         * 下载目录
          */
-        fun setDownloadDirectory(directory: String?): Builder {
-            downloadDirectory = directory
-            return this
+        fun setDownloadDirectory(directory: File?) = apply {
+            this.downloadDirectory = directory
         }
 
         /**
-         * 设置下载执行器
+         * 下载执行器
          */
-        fun setDownloadExecutor(executor: IDownloadExecutor?): Builder {
-            downloadExecutor = executor
-            return this
+        fun setDownloadExecutor(executor: IDownloadExecutor?) = apply {
+            this.downloadExecutor = executor
         }
 
         fun build(context: Context): DownloadManagerConfig {
@@ -70,29 +60,31 @@ class DownloadManagerConfig {
     }
 
     companion object {
+        @Volatile
+        private var sConfig: DownloadManagerConfig? = null
+
+        /**
+         * 初始化
+         */
         @JvmStatic
-        private var _config: DownloadManagerConfig? = null
+        fun init(config: DownloadManagerConfig) {
+            synchronized(this) {
+                if (sConfig == null) {
+                    sConfig = config
+                }
+            }
+        }
 
         /**
          * 返回配置
          */
         @JvmStatic
         fun get(): DownloadManagerConfig {
-            return _config ?: throw RuntimeException("${DownloadManagerConfig::class.java.simpleName} has not been initialized")
-        }
-
-        /**
-         * 初始化
-         *
-         * @param config
-         */
-        @JvmStatic
-        @Synchronized
-        fun init(config: DownloadManagerConfig) {
-            if (_config != null) {
-                throw RuntimeException("${DownloadManagerConfig::class.java.simpleName} has been initialized")
+            val config = sConfig
+            if (config != null) return config
+            synchronized(this) {
+                return sConfig ?: error("DownloadManagerConfig has not been initialized")
             }
-            _config = config
         }
     }
 }
