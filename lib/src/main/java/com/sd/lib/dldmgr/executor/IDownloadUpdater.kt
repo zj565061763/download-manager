@@ -1,4 +1,4 @@
-package com.sd.lib.dldmgr
+package com.sd.lib.dldmgr.executor
 
 interface IDownloadUpdater {
     /**

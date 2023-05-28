@@ -1,7 +1,6 @@
 package com.sd.lib.dldmgr.executor
 
 import com.sd.lib.dldmgr.DownloadRequest
-import com.sd.lib.dldmgr.IDownloadUpdater
 import java.io.File
 
 interface IDownloadExecutor {

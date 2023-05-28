@@ -5,9 +5,9 @@ import com.sd.lib.dldmgr.directory.DownloadDirectory
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import com.sd.lib.dldmgr.exception.DownloadException
 import com.sd.lib.dldmgr.exception.DownloadHttpException
+import com.sd.lib.dldmgr.executor.IDownloadUpdater
 import com.sd.lib.dldmgr.utils.UrlCallbackHolder
 import java.io.File
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
