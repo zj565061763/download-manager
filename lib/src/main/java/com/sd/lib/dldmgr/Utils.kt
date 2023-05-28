@@ -10,10 +10,10 @@ import java.io.File
 import java.security.MessageDigest
 
 internal object Utils {
-    private val HANDLER = Handler(Looper.getMainLooper())
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     fun postMainThread(runnable: Runnable) {
-        HANDLER.post(runnable)
+        mainHandler.post(runnable)
     }
 
     fun getCacheDir(name: String, context: Context): File {
