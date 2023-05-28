@@ -269,16 +269,16 @@ private class DefaultDownloadUpdater(
         }
     }
 
-    override fun notifyError(e: Exception) {
+    override fun notifyError(t: Throwable) {
         if (_isFinish) return
         _isFinish = true
-        logMsg { "updater download error:${e} $_url" }
+        logMsg { "updater download error:${t} $_url" }
 
         var error = DownloadError.Other
-        if (e is DownloadHttpException) {
+        if (t is DownloadHttpException) {
             error = DownloadError.Http
         }
-        FDownloadManager.notifyError(_downloadInfo, error, DownloadException.wrap(e))
+        FDownloadManager.notifyError(_downloadInfo, error, DownloadException.wrap(t))
     }
 
     override fun notifyCancel() {

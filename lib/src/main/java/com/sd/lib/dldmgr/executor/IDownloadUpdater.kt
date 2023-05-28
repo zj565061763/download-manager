@@ -17,7 +17,7 @@ interface IDownloadUpdater {
     /**
      * 通知下载错误
      */
-    fun notifyError(e: Exception)
+    fun notifyError(t: Throwable)
 
     /**
      * 通知下载被取消
