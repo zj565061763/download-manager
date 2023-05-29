@@ -16,11 +16,13 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
         return if (_directory.fCreateDir()) _directory else null
     }
 
+    @Synchronized
     override fun urlFile(url: String?, defaultFile: File?): File? {
         val file = newUrlFile(url)
         return if (file?.exists() == true) file else defaultFile
     }
 
+    @Synchronized
     override fun urlTempFile(url: String?): File? {
         val file = newUrlTempFile(url) ?: return null
         return if (file.exists()) file else null
