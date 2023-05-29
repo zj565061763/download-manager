@@ -1,13 +1,11 @@
-package com.sd.lib.dldmgr
+package com.sd.lib.dldmgr.utils
 
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.webkit.MimeTypeMap
-import com.sd.lib.dldmgr.utils.libThrowOrReturn
+import com.sd.lib.dldmgr.DownloadManagerConfig
 import java.io.File
-import java.io.IOException
 import java.security.MessageDigest
 
 internal object Utils {

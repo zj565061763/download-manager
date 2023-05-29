@@ -1,6 +1,5 @@
 package com.sd.lib.dldmgr
 
-import com.sd.lib.dldmgr.Utils.fMoveToFile
 import com.sd.lib.dldmgr.directory.DownloadDirectory
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import com.sd.lib.dldmgr.exception.DownloadException
@@ -9,6 +8,9 @@ import com.sd.lib.dldmgr.exception.DownloadExceptionCompleteFile
 import com.sd.lib.dldmgr.exception.DownloadExceptionPrepareFile
 import com.sd.lib.dldmgr.exception.DownloadExceptionSubmitTask
 import com.sd.lib.dldmgr.executor.IDownloadUpdater
+import com.sd.lib.dldmgr.utils.Utils
+import com.sd.lib.dldmgr.utils.Utils.fMoveToFile
+import com.sd.lib.dldmgr.utils.logMsg
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.suspendCoroutine

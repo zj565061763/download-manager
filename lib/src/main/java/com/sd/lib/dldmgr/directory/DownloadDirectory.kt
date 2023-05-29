@@ -1,11 +1,11 @@
 package com.sd.lib.dldmgr.directory
 
-import com.sd.lib.dldmgr.Utils
-import com.sd.lib.dldmgr.Utils.fCopyToFile
-import com.sd.lib.dldmgr.Utils.fCreateDir
-import com.sd.lib.dldmgr.Utils.fDelete
-import com.sd.lib.dldmgr.Utils.fMoveToFile
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
+import com.sd.lib.dldmgr.utils.Utils
+import com.sd.lib.dldmgr.utils.Utils.fCopyToFile
+import com.sd.lib.dldmgr.utils.Utils.fCreateDir
+import com.sd.lib.dldmgr.utils.Utils.fDelete
+import com.sd.lib.dldmgr.utils.Utils.fMoveToFile
 import com.sd.lib.dldmgr.utils.fGetExt
 import com.sd.lib.dldmgr.utils.fNoneDotExt
 import java.io.File
