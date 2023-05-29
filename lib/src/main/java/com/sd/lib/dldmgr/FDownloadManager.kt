@@ -150,7 +150,7 @@ object FDownloadManager : IDownloadManager {
      * 任务结束，移除下载信息
      */
     @Synchronized
-    private fun removeDownloadInfo(url: String): DownloadInfoWrapper? {
+    private fun removeDownloadInfo(url: String) {
         val wrapper = _mapDownloadInfo.remove(url)
         if (wrapper != null) {
             _mapTempFile.remove(wrapper.tempFile)
@@ -158,7 +158,6 @@ object FDownloadManager : IDownloadManager {
                 "removeDownloadInfo url:${url} size:${_mapDownloadInfo.size} tempSize:${_mapTempFile.size}"
             }
         }
-        return wrapper
     }
 
     internal fun notifyProgress(info: DownloadInfo, total: Long, current: Long) {
