@@ -1,51 +1,41 @@
 package com.sd.lib.dldmgr
 
-class TransmitParam {
-    private val _calculateSpeedInterval: Long
+class TransmitParam @JvmOverloads constructor(calculateSpeedInterval: Long = 100) {
+    private val _calculateSpeedInterval: Long = calculateSpeedInterval.takeIf { it > 0 } ?: 100
     private var _lastTime: Long = 0
     private var _lastCount: Long = 0
 
-    /** 当前传输量 */
-    var current: Long = 0
-        private set
-
     /** 总量 */
     var total: Long = 0
+        private set
+
+    /** 当前传输量 */
+    var current: Long = 0
         private set
 
     /** 传输进度 */
     var progress = 0
         private set
 
-    /** 传输速率(Bps) */
+    /** 传输速率（B/S） */
     var speedBps = 0
         private set
 
-    /** 传输速率(KBps) */
+    /** 传输速率（KB/S） */
     val speedKBps: Int
         get() = speedBps / 1024
 
     /** 传输是否完成 */
-    val isComplete: Boolean
+    val isFinished: Boolean
         get() = current > 0 && current == total
-
-    @JvmOverloads
-    constructor(calculateSpeedInterval: Long = 100) {
-        val interval = if (calculateSpeedInterval > 0) {
-            calculateSpeedInterval
-        } else {
-            100
-        }
-        _calculateSpeedInterval = interval
-    }
 
     /**
      * 拷贝对象
      */
     fun copy(): TransmitParam {
         val copy = TransmitParam(_calculateSpeedInterval)
-        copy.current = current
         copy.total = total
+        copy.current = current
         copy.progress = progress
         copy.speedBps = speedBps
         copy._lastTime = _lastTime
