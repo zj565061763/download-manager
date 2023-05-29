@@ -18,8 +18,6 @@ import com.sd.lib.dldmgr.DownloadInfo
 import com.sd.lib.dldmgr.DownloadRequest
 import com.sd.lib.dldmgr.FDownloadManager
 import com.sd.lib.dldmgr.IDownloadManager
-import com.sd.lib.dldmgr.directory.DownloadDirectory
-import com.sd.lib.dldmgr.directory.IDownloadDirectory
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -28,8 +26,7 @@ import java.io.File
 private const val URL = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe"
 
 class MainActivity : ComponentActivity() {
-    private val _mainScope = MainScope()
-    private lateinit var _downloadDirectory: IDownloadDirectory
+    private val _scope = MainScope()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,9 +43,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // 创建一个目录，下载成功后可以拷贝到该目录
-        _downloadDirectory = DownloadDirectory.from(getExternalFilesDir("my_download")!!)
-
         // 添加下载回调
         FDownloadManager.addCallback(_downloadCallback)
     }
@@ -64,7 +58,7 @@ class MainActivity : ComponentActivity() {
         logMsg { "click download addTask:${addTask}" }
 
         if (addTask) {
-            _mainScope.launch {
+            _scope.launch {
                 val file = FDownloadManager.awaitTask(URL)
                 logMsg { "awaitTask file:${file}" }
             }
@@ -93,11 +87,6 @@ class MainActivity : ComponentActivity() {
 
         override fun onSuccess(info: DownloadInfo, file: File) {
             logMsg { "onSuccess:${info.url} file:${file.absolutePath} state:${info.state}" }
-
-            val start = System.currentTimeMillis()
-            _downloadDirectory.copyFile(file)
-
-            logMsg { "process file time:${(System.currentTimeMillis() - start)}" }
         }
 
         override fun onError(info: DownloadInfo) {
@@ -107,7 +96,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        _mainScope.cancel()
+        _scope.cancel()
 
         // 移除下载回调
         FDownloadManager.removeCallback(_downloadCallback)
@@ -115,9 +104,6 @@ class MainActivity : ComponentActivity() {
         FDownloadManager.deleteTempFile()
         // 删除下载文件（临时文件不会被删除）
         FDownloadManager.deleteDownloadFile(null)
-
-        _downloadDirectory.deleteTempFile(null)
-        _downloadDirectory.deleteFile(null)
     }
 }
 

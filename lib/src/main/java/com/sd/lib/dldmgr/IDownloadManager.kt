@@ -21,13 +21,6 @@ interface IDownloadManager {
     fun getDownloadFile(url: String?): File?
 
     /**
-     * 返回[url]对应的缓存文件
-     *
-     * @return null-文件不存在；不为null-缓存文件存在
-     */
-    fun getTempFile(url: String?): File?
-
-    /**
      * 删除下载文件（临时文件不会被删除）
      *
      * 如果指定了扩展名，则扩展名不能包含点符号

@@ -1,7 +1,6 @@
 package com.sd.lib.dldmgr
 
 import com.sd.lib.dldmgr.directory.DownloadDirectory
-import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import com.sd.lib.dldmgr.exception.DownloadException
 import com.sd.lib.dldmgr.exception.DownloadExceptionCancellation
 import com.sd.lib.dldmgr.exception.DownloadExceptionCompleteFile
@@ -43,10 +42,6 @@ object FDownloadManager : IDownloadManager {
         return _downloadDirectory.urlFile(url)
     }
 
-    override fun getTempFile(url: String?): File? {
-        return _downloadDirectory.urlTempFile(url)
-    }
-
     override fun deleteDownloadFile(ext: String?) {
         val count = _downloadDirectory.deleteFile(ext)
         if (count > 0) {
@@ -55,13 +50,9 @@ object FDownloadManager : IDownloadManager {
     }
 
     override fun deleteTempFile() {
-        val count = _downloadDirectory.deleteTempFile(
-            object : FileInterceptor {
-                override fun intercept(file: File): Boolean {
-                    return _mapTempFile.containsKey(file)
-                }
-            }
-        )
+        val count = _downloadDirectory.deleteTempFile {
+            _mapTempFile.containsKey(it)
+        }
         if (count > 0) {
             logMsg { "deleteTempFile count:${count}" }
         }
