@@ -17,7 +17,7 @@ class DownloadManagerConfig private constructor(builder: Builder) {
     init {
         this.context = builder.context
         this.isDebug = builder.isDebug
-        this.downloadDirectory = builder.downloadDirectory ?: Utils.getCacheDir("fdownload", builder.context)
+        this.downloadDirectory = builder.downloadDirectory ?: Utils.fCacheDir(builder.context, "fdownload")
         this.downloadExecutor = builder.downloadExecutor ?: DefaultDownloadExecutor()
     }
 

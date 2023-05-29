@@ -1,5 +1,6 @@
 package com.sd.lib.dldmgr
 
+import com.sd.lib.dldmgr.Utils.fMoveToFile
 import com.sd.lib.dldmgr.directory.DownloadDirectory
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import com.sd.lib.dldmgr.exception.DownloadException
@@ -248,7 +249,7 @@ private class DefaultDownloadUpdater(
             return
         }
 
-        if (Utils.moveFile(_tempFile, downloadFile)) {
+        if (_tempFile.fMoveToFile(downloadFile)) {
             FDownloadManager.notifySuccess(_downloadInfo, downloadFile)
         } else {
             logMsg { "updater download success error rename temp file to download file $_url" }

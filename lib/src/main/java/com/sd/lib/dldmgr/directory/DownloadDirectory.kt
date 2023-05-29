@@ -1,6 +1,11 @@
 package com.sd.lib.dldmgr.directory
 
 import com.sd.lib.dldmgr.Utils
+import com.sd.lib.dldmgr.Utils.fCopyToFile
+import com.sd.lib.dldmgr.Utils.fCreateDir
+import com.sd.lib.dldmgr.Utils.fDelete
+import com.sd.lib.dldmgr.Utils.fGetExt
+import com.sd.lib.dldmgr.Utils.fMoveToFile
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import java.io.File
 
@@ -8,7 +13,7 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
     private val _directory = directory
 
     override fun checkExist(): Boolean {
-        return Utils.checkDir(_directory)
+        return _directory.fCreateDir()
     }
 
     override fun getFile(url: String?, defaultFile: File?): File? {
@@ -27,10 +32,10 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
         if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
 
         val dir = _directory
-        if (!Utils.checkDir(dir)) return file
+        if (!dir.fCreateDir()) return file
 
         val newFile = File(dir, file.name)
-        return if (Utils.copyFile(file, newFile)) {
+        return if (file.fCopyToFile(newFile)) {
             newFile
         } else {
             file
@@ -43,10 +48,10 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
         if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
 
         val dir = _directory
-        if (!Utils.checkDir(dir)) return file
+        if (!dir.fCreateDir()) return file
 
         val newFile = File(dir, file.name)
-        return if (Utils.moveFile(file, newFile)) {
+        return if (file.fMoveToFile(newFile)) {
             newFile
         } else {
             file
@@ -60,7 +65,7 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
         }
 
         val files = getAllFile()
-        if (files == null || files.isEmpty()) return 0
+        if (files.isNullOrEmpty()) return 0
 
         var count = 0
         var delete = false
@@ -71,11 +76,11 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
             if (ext == null) {
                 delete = true
             } else {
-                val itemExt = Utils.getExt(file.absolutePath)
+                val itemExt = file.absolutePath.fGetExt()
                 if (ext == itemExt) delete = true
             }
 
-            if (delete && Utils.delete(file)) {
+            if (delete && file.fDelete()) {
                 count++
             }
         }
@@ -85,7 +90,7 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
     @Synchronized
     override fun deleteTempFile(interceptor: FileInterceptor?): Int {
         val files = getAllFile()
-        if (files == null || files.isEmpty()) return 0
+        if (files.isNullOrEmpty()) return 0
 
         var count = 0
         for (file in files) {
@@ -93,7 +98,7 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
                 continue
             }
             if (file.name.endsWith(IDownloadDirectory.EXT_TEMP)) {
-                if (Utils.delete(file)) count++
+                if (file.fDelete()) count++
             }
         }
         return count
@@ -101,22 +106,22 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
 
     private fun getAllFile(): Array<File>? {
         val dir = _directory
-        if (!Utils.checkDir(dir)) return null
+        if (!dir.fCreateDir()) return null
 
         val files = dir.listFiles()
         return if (files == null || files.isEmpty()) null else files
     }
 
     internal fun newUrlFile(url: String?): File? {
-        if (url == null || url.isEmpty()) {
+        if (url.isNullOrEmpty()) {
             return null
         }
-        val ext = Utils.getExt(url)
+        val ext = url.fGetExt()
         return createUrlFile(url, ext)
     }
 
     internal fun newUrlTempFile(url: String?): File? {
-        if (url == null || url.isEmpty()) {
+        if (url.isNullOrEmpty()) {
             return null
         }
         val ext = IDownloadDirectory.EXT_TEMP
@@ -127,9 +132,9 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
         if (url.isEmpty()) return null
 
         val dir = _directory
-        if (!Utils.checkDir(dir)) return null
+        if (!dir.fCreateDir()) return null
 
-        val finalExt = if (ext == null || ext.isEmpty()) {
+        val finalExt = if (ext.isNullOrEmpty()) {
             ""
         } else {
             if (ext.startsWith(".")) ext else ".${ext}"
