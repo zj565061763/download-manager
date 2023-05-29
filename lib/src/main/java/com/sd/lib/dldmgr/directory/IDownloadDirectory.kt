@@ -33,7 +33,7 @@ interface IDownloadDirectory {
     fun takeFile(file: File): File
 
     /**
-     * 删除文件（临时文件不会被删除）
+     * 删除文件（临时文件[TempExt]不会被删除）
      * @param ext 文件扩展名（例如mp3）null-删除所有文件；空字符串-删除扩展名为空的文件
      * @return 返回删除的文件数量
      */
@@ -57,6 +57,6 @@ interface IDownloadDirectory {
 
     companion object {
         /** 临时文件扩展名  */
-        const val EXT_TEMP = ".temp"
+        const val TempExt = "temp"
     }
 }

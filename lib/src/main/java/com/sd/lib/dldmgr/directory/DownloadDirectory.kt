@@ -6,8 +6,8 @@ import com.sd.lib.dldmgr.Utils.fCreateDir
 import com.sd.lib.dldmgr.Utils.fDelete
 import com.sd.lib.dldmgr.Utils.fMoveToFile
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
-import com.sd.lib.dldmgr.utils.fDotExt
 import com.sd.lib.dldmgr.utils.fGetExt
+import com.sd.lib.dldmgr.utils.removePrefixDot
 import java.io.File
 
 class DownloadDirectory private constructor(directory: File) : IDownloadDirectory {
@@ -61,33 +61,32 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
         }
     }
 
-    @Synchronized
     override fun deleteFile(ext: String?): Int {
-        val finalExt = if (ext.isNullOrEmpty()) ext else {
-            ext.fDotExt()
-        }
+        return modify { dir ->
+            val files = dir?.listFiles()
+            if (!files.isNullOrEmpty()) {
+                val formatDot = if (ext.isNullOrEmpty()) ext else {
+                    removePrefixDot(ext)
+                }
 
-        val files = getAllFile()
-        if (files.isNullOrEmpty()) return 0
+                var count = 0
+                for (item in files) {
+                    val itemExt = item.extension
+                    if (itemExt == IDownloadDirectory.TempExt) continue
 
-        var count = 0
-        var delete = false
-        for (file in files) {
-            val name = file.name
-            if (name.endsWith(IDownloadDirectory.EXT_TEMP)) continue
-
-            if (ext == null) {
-                delete = true
+                    if (formatDot == null) {
+                        if (item.fDelete()) count++
+                    } else {
+                        if (formatDot == itemExt) {
+                            if (item.fDelete()) count++
+                        }
+                    }
+                }
+                count
             } else {
-                val itemExt = file.absolutePath.fGetExt()
-                if (ext == itemExt) delete = true
-            }
-
-            if (delete && file.fDelete()) {
-                count++
+                0
             }
         }
-        return count
     }
 
     @Synchronized
@@ -100,7 +99,7 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
             if (interceptor != null && interceptor.intercept(file)) {
                 continue
             }
-            if (file.name.endsWith(IDownloadDirectory.EXT_TEMP)) {
+            if (file.name.endsWith(IDownloadDirectory.TempExt)) {
                 if (file.fDelete()) count++
             }
         }
@@ -124,7 +123,7 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
         if (url.isNullOrEmpty()) {
             return null
         }
-        val ext = IDownloadDirectory.EXT_TEMP
+        val ext = IDownloadDirectory.TempExt
         return createUrlFile(url, ext)
     }
 

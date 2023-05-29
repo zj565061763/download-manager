@@ -44,7 +44,7 @@ private fun formatDefaultExt(defaultExt: String?): String {
     }
 }
 
-private fun removePrefixDot(input: String): String {
+internal fun removePrefixDot(input: String): String {
     var ret = input
     while (ret.startsWith(".")) {
         ret = ret.removePrefix(".")
