@@ -12,16 +12,9 @@ interface IDownloadDirectory {
     fun checkExist(): Boolean
 
     /**
-     * 返回[url]对应的文件
-     *
-     * @return null-文件不存在；不为null-文件存在
-     */
-    fun getFile(url: String?): File?
-
-    /**
      * 返回[url]对应的文件，如果文件不存在则返回[defaultFile]
      */
-    fun getFile(url: String?, defaultFile: File?): File?
+    fun getFile(url: String?, defaultFile: File? = null): File?
 
     /**
      * 返回[url]对应的缓存文件

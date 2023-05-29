@@ -4,24 +4,16 @@ import com.sd.lib.dldmgr.Utils
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import java.io.File
 
-class DownloadDirectory : IDownloadDirectory {
-    protected val directory: File
-
-    private constructor(directory: File?) {
-        this.directory = directory ?: File("path")
-    }
+class DownloadDirectory private constructor(directory: File) : IDownloadDirectory {
+    private val _directory = directory
 
     override fun checkExist(): Boolean {
-        return Utils.checkDir(directory)
-    }
-
-    override fun getFile(url: String?): File? {
-        val file = newUrlFile(url) ?: return null
-        return if (file.exists()) file else null
+        return Utils.checkDir(_directory)
     }
 
     override fun getFile(url: String?, defaultFile: File?): File? {
-        return getFile(url) ?: defaultFile
+        val file = newUrlFile(url)
+        return if (file?.exists() == true) file else defaultFile
     }
 
     override fun getTempFile(url: String?): File? {
@@ -34,7 +26,7 @@ class DownloadDirectory : IDownloadDirectory {
         if (!file.exists()) return file
         if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
 
-        val dir = directory
+        val dir = _directory
         if (!Utils.checkDir(dir)) return file
 
         val newFile = File(dir, file.name)
@@ -50,7 +42,7 @@ class DownloadDirectory : IDownloadDirectory {
         if (!file.exists()) return file
         if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
 
-        val dir = directory
+        val dir = _directory
         if (!Utils.checkDir(dir)) return file
 
         val newFile = File(dir, file.name)
@@ -108,7 +100,7 @@ class DownloadDirectory : IDownloadDirectory {
     }
 
     private fun getAllFile(): Array<File>? {
-        val dir = directory
+        val dir = _directory
         if (!Utils.checkDir(dir)) return null
 
         val files = dir.listFiles()
@@ -134,7 +126,7 @@ class DownloadDirectory : IDownloadDirectory {
     private fun createUrlFile(url: String, ext: String?): File? {
         if (url.isEmpty()) return null
 
-        val dir = directory
+        val dir = _directory
         if (!Utils.checkDir(dir)) return null
 
         val finalExt = if (ext == null || ext.isEmpty()) {
@@ -148,22 +140,22 @@ class DownloadDirectory : IDownloadDirectory {
     }
 
     override fun hashCode(): Int {
-        return directory.hashCode()
+        return _directory.hashCode()
     }
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
         if (other !is DownloadDirectory) return false
-        return directory == other.directory
+        return _directory == other._directory
     }
 
     override fun toString(): String {
-        return directory.toString()
+        return _directory.toString()
     }
 
     companion object {
         @JvmStatic
-        fun from(directory: File?): DownloadDirectory {
+        fun from(directory: File): DownloadDirectory {
             return DownloadDirectory(directory)
         }
     }

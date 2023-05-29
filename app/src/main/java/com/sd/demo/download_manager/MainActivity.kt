@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // 创建一个目录，下载成功后可以拷贝到该目录
-        _downloadDirectory = DownloadDirectory.from(getExternalFilesDir("my_download"))
+        _downloadDirectory = DownloadDirectory.from(getExternalFilesDir("my_download")!!)
 
         // 添加下载回调
         FDownloadManager.addCallback(_downloadCallback)
