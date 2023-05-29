@@ -79,11 +79,6 @@ interface IDownloadManager {
      */
     interface Callback {
         /**
-         * 准备下载（已提交未开始）
-         */
-        fun onPrepare(info: DownloadInfo)
-
-        /**
          * 下载中
          */
         fun onProgress(info: DownloadInfo)
@@ -102,8 +97,6 @@ interface IDownloadManager {
     }
 
     abstract class EmptyCallback : Callback {
-        override fun onPrepare(info: DownloadInfo) {}
-
         override fun onProgress(info: DownloadInfo) {}
 
         override fun onSuccess(info: DownloadInfo, file: File) {}

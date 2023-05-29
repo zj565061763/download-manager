@@ -1,15 +1,14 @@
 package com.sd.lib.dldmgr
 
+import com.sd.lib.dldmgr.exception.DownloadException
+
 class DownloadInfo internal constructor(val url: String) {
 
     @Volatile
     var state: DownloadState = DownloadState.None
         private set
 
-    var error: DownloadError? = null
-        private set
-
-    var throwable: Throwable? = null
+    var exception: DownloadException? = null
         private set
 
     var transmitParam = TransmitParam()
@@ -43,11 +42,10 @@ class DownloadInfo internal constructor(val url: String) {
     /**
      * 下载失败
      */
-    internal fun notifyError(error: DownloadError, throwable: Throwable?) {
+    internal fun notifyError(exception: DownloadException) {
         assert(state != DownloadState.Success && state != DownloadState.Error)
         state = DownloadState.Error
-        this.error = error
-        this.throwable = throwable
+        this.exception = exception
     }
 
     /**
@@ -56,8 +54,7 @@ class DownloadInfo internal constructor(val url: String) {
     internal fun copy(): DownloadInfo {
         return DownloadInfo(url).apply {
             this.state = this@DownloadInfo.state
-            this.error = this@DownloadInfo.error
-            this.throwable = this@DownloadInfo.throwable
+            this.exception = this@DownloadInfo.exception
             this.transmitParam = this@DownloadInfo.transmitParam.copy()
         }
     }

@@ -80,10 +80,6 @@ class MainActivity : ComponentActivity() {
      * 下载回调
      */
     private val _downloadCallback: IDownloadManager.Callback = object : IDownloadManager.Callback {
-        override fun onPrepare(info: DownloadInfo) {
-            logMsg { "onPrepare:${info.url} state:${info.state}" }
-        }
-
         override fun onProgress(info: DownloadInfo) {
             // 下载参数
             val param = info.transmitParam
@@ -105,7 +101,7 @@ class MainActivity : ComponentActivity() {
         }
 
         override fun onError(info: DownloadInfo) {
-            logMsg { "onError:${info.error} throwable:${info.throwable} state:${info.state}" }
+            logMsg { "onError:${info.exception} state:${info.state}" }
         }
     }
 

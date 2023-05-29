@@ -9,14 +9,16 @@ import java.io.File
  * 下载器配置
  */
 class DownloadManagerConfig private constructor(builder: Builder) {
+    internal val context: Context
     internal val isDebug: Boolean
     internal val downloadDirectory: File
     internal val downloadExecutor: IDownloadExecutor
 
     init {
-        isDebug = builder.isDebug
-        downloadDirectory = builder.downloadDirectory ?: Utils.getCacheDir("fdownload", builder.context)
-        downloadExecutor = builder.downloadExecutor ?: DefaultDownloadExecutor()
+        this.context = builder.context
+        this.isDebug = builder.isDebug
+        this.downloadDirectory = builder.downloadDirectory ?: Utils.getCacheDir("fdownload", builder.context)
+        this.downloadExecutor = builder.downloadExecutor ?: DefaultDownloadExecutor()
     }
 
     class Builder {

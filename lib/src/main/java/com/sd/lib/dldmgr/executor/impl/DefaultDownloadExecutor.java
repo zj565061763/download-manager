@@ -3,7 +3,7 @@ package com.sd.lib.dldmgr.executor.impl;
 import android.text.TextUtils;
 
 import com.sd.lib.dldmgr.DownloadRequest;
-import com.sd.lib.dldmgr.exception.DownloadHttpException;
+import com.sd.lib.dldmgr.exception.DownloadHttpExceptionResponseCode;
 import com.sd.lib.dldmgr.executor.IDownloadExecutor;
 import com.sd.lib.dldmgr.executor.IDownloadUpdater;
 
@@ -76,7 +76,7 @@ public class DefaultDownloadExecutor implements IDownloadExecutor {
     }
 
     @Override
-    public boolean submit(final DownloadRequest request, final File file, final IDownloadUpdater updater) {
+    public void submit(final DownloadRequest request, final File file, final IDownloadUpdater updater) {
         final Boolean requestPreferBreakpoint = request.getPreferBreakpoint();
         final boolean preferBreakpoint = requestPreferBreakpoint != null ? requestPreferBreakpoint : mPreferBreakpoint;
 
@@ -109,7 +109,7 @@ public class DefaultDownloadExecutor implements IDownloadExecutor {
                     if (code == HttpURLConnection.HTTP_OK) {
                         downloadNormal(httpRequest, file, updater);
                     } else {
-                        updater.notifyError(new DownloadHttpException(null));
+                        updater.notifyError(new DownloadHttpExceptionResponseCode(code));
                     }
                 } catch (Exception e) {
                     Throwable throwable = e;
@@ -124,7 +124,7 @@ public class DefaultDownloadExecutor implements IDownloadExecutor {
                         }
                     }
 
-                    updater.notifyError(new DownloadHttpException(throwable));
+                    updater.notifyError(throwable);
                 } finally {
                     mMapTask.remove(url);
                 }
@@ -134,8 +134,6 @@ public class DefaultDownloadExecutor implements IDownloadExecutor {
         final Future<?> future = getExecutor().submit(runnable);
         final TaskInfo taskInfo = new TaskInfo(future, updater);
         mMapTask.put(url, taskInfo);
-
-        return true;
     }
 
     private void downloadNormal(HttpRequest request, File file, final IDownloadUpdater updater) throws IOException {

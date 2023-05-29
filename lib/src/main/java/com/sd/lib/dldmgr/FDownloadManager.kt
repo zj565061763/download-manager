@@ -3,7 +3,10 @@ package com.sd.lib.dldmgr
 import com.sd.lib.dldmgr.directory.DownloadDirectory
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import com.sd.lib.dldmgr.exception.DownloadException
-import com.sd.lib.dldmgr.exception.DownloadHttpException
+import com.sd.lib.dldmgr.exception.DownloadExceptionCancellation
+import com.sd.lib.dldmgr.exception.DownloadExceptionCompleteFile
+import com.sd.lib.dldmgr.exception.DownloadExceptionPrepareFile
+import com.sd.lib.dldmgr.exception.DownloadExceptionSubmitTask
 import com.sd.lib.dldmgr.executor.IDownloadUpdater
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -18,20 +21,18 @@ object FDownloadManager : IDownloadManager {
     private val config get() = DownloadManagerConfig.get()
     private val _downloadDirectory by lazy { DownloadDirectory.from(config.downloadDirectory) }
 
+    @Synchronized
     override fun addCallback(callback: IDownloadManager.Callback) {
-        synchronized(this@FDownloadManager) {
-            val put = _callbackHolder.put(callback, "")
-            if (put == null) {
-                logMsg { "addCallback:${callback} size:${_callbackHolder.size}" }
-            }
+        val put = _callbackHolder.put(callback, "")
+        if (put == null) {
+            logMsg { "addCallback:${callback} size:${_callbackHolder.size}" }
         }
     }
 
+    @Synchronized
     override fun removeCallback(callback: IDownloadManager.Callback) {
-        synchronized(this@FDownloadManager) {
-            if (_callbackHolder.remove(callback) != null) {
-                logMsg { "removeCallback:${callback} size:${_callbackHolder.size}" }
-            }
+        if (_callbackHolder.remove(callback) != null) {
+            logMsg { "removeCallback:${callback} size:${_callbackHolder.size}" }
         }
     }
 
@@ -75,23 +76,23 @@ object FDownloadManager : IDownloadManager {
     @Synchronized
     override fun addTask(request: DownloadRequest): Boolean {
         val url = request.url
-
-        val isDownloading = _mapDownloadInfo.containsKey(url)
-        if (isDownloading) return true
+        if (_mapDownloadInfo.containsKey(url)) return true
 
         val info = DownloadInfo(url)
+
         val tempFile = _downloadDirectory.newUrlTempFile(url)
         if (tempFile == null) {
             logMsg { "addTask error create temp file failed:${url}" }
-            notifyError(info, DownloadError.CreateTempFile)
+            notifyError(info, DownloadExceptionPrepareFile())
             return false
         }
 
         val downloadUpdater = DefaultDownloadUpdater(info, tempFile, _downloadDirectory)
-        val submitted = config.downloadExecutor.submit(request, tempFile, downloadUpdater)
-        if (!submitted) {
-            logMsg { "addTask error submit request failed:${url}" }
-            notifyError(info, DownloadError.SubmitFailed)
+        try {
+            config.downloadExecutor.submit(request, tempFile, downloadUpdater)
+        } catch (e: Exception) {
+            check(e !is DownloadException)
+            notifyError(info, DownloadExceptionSubmitTask(e))
             return false
         }
 
@@ -100,16 +101,15 @@ object FDownloadManager : IDownloadManager {
         logMsg {
             "addTask url:${url} temp:${tempFile.absolutePath} size:${_mapDownloadInfo.size} tempSize:${_mapTempFile.size}"
         }
-        notifyPrepare(info)
         return true
     }
 
     @Synchronized
     override fun cancelTask(url: String?): Boolean {
         if (url.isNullOrEmpty()) return false
+        val info = getDownloadInfo(url) ?: return false
 
-        val downloadInfo = getDownloadInfo(url)
-        val isDownloading = downloadInfo != null && !downloadInfo.state.isCompleted
+        val isDownloading = !info.state.isCompleted
         if (isDownloading) {
             logMsg { "cancelTask start url:${url}" }
         }
@@ -167,16 +167,6 @@ object FDownloadManager : IDownloadManager {
         return wrapper
     }
 
-    private fun notifyPrepare(info: DownloadInfo) {
-        info.notifyPrepare()
-        val copyInfo = info.copy()
-        Utils.postMainThread {
-            for (item in _callbackHolder.keys) {
-                item.onPrepare(copyInfo)
-            }
-        }
-    }
-
     internal fun notifyProgress(info: DownloadInfo, total: Long, current: Long) {
         val changed = info.notifyDownloading(total, current)
         if (!changed) return
@@ -204,15 +194,15 @@ object FDownloadManager : IDownloadManager {
     }
 
     @Synchronized
-    internal fun notifyError(info: DownloadInfo, error: DownloadError, throwable: Throwable? = null) {
+    internal fun notifyError(info: DownloadInfo, exception: DownloadException) {
         // 立即移除下载信息，避免重新开始任务无效
         removeDownloadInfo(info.url)
-        info.notifyError(error, throwable)
+        info.notifyError(exception)
         val copyInfo = info.copy()
 
         val callbacks = _callbackHolder.keys.toTypedArray()
         Utils.postMainThread {
-            logMsg { "notify callback onError url:${copyInfo.url} error:${copyInfo.error}" }
+            logMsg { "notify callback onError url:${copyInfo.url} exception:${exception}" }
             for (item in callbacks) {
                 item.onError(copyInfo)
             }
@@ -250,14 +240,14 @@ private class DefaultDownloadUpdater(
 
         if (!_tempFile.exists()) {
             logMsg { "updater download success error temp file not exists $_url" }
-            FDownloadManager.notifyError(_downloadInfo, DownloadError.TempFileNotExists)
+            FDownloadManager.notifyError(_downloadInfo, DownloadExceptionCompleteFile())
             return
         }
 
         val downloadFile = _downloadDirectory.newUrlFile(_url)
         if (downloadFile == null) {
             logMsg { "updater download success error create download file $_url" }
-            FDownloadManager.notifyError(_downloadInfo, DownloadError.CreateDownloadFile)
+            FDownloadManager.notifyError(_downloadInfo, DownloadExceptionCompleteFile())
             return
         }
 
@@ -265,7 +255,7 @@ private class DefaultDownloadUpdater(
             FDownloadManager.notifySuccess(_downloadInfo, downloadFile)
         } else {
             logMsg { "updater download success error rename temp file to download file $_url" }
-            FDownloadManager.notifyError(_downloadInfo, DownloadError.RenameFile)
+            FDownloadManager.notifyError(_downloadInfo, DownloadExceptionCompleteFile())
         }
     }
 
@@ -273,28 +263,18 @@ private class DefaultDownloadUpdater(
         if (_isFinish) return
         _isFinish = true
         logMsg { "updater download error:${t} $_url" }
-
-        var error = DownloadError.Other
-        if (t is DownloadHttpException) {
-            error = DownloadError.Http
-        }
-        FDownloadManager.notifyError(_downloadInfo, error, DownloadException.wrap(t))
+        FDownloadManager.notifyError(_downloadInfo, DownloadException.wrap(t))
     }
 
     override fun notifyCancel() {
         if (_isFinish) return
         _isFinish = true
-        logMsg { "${IDownloadUpdater::class.java.simpleName} download cancel $_url" }
-        FDownloadManager.notifyError(_downloadInfo, DownloadError.Cancel)
+        logMsg { "updater download cancel $_url" }
+        FDownloadManager.notifyError(_downloadInfo, DownloadExceptionCancellation())
     }
 }
 
-private class DownloadInfoWrapper {
-    val downloadInfo: DownloadInfo
-    val tempFile: File
-
-    constructor(downloadInfo: DownloadInfo, tempFile: File) {
-        this.downloadInfo = downloadInfo
-        this.tempFile = tempFile
-    }
-}
+private class DownloadInfoWrapper(
+    val downloadInfo: DownloadInfo,
+    val tempFile: File,
+)
