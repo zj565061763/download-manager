@@ -7,7 +7,7 @@ import com.sd.lib.dldmgr.Utils.fDelete
 import com.sd.lib.dldmgr.Utils.fMoveToFile
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
 import com.sd.lib.dldmgr.utils.fGetExt
-import com.sd.lib.dldmgr.utils.removePrefixDot
+import com.sd.lib.dldmgr.utils.fNoneDotExt
 import java.io.File
 
 /** 临时文件扩展名  */
@@ -69,7 +69,7 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
             val files = dir?.listFiles()
             if (!files.isNullOrEmpty()) {
                 val formatDot = if (ext.isNullOrEmpty()) ext else {
-                    removePrefixDot(ext)
+                    ext.fNoneDotExt()
                 }
 
                 var count = 0
