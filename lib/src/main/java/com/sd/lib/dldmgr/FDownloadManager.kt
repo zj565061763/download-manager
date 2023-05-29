@@ -182,31 +182,26 @@ object FDownloadManager : IDownloadManager {
 
     internal fun notifySuccess(info: DownloadInfo, file: File) {
         if (info.notifySuccess()) {
+            removeDownloadInfo(info.url)
             val copyInfo = info.copy()
             Utils.postMainThread {
-                synchronized(this@FDownloadManager) {
-                    removeDownloadInfo(copyInfo.url)
-                    logMsg { "notify callback onSuccess url:${copyInfo.url} file:${file.absolutePath}" }
-                    for (item in _callbackHolder.keys) {
-                        item.onSuccess(copyInfo, file)
-                    }
+                logMsg { "notify callback onSuccess url:${copyInfo.url} file:${file.absolutePath}" }
+                for (item in _callbackHolder.keys) {
+                    item.onSuccess(copyInfo, file)
                 }
             }
         }
     }
 
-    @Synchronized
     internal fun notifyError(info: DownloadInfo, exception: DownloadException) {
-        // 立即移除下载信息，避免重新开始任务无效
-        removeDownloadInfo(info.url)
-        info.notifyError(exception)
-        val copyInfo = info.copy()
-
-        val callbacks = _callbackHolder.keys.toTypedArray()
-        Utils.postMainThread {
-            logMsg { "notify callback onError url:${copyInfo.url} exception:${exception}" }
-            for (item in callbacks) {
-                item.onError(copyInfo)
+        if (info.notifyError(exception)) {
+            removeDownloadInfo(info.url)
+            val copyInfo = info.copy()
+            Utils.postMainThread {
+                logMsg { "notify callback onError url:${copyInfo.url} exception:${exception}" }
+                for (item in _callbackHolder.keys) {
+                    item.onError(copyInfo)
+                }
             }
         }
     }
