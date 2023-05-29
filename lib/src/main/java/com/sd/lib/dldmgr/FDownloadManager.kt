@@ -77,30 +77,34 @@ object FDownloadManager : IDownloadManager {
         val url = request.url
         if (_mapDownloadInfo.containsKey(url)) return true
 
-        val info = DownloadInfo(url)
+        val downloadInfo = DownloadInfo(url)
 
         val tempFile = _downloadDirectory.newUrlTempFile(url)
         if (tempFile == null) {
             logMsg { "addTask error create temp file failed:${url}" }
-            notifyError(info, DownloadExceptionPrepareFile())
+            notifyError(downloadInfo, DownloadExceptionPrepareFile())
             return false
         }
 
         val downloadUpdater = DefaultDownloadUpdater(
-            downloadInfo = info,
+            downloadInfo = downloadInfo,
             tempFile = tempFile,
             downloadDirectory = _downloadDirectory,
         )
 
         try {
-            config.downloadExecutor.submit(request, tempFile, downloadUpdater)
+            config.downloadExecutor.submit(
+                request = request,
+                file = tempFile,
+                updater = downloadUpdater,
+            )
         } catch (e: Exception) {
             check(e !is DownloadException)
-            notifyError(info, DownloadExceptionSubmitTask(e))
+            notifyError(downloadInfo, DownloadExceptionSubmitTask(e))
             return false
         }
 
-        _mapDownloadInfo[url] = DownloadInfoWrapper(info, tempFile)
+        _mapDownloadInfo[url] = DownloadInfoWrapper(downloadInfo, tempFile)
         _mapTempFile[tempFile] = url
         logMsg {
             "addTask url:${url} temp:${tempFile.absolutePath} size:${_mapDownloadInfo.size} tempSize:${_mapTempFile.size}"
