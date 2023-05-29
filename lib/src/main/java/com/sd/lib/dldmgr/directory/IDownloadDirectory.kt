@@ -54,9 +54,4 @@ interface IDownloadDirectory {
          */
         fun intercept(file: File): Boolean
     }
-
-    companion object {
-        /** 临时文件扩展名  */
-        const val TempExt = "temp"
-    }
 }

@@ -10,6 +10,9 @@ import com.sd.lib.dldmgr.utils.fGetExt
 import com.sd.lib.dldmgr.utils.removePrefixDot
 import java.io.File
 
+/** 临时文件扩展名  */
+private const val TempExt = "temp"
+
 class DownloadDirectory private constructor(directory: File) : IDownloadDirectory {
     private val _directory = directory
 
@@ -72,7 +75,7 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
                 var count = 0
                 for (item in files) {
                     val itemExt = item.extension
-                    if (itemExt == IDownloadDirectory.TempExt) continue
+                    if (itemExt == TempExt) continue
 
                     if (formatDot == null) {
                         if (item.fDelete()) count++
@@ -99,7 +102,7 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
             if (interceptor != null && interceptor.intercept(file)) {
                 continue
             }
-            if (file.name.endsWith(IDownloadDirectory.TempExt)) {
+            if (file.name.endsWith(TempExt)) {
                 if (file.fDelete()) count++
             }
         }
@@ -123,7 +126,7 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
         if (url.isNullOrEmpty()) {
             return null
         }
-        val ext = IDownloadDirectory.TempExt
+        val ext = TempExt
         return createUrlFile(url, ext)
     }
 
