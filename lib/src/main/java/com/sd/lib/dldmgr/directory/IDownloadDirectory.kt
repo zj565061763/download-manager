@@ -34,12 +34,7 @@ interface IDownloadDirectory {
 
     /**
      * 删除文件（临时文件不会被删除）
-     *
-     * 如果指定了扩展名，则扩展名不能包含点符号。
-     * 合法：mp3
-     * 不合法：.mp3
-     *
-     * @param ext 文件扩展名(例如mp3)；null-删除所有文件；空字符串-删除扩展名为空的文件
+     * @param ext 文件扩展名（例如mp3）null-删除所有文件；空字符串-删除扩展名为空的文件
      * @return 返回删除的文件数量
      */
     fun deleteFile(ext: String?): Int

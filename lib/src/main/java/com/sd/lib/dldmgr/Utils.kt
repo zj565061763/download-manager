@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.webkit.MimeTypeMap
+import com.sd.lib.dldmgr.utils.libThrowOrReturn
 import java.io.File
 import java.io.IOException
 import java.security.MessageDigest
@@ -121,67 +122,10 @@ internal object Utils {
         val bytes = MessageDigest.getInstance("MD5").digest(value.toByteArray())
         return bytes.joinToString("") { "%02X".format(it) }
     }
-
-    /**
-     * 获取扩展名，不包括"."，
-     * 例如：png
-     */
-    @JvmOverloads
-    fun String?.fGetExt(defaultExt: String? = null): String {
-        if (this.isNullOrEmpty()) {
-            return formatDefaultExt(defaultExt)
-        }
-
-        var ext = MimeTypeMap.getFileExtensionFromUrl(this)
-        if (ext.isNullOrEmpty()) {
-            ext = this.substringAfterLast(delimiter = ".", missingDelimiterValue = "")
-        }
-
-        return if (ext.isEmpty()) {
-            formatDefaultExt(defaultExt)
-        } else {
-            removePrefixDot(ext)
-        }
-    }
-
-    private fun formatDefaultExt(defaultExt: String?): String {
-        return if (defaultExt.isNullOrEmpty()) {
-            ""
-        } else {
-            removePrefixDot(defaultExt)
-        }
-    }
-
-    private fun removePrefixDot(input: String): String {
-        var ret = input
-        while (ret.startsWith(".")) {
-            ret = ret.removePrefix(".")
-        }
-        return ret
-    }
 }
 
 internal inline fun logMsg(block: () -> String) {
     if (DownloadManagerConfig.get().isDebug) {
         Log.i("FDownloadManager", block())
-    }
-}
-
-internal fun libWhiteExceptionList(): List<Class<out Exception>> {
-    return listOf(
-        IOException::class.java,
-        SecurityException::class.java,
-    )
-}
-
-internal fun <T> Exception.libThrowOrReturn(
-    whiteList: List<Class<out Exception>> = libWhiteExceptionList(),
-    block: () -> T,
-): T {
-    if (this.javaClass in whiteList) {
-        this.printStackTrace()
-        return block()
-    } else {
-        throw this
     }
 }

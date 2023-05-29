@@ -4,9 +4,10 @@ import com.sd.lib.dldmgr.Utils
 import com.sd.lib.dldmgr.Utils.fCopyToFile
 import com.sd.lib.dldmgr.Utils.fCreateDir
 import com.sd.lib.dldmgr.Utils.fDelete
-import com.sd.lib.dldmgr.Utils.fGetExt
 import com.sd.lib.dldmgr.Utils.fMoveToFile
 import com.sd.lib.dldmgr.directory.IDownloadDirectory.FileInterceptor
+import com.sd.lib.dldmgr.utils.fDotExt
+import com.sd.lib.dldmgr.utils.fGetExt
 import java.io.File
 
 class DownloadDirectory private constructor(directory: File) : IDownloadDirectory {
@@ -16,40 +17,54 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
         return if (_directory.fCreateDir()) _directory else null
     }
 
-    @Synchronized
+    private fun getAllFile(): Array<File>? {
+        val dir = createDir() ?: return null
+        val files = dir.listFiles()
+        return if (files.isNullOrEmpty()) null else files
+    }
+
     override fun urlFile(url: String?, defaultFile: File?): File? {
-        val file = newUrlFile(url)
-        return if (file?.exists() == true) file else defaultFile
+        return modify {
+            val file = newUrlFile(url)
+            if (file?.exists() == true) file else defaultFile
+        }
     }
 
-    @Synchronized
     override fun urlTempFile(url: String?): File? {
-        val file = newUrlTempFile(url) ?: return null
-        return if (file.exists()) file else null
+        return modify {
+            val file = newUrlTempFile(url)
+            if (file?.exists() == true) file else null
+        }
     }
 
-    @Synchronized
     override fun copyFile(file: File): File {
-        if (!file.exists()) return file
-        if (file.isDirectory) error("file should not be a directory")
-        val dir = createDir() ?: return file
-        val newFile = dir.resolve(file.name)
-        return if (file.fCopyToFile(newFile)) newFile else file
+        return modify { dir ->
+            if (dir != null && file.exists()) {
+                if (file.isDirectory) error("file should not be a directory")
+                val newFile = dir.resolve(file.name)
+                if (file.fCopyToFile(newFile)) newFile else file
+            } else {
+                file
+            }
+        }
     }
 
-    @Synchronized
     override fun takeFile(file: File): File {
-        if (!file.exists()) return file
-        if (file.isDirectory) error("file should not be a directory")
-        val dir = createDir() ?: return file
-        val newFile = dir.resolve(file.name)
-        return if (file.fMoveToFile(newFile)) newFile else file
+        return modify { dir ->
+            if (dir != null && file.exists()) {
+                if (file.isDirectory) error("file should not be a directory")
+                val newFile = dir.resolve(file.name)
+                if (file.fMoveToFile(newFile)) newFile else file
+            } else {
+                file
+            }
+        }
     }
 
     @Synchronized
     override fun deleteFile(ext: String?): Int {
-        if (ext != null && ext.startsWith(".")) {
-            throw IllegalArgumentException("ext should not start with dot ${ext}")
+        val finalExt = if (ext.isNullOrEmpty()) ext else {
+            ext.fDotExt()
         }
 
         val files = getAllFile()
@@ -92,12 +107,9 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
         return count
     }
 
-    private fun getAllFile(): Array<File>? {
-        val dir = _directory
-        if (!dir.fCreateDir()) return null
-
-        val files = dir.listFiles()
-        return if (files == null || files.isEmpty()) null else files
+    @Synchronized
+    fun <T> modify(block: (dir: File?) -> T): T {
+        return block(createDir())
     }
 
     internal fun newUrlFile(url: String?): File? {
