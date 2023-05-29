@@ -170,13 +170,12 @@ object FDownloadManager : IDownloadManager {
     }
 
     internal fun notifyProgress(info: DownloadInfo, total: Long, current: Long) {
-        val changed = info.notifyProgress(total, current)
-        if (!changed) return
-
-        val copyInfo = info.copy()
-        Utils.postMainThread {
-            for (item in _callbackHolder.keys) {
-                item.onProgress(copyInfo)
+        if (info.notifyProgress(total, current)) {
+            val copyInfo = info.copy()
+            Utils.postMainThread {
+                for (item in _callbackHolder.keys) {
+                    item.onProgress(copyInfo)
+                }
             }
         }
     }
