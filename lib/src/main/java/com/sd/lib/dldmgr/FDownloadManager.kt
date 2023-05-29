@@ -65,8 +65,7 @@ object FDownloadManager : IDownloadManager {
     }
 
     override fun getDownloadInfo(url: String?): DownloadInfo? {
-        val wrapper = _mapDownloadInfo[url] ?: return null
-        return wrapper.downloadInfo
+        return _mapDownloadInfo[url]?.downloadInfo
     }
 
     override fun addTask(url: String?): Boolean {
