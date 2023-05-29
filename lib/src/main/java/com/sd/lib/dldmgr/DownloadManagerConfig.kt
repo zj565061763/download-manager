@@ -1,5 +1,6 @@
 package com.sd.lib.dldmgr
 
+import android.annotation.SuppressLint
 import android.content.Context
 import com.sd.lib.dldmgr.executor.IDownloadExecutor
 import com.sd.lib.dldmgr.executor.impl.DefaultDownloadExecutor
@@ -63,6 +64,7 @@ class DownloadManagerConfig private constructor(builder: Builder) {
     }
 
     companion object {
+        @SuppressLint("StaticFieldLeak")
         @Volatile
         private var sConfig: DownloadManagerConfig? = null
 
