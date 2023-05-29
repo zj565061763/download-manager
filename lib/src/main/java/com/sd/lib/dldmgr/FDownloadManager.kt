@@ -14,7 +14,7 @@ import kotlin.coroutines.suspendCoroutine
 
 object FDownloadManager : IDownloadManager {
     private val _mapDownloadInfo: MutableMap<String, DownloadInfoWrapper> = ConcurrentHashMap()
-    private val _mapTempFile: MutableMap<File, String> = ConcurrentHashMap()
+    private val _mapTempFile: MutableMap<File, String> = hashMapOf()
 
     private val _callbackHolder: MutableMap<IDownloadManager.Callback, String> = ConcurrentHashMap()
 
@@ -109,7 +109,7 @@ object FDownloadManager : IDownloadManager {
         if (url.isNullOrEmpty()) return false
         val info = getDownloadInfo(url) ?: return false
 
-        val isDownloading = !info.state.isCompleted
+        val isDownloading = !info.state.isFinished
         if (isDownloading) {
             logMsg { "cancelTask start url:${url}" }
         }

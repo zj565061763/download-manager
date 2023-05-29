@@ -2,10 +2,7 @@ package com.sd.lib.dldmgr
 
 enum class DownloadState {
     /** 初始状态 */
-    None,
-
-    /** 准备下载 */
-    Prepare,
+    Initialized,
 
     /** 下载中 */
     Downloading,
@@ -17,6 +14,6 @@ enum class DownloadState {
     Error;
 
     /** 是否处于完成状态，[Success]或者[Error] */
-    val isCompleted: Boolean
+    val isFinished: Boolean
         get() = this == Success || this == Error
 }

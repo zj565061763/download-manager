@@ -5,7 +5,7 @@ import com.sd.lib.dldmgr.exception.DownloadException
 class DownloadInfo internal constructor(val url: String) {
 
     @Volatile
-    var state: DownloadState = DownloadState.None
+    var state: DownloadState = DownloadState.Initialized
         private set
 
     var exception: DownloadException? = null
@@ -15,18 +15,10 @@ class DownloadInfo internal constructor(val url: String) {
         private set
 
     /**
-     * 准备状态
-     */
-    internal fun notifyPrepare() {
-        assert(state == DownloadState.None)
-        state = DownloadState.Prepare
-    }
-
-    /**
      * 下载中
      */
     internal fun notifyDownloading(total: Long, current: Long): Boolean {
-        assert(state != DownloadState.Success && state != DownloadState.Error)
+        if (state.isFinished) return false
         state = DownloadState.Downloading
         return transmitParam.transmit(total, current)
     }
@@ -35,15 +27,15 @@ class DownloadInfo internal constructor(val url: String) {
      * 下载成功
      */
     internal fun notifySuccess() {
-        assert(state != DownloadState.Success && state != DownloadState.Error)
-        state = DownloadState.Success
+        if (state.isFinished) return
+        this.state = DownloadState.Success
     }
 
     /**
      * 下载失败
      */
     internal fun notifyError(exception: DownloadException) {
-        assert(state != DownloadState.Success && state != DownloadState.Error)
+        if (state.isFinished) return
         state = DownloadState.Error
         this.exception = exception
     }
