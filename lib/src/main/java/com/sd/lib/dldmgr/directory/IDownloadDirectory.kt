@@ -7,21 +7,16 @@ import java.io.File
  */
 interface IDownloadDirectory {
     /**
-     * 检查目录是否存在
-     */
-    fun checkExist(): Boolean
-
-    /**
      * 返回[url]对应的文件，如果文件不存在则返回[defaultFile]
      */
-    fun getFile(url: String?, defaultFile: File? = null): File?
+    fun urlFile(url: String?, defaultFile: File? = null): File?
 
     /**
      * 返回[url]对应的缓存文件
      *
      * @return null-文件不存在；不为null-文件存在
      */
-    fun getTempFile(url: String?): File?
+    fun urlTempFile(url: String?): File?
 
     /**
      * 拷贝[file]文件到当前目录

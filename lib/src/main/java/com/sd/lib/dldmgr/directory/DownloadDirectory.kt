@@ -12,16 +12,16 @@ import java.io.File
 class DownloadDirectory private constructor(directory: File) : IDownloadDirectory {
     private val _directory = directory
 
-    override fun checkExist(): Boolean {
-        return _directory.fCreateDir()
+    private fun createDir(): File? {
+        return if (_directory.fCreateDir()) _directory else null
     }
 
-    override fun getFile(url: String?, defaultFile: File?): File? {
+    override fun urlFile(url: String?, defaultFile: File?): File? {
         val file = newUrlFile(url)
         return if (file?.exists() == true) file else defaultFile
     }
 
-    override fun getTempFile(url: String?): File? {
+    override fun urlTempFile(url: String?): File? {
         val file = newUrlTempFile(url) ?: return null
         return if (file.exists()) file else null
     }
@@ -29,17 +29,10 @@ class DownloadDirectory private constructor(directory: File) : IDownloadDirector
     @Synchronized
     override fun copyFile(file: File): File {
         if (!file.exists()) return file
-        if (file.isDirectory) throw IllegalArgumentException("file must not be a directory")
-
-        val dir = _directory
-        if (!dir.fCreateDir()) return file
-
-        val newFile = File(dir, file.name)
-        return if (file.fCopyToFile(newFile)) {
-            newFile
-        } else {
-            file
-        }
+        if (file.isDirectory) error("file should not be a directory")
+        val dir = createDir() ?: return file
+        val newFile = dir.resolve(file.name)
+        return if (file.fCopyToFile(newFile)) newFile else file
     }
 
     @Synchronized

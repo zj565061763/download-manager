@@ -38,11 +38,11 @@ object FDownloadManager : IDownloadManager {
     }
 
     override fun getDownloadFile(url: String?): File? {
-        return _downloadDirectory.getFile(url)
+        return _downloadDirectory.urlFile(url)
     }
 
     override fun getTempFile(url: String?): File? {
-        return _downloadDirectory.getTempFile(url)
+        return _downloadDirectory.urlTempFile(url)
     }
 
     override fun deleteDownloadFile(ext: String?) {
