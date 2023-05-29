@@ -75,8 +75,8 @@ class TransmitParam @JvmOverloads constructor(calculateSpeedInterval: Long = 100
     }
 
     private fun reset() {
-        current = 0
         total = 0
+        current = 0
         progress = 0
         speedBps = 0
         _lastTime = 0
