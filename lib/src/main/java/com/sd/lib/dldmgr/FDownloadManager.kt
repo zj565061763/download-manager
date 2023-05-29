@@ -170,7 +170,7 @@ object FDownloadManager : IDownloadManager {
     }
 
     internal fun notifyProgress(info: DownloadInfo, total: Long, current: Long) {
-        val changed = info.notifyDownloading(total, current)
+        val changed = info.notifyProgress(total, current)
         if (!changed) return
 
         val copyInfo = info.copy()

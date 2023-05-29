@@ -15,9 +15,9 @@ class DownloadInfo internal constructor(val url: String) {
         private set
 
     /**
-     * 下载中
+     * 下载进度
      */
-    internal fun notifyDownloading(total: Long, current: Long): Boolean {
+    internal fun notifyProgress(total: Long, current: Long): Boolean {
         if (state.isFinished) return false
         state = DownloadState.Downloading
         return transmitParam.transmit(total, current)
