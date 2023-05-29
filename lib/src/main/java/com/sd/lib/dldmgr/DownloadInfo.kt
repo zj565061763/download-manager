@@ -26,18 +26,20 @@ class DownloadInfo internal constructor(val url: String) {
     /**
      * 下载成功
      */
-    internal fun notifySuccess() {
-        if (state.isFinished) return
+    internal fun notifySuccess(): Boolean {
+        if (!state.isFinished) return false
         this.state = DownloadState.Success
+        return true
     }
 
     /**
      * 下载失败
      */
-    internal fun notifyError(exception: DownloadException) {
-        if (state.isFinished) return
+    internal fun notifyError(exception: DownloadException): Boolean {
+        if (state.isFinished) return false
         state = DownloadState.Error
         this.exception = exception
+        return true
     }
 
     /**
