@@ -86,7 +86,12 @@ object FDownloadManager : IDownloadManager {
             return false
         }
 
-        val downloadUpdater = DefaultDownloadUpdater(info, tempFile, _downloadDirectory)
+        val downloadUpdater = DefaultDownloadUpdater(
+            downloadInfo = info,
+            tempFile = tempFile,
+            downloadDirectory = _downloadDirectory,
+        )
+
         try {
             config.downloadExecutor.submit(request, tempFile, downloadUpdater)
         } catch (e: Exception) {
@@ -204,13 +209,13 @@ object FDownloadManager : IDownloadManager {
 }
 
 private class DefaultDownloadUpdater(
-    info: DownloadInfo,
+    downloadInfo: DownloadInfo,
     tempFile: File,
     downloadDirectory: DownloadDirectory,
 ) : IDownloadUpdater {
 
-    private val _url = info.url
-    private val _downloadInfo = info
+    private val _url = downloadInfo.url
+    private val _downloadInfo = downloadInfo
     private val _tempFile = tempFile
     private val _downloadDirectory = downloadDirectory
 
