@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
             // 下载速率
             val speed = param.speedKBps
 
-            logMsg { "onProgress:${progress} $speed" }
+            logMsg { "onProgress:${progress}% $speed KB/S" }
         }
 
         override fun onSuccess(info: DownloadInfo, file: File) {
@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
         }
 
         override fun onError(info: DownloadInfo) {
-            logMsg { "onError:${info.exception}" }
+            logMsg { "onError:${info.exception!!.javaClass.name}" }
         }
     }
 
