@@ -3,7 +3,6 @@ package com.sd.lib.dldmgr
 import android.content.Context
 import com.sd.lib.dldmgr.executor.IDownloadExecutor
 import com.sd.lib.dldmgr.executor.impl.DefaultDownloadExecutor
-import com.sd.lib.io.fCacheDir
 import java.io.File
 
 /**
@@ -16,7 +15,11 @@ class DownloadManagerConfig private constructor(builder: Builder) {
 
     init {
         this.isDebug = builder.isDebug
-        this.downloadDirectory = builder.downloadDirectory ?: fCacheDir("fdownload")
+        this.downloadDirectory = builder.downloadDirectory ?: kotlin.run {
+            val context = builder.context
+            val dir = context.externalCacheDir ?: context.cacheDir ?: error("cache dir is unavailable")
+            dir.resolve("f_lib_download")
+        }
         this.downloadExecutor = builder.downloadExecutor ?: DefaultDownloadExecutor()
     }
 
