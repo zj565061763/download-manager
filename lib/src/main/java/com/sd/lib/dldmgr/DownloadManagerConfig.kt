@@ -15,11 +15,9 @@ class DownloadManagerConfig private constructor(builder: Builder) {
 
     init {
         this.isDebug = builder.isDebug
-        this.downloadDirectory = builder.downloadDirectory ?: kotlin.run {
-            val context = builder.context
-            val dir = context.externalCacheDir ?: context.cacheDir ?: error("cache dir is unavailable")
-            dir.resolve("f_lib_download")
-        }
+        this.downloadDirectory = builder.downloadDirectory ?: builder.context.run {
+            externalCacheDir ?: cacheDir ?: error("cache dir is unavailable")
+        }.resolve("f_lib_download")
         this.downloadExecutor = builder.downloadExecutor ?: DefaultDownloadExecutor()
     }
 
