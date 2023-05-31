@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.sd.io)
 }
 
 afterEvaluate {

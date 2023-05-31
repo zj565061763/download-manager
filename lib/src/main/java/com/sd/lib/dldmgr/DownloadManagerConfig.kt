@@ -1,25 +1,22 @@
 package com.sd.lib.dldmgr
 
-import android.annotation.SuppressLint
 import android.content.Context
 import com.sd.lib.dldmgr.executor.IDownloadExecutor
 import com.sd.lib.dldmgr.executor.impl.DefaultDownloadExecutor
-import com.sd.lib.dldmgr.utils.Utils
+import com.sd.lib.io.fCacheDir
 import java.io.File
 
 /**
  * 下载器配置
  */
 class DownloadManagerConfig private constructor(builder: Builder) {
-    internal val context: Context
     internal val isDebug: Boolean
     internal val downloadDirectory: File
     internal val downloadExecutor: IDownloadExecutor
 
     init {
-        this.context = builder.context
         this.isDebug = builder.isDebug
-        this.downloadDirectory = builder.downloadDirectory ?: Utils.fCacheDir(builder.context, "fdownload")
+        this.downloadDirectory = builder.downloadDirectory ?: fCacheDir("fdownload")
         this.downloadExecutor = builder.downloadExecutor ?: DefaultDownloadExecutor()
     }
 
@@ -64,7 +61,6 @@ class DownloadManagerConfig private constructor(builder: Builder) {
     }
 
     companion object {
-        @SuppressLint("StaticFieldLeak")
         @Volatile
         private var sConfig: DownloadManagerConfig? = null
 

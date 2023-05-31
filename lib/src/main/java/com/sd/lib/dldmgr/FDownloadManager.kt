@@ -1,15 +1,18 @@
 package com.sd.lib.dldmgr
 
-import com.sd.lib.dldmgr.directory.DownloadDirectory
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import com.sd.lib.dldmgr.exception.DownloadException
 import com.sd.lib.dldmgr.exception.DownloadExceptionCancellation
 import com.sd.lib.dldmgr.exception.DownloadExceptionCompleteFile
 import com.sd.lib.dldmgr.exception.DownloadExceptionPrepareFile
 import com.sd.lib.dldmgr.exception.DownloadExceptionSubmitTask
 import com.sd.lib.dldmgr.executor.IDownloadUpdater
-import com.sd.lib.dldmgr.utils.Utils
-import com.sd.lib.dldmgr.utils.Utils.fMoveToFile
-import com.sd.lib.dldmgr.utils.logMsg
+import com.sd.lib.io.IDir
+import com.sd.lib.io.fDir
+import com.sd.lib.io.fExist
+import com.sd.lib.io.fMoveToFile
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.suspendCoroutine
@@ -21,7 +24,9 @@ object FDownloadManager : IDownloadManager {
     private val _callbackHolder: MutableMap<IDownloadManager.Callback, String> = ConcurrentHashMap()
 
     private val config get() = DownloadManagerConfig.get()
-    private val _downloadDirectory by lazy { DownloadDirectory.from(config.downloadDirectory) }
+    private val _downloadDirectory by lazy { config.downloadDirectory.fDir() }
+
+    private val _handler by lazy { Handler(Looper.getMainLooper()) }
 
     @Synchronized
     override fun addCallback(callback: IDownloadManager.Callback) {
@@ -39,7 +44,8 @@ object FDownloadManager : IDownloadManager {
     }
 
     override fun getDownloadFile(url: String?): File? {
-        return _downloadDirectory.urlFile(url)
+        val file = _downloadDirectory.getKeyFile(url)
+        return if (file.fExist()) file else null
     }
 
     override fun deleteDownloadFile(ext: String?) {
@@ -73,7 +79,7 @@ object FDownloadManager : IDownloadManager {
 
         val downloadInfo = DownloadInfo(url)
 
-        val tempFile = _downloadDirectory.newUrlTempFile(url)
+        val tempFile = _downloadDirectory.getKeyTempFile(url)
         if (tempFile == null) {
             logMsg { "addTask error create temp file failed:${url}" }
             notifyError(downloadInfo, DownloadExceptionPrepareFile())
@@ -166,7 +172,7 @@ object FDownloadManager : IDownloadManager {
     internal fun notifyProgress(info: DownloadInfo, total: Long, current: Long) {
         if (info.notifyProgress(total, current)) {
             val copyInfo = info.copy()
-            Utils.postMainThread {
+            _handler.post {
                 for (item in _callbackHolder.keys) {
                     item.onProgress(copyInfo)
                 }
@@ -178,7 +184,7 @@ object FDownloadManager : IDownloadManager {
         if (info.notifySuccess()) {
             removeDownloadInfo(info.url)
             val copyInfo = info.copy()
-            Utils.postMainThread {
+            _handler.post {
                 logMsg { "notify callback onSuccess url:${copyInfo.url} file:${file.absolutePath}" }
                 for (item in _callbackHolder.keys) {
                     item.onSuccess(copyInfo, file)
@@ -191,7 +197,7 @@ object FDownloadManager : IDownloadManager {
         if (info.notifyError(exception)) {
             removeDownloadInfo(info.url)
             val copyInfo = info.copy()
-            Utils.postMainThread {
+            _handler.post {
                 logMsg { "notify callback onError url:${copyInfo.url} exception:${exception}" }
                 for (item in _callbackHolder.keys) {
                     item.onError(copyInfo)
@@ -204,7 +210,7 @@ object FDownloadManager : IDownloadManager {
 private class DefaultDownloadUpdater(
     downloadInfo: DownloadInfo,
     tempFile: File,
-    downloadDirectory: DownloadDirectory,
+    downloadDirectory: IDir,
 ) : IDownloadUpdater {
 
     private val _url = downloadInfo.url
@@ -235,7 +241,7 @@ private class DefaultDownloadUpdater(
             return
         }
 
-        val downloadFile = _downloadDirectory.newUrlFile(_url)
+        val downloadFile = _downloadDirectory.getKeyFile(_url)
         if (downloadFile == null) {
             logMsg { "updater download success error create download file $_url" }
             FDownloadManager.notifyError(_downloadInfo, DownloadExceptionCompleteFile())
@@ -269,3 +275,9 @@ private class DownloadInfoWrapper(
     val downloadInfo: DownloadInfo,
     val tempFile: File,
 )
+
+internal inline fun logMsg(block: () -> String) {
+    if (DownloadManagerConfig.get().isDebug) {
+        Log.i("FDownloadManager", block())
+    }
+}

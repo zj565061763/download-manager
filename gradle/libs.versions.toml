@@ -20,6 +20,7 @@ androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-mani
 androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 
 androidx-activity-compose = "androidx.activity:activity-compose:1.7.1"
+sd-io = "com.github.zj565061763:io:8cf92d1bc9"
 
 junit = "junit:junit:4.13.2"
 androidx-test-ext-junit = "androidx.test.ext:junit:1.1.5"
