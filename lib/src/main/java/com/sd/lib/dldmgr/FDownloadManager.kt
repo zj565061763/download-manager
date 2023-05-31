@@ -49,18 +49,20 @@ object FDownloadManager : IDownloadManager {
     }
 
     override fun deleteDownloadFile(ext: String?) {
-        val count = _downloadDirectory.deleteFile(ext)
-        if (count > 0) {
-            logMsg { "deleteDownloadFile count:${count} ext:${ext}" }
+        _downloadDirectory.deleteFile(ext).let { count ->
+            if (count > 0) {
+                logMsg { "deleteDownloadFile count:${count} ext:${ext}" }
+            }
         }
     }
 
     override fun deleteTempFile() {
-        val count = _downloadDirectory.deleteTempFile {
+        _downloadDirectory.deleteTempFile {
             _mapTempFile.containsKey(it)
-        }
-        if (count > 0) {
-            logMsg { "deleteTempFile count:${count}" }
+        }.let { count ->
+            if (count > 0) {
+                logMsg { "deleteTempFile count:${count}" }
+            }
         }
     }
 
