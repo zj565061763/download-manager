@@ -44,8 +44,7 @@ object FDownloadManager : IDownloadManager {
     }
 
     override fun getDownloadFile(url: String?): File? {
-        val file = _downloadDirectory.getKeyFile(url)
-        return if (file.fExist()) file else null
+        return _downloadDirectory.getKeyFile(url).takeIf { it.fExist() }
     }
 
     override fun deleteDownloadFile(ext: String?) {
