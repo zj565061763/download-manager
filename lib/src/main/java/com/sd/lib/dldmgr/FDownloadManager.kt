@@ -66,7 +66,7 @@ object FDownloadManager : IDownloadManager {
     }
 
     override fun getProgress(url: String?): DownloadProgress? {
-        return _mapDownloadInfo[url]?.downloadInfo?.progress
+        return _mapDownloadInfo[url]?.downloadInfo?.getProgress()
     }
 
     override fun addTask(url: String?): Boolean {
@@ -169,8 +169,7 @@ object FDownloadManager : IDownloadManager {
     }
 
     internal fun notifyProgress(info: DownloadInfo, total: Long, current: Long) {
-        if (info.notifyProgress(total, current)) {
-            val progress = info.progress
+        info.notifyProgress(total, current)?.let { progress ->
             _handler.post {
                 for (item in _callbackHolder.keys) {
                     item.onProgress(info.url, progress)
