@@ -34,23 +34,16 @@ internal class DownloadInfo(val url: String) {
      * 下载进度
      */
     @Synchronized
-    fun getProgress(): DownloadProgress {
-        return DownloadProgress(
-            total = _transmitParam.total,
-            current = _transmitParam.current,
-            speedBps = _transmitParam.speedBps,
-        )
-    }
-
-    /**
-     * 下载进度
-     */
-    @Synchronized
     fun notifyProgress(total: Long, current: Long): DownloadProgress? {
         if (_state.isFinished) return null
         _state = DownloadState.Downloading
-        _transmitParam.transmit(total, current)
-        return getProgress()
+        return if (_transmitParam.transmit(total, current)) {
+            DownloadProgress(
+                total = _transmitParam.total,
+                current = _transmitParam.current,
+                speedBps = _transmitParam.speedBps,
+            )
+        } else null
     }
 
     /**
