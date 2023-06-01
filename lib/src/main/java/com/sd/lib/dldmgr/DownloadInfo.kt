@@ -78,8 +78,7 @@ private enum class DownloadState {
         get() = this == Success || this == Error
 }
 
-private class TransmitParam(calculateSpeedInterval: Long = 100) {
-    private val _calculateSpeedInterval: Long = calculateSpeedInterval.coerceAtLeast(100)
+private class TransmitParam {
     private var _lastSpeedTime: Long = 0
     private var _lastSpeedCount: Long = 0
 
@@ -113,22 +112,21 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
             return oldProgress != progress
         }
 
-        kotlin.run {
-            val time = System.currentTimeMillis()
-            val interval = time - _lastSpeedTime
-            if (interval >= _calculateSpeedInterval) {
-                val count = current - _lastSpeedCount
-                speedBps = (count * (1000f / interval)).toInt().coerceAtLeast(0)
-                _lastSpeedTime = time
-                _lastSpeedCount = current
-            }
-        }
-
         this.total = total
         this.current = current
-        this.progress = (current * 100 / total).toInt().coerceAtMost(100)
+        val newProgress = (current * 100 / total).toInt().coerceAtMost(100)
+        this.progress = newProgress
 
-        return this.progress > oldProgress
+        if (newProgress > oldProgress) {
+            val time = System.currentTimeMillis()
+            val changeTime = time - _lastSpeedTime
+            val changeCount = current - _lastSpeedCount
+            speedBps = (changeCount * (1000f / changeTime)).toInt().coerceAtLeast(0)
+            _lastSpeedTime = time
+            _lastSpeedCount = current
+        }
+
+        return newProgress > oldProgress
     }
 
     private fun reset() {
