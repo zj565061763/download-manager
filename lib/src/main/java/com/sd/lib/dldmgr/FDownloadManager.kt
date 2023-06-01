@@ -116,9 +116,7 @@ object FDownloadManager : IDownloadManager {
     @Synchronized
     override fun cancelTask(url: String?): Boolean {
         if (url.isNullOrEmpty()) return false
-
-        val info = _mapDownloadInfo[url]?.downloadInfo ?: return false
-        if (info.state.isFinished) return false
+        if (getProgress(url) == null) return false
 
         logMsg { "cancelTask start url:${url}" }
         val result = config.downloadExecutor.cancel(url)

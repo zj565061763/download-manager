@@ -24,8 +24,7 @@ data class DownloadProgress(
 
 internal class DownloadInfo(val url: String) {
     @Volatile
-    var state: DownloadState = DownloadState.Initialized
-        private set
+    private var state: DownloadState = DownloadState.Initialized
 
     private val _transmitParam = TransmitParam()
 
@@ -64,6 +63,24 @@ internal class DownloadInfo(val url: String) {
         state = DownloadState.Error
         return true
     }
+}
+
+private enum class DownloadState {
+    /** 初始状态 */
+    Initialized,
+
+    /** 下载中 */
+    Downloading,
+
+    /** 下载成功 */
+    Success,
+
+    /** 下载失败 */
+    Error;
+
+    /** 是否处于完成状态，[Success]或者[Error] */
+    val isFinished: Boolean
+        get() = this == Success || this == Error
 }
 
 private class TransmitParam(calculateSpeedInterval: Long = 100) {
