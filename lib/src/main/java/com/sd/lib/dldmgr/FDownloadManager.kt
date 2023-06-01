@@ -121,7 +121,7 @@ object FDownloadManager : IDownloadManager {
         return result
     }
 
-    override suspend fun awaitTask(url: String, callback: IDownloadManager.Callback?): File? {
+    override suspend fun awaitTask(url: String, callback: IDownloadManager.Callback?): Result<File> {
         return suspendCoroutine { continuation ->
             // TODO
 //            val add = addUrlCallback(url, object : IDownloadManager.Callback {

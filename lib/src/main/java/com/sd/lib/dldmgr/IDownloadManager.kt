@@ -66,7 +66,7 @@ interface IDownloadManager {
     /**
      * 监听任务
      */
-    suspend fun awaitTask(url: String, callback: Callback? = null): File?
+    suspend fun awaitTask(url: String, callback: Callback? = null): Result<File>
 
     /**
      * 下载回调
