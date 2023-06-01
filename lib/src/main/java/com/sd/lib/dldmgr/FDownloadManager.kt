@@ -159,9 +159,7 @@ object FDownloadManager : IDownloadManager {
         val wrapper = _mapDownloadInfo.remove(url)
         if (wrapper != null) {
             _mapTempFile.remove(wrapper.tempFile)
-            logMsg {
-                "removeDownloadInfo url:${url} size:${_mapDownloadInfo.size} tempSize:${_mapTempFile.size}"
-            }
+            logMsg { "removeDownloadInfo url:${url} size:${_mapDownloadInfo.size} tempSize:${_mapTempFile.size}" }
         }
     }
 
