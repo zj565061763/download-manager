@@ -1,26 +1,18 @@
 package com.sd.lib.dldmgr
 
 data class DownloadProgress(
-    /** 总量 */
+    /** 总数量 */
     val total: Long,
 
-    /** 当前传输量 */
+    /** 已传输数量 */
     val current: Long,
+
+    /** 传输进度[0-100] */
+    val progress: Int,
 
     /** 传输速率（B/S） */
     val speedBps: Int,
 ) {
-    /** 传输进度 */
-    val progress: Int
-        get() {
-            return if (current > 0 && total > 0) {
-                val max = 100
-                (current * max / total).toInt().coerceAtMost(max)
-            } else {
-                0
-            }
-        }
-
     /** 传输速率（KB/S） */
     val speedKBps: Int
         get() = speedBps / 1024
@@ -41,6 +33,7 @@ internal class DownloadInfo(val url: String) {
             DownloadProgress(
                 total = _transmitParam.total,
                 current = _transmitParam.current,
+                progress = _transmitParam.progress,
                 speedBps = _transmitParam.speedBps,
             )
         } else null
