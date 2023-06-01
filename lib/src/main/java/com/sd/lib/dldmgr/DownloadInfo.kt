@@ -125,7 +125,7 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
             val interval = time - _lastSpeedTime
             if (interval >= _calculateSpeedInterval) {
                 val count = current - _lastSpeedCount
-                speedBps = (count * (1000f / interval)).toInt()
+                speedBps = (count * (1000f / interval)).toInt().coerceAtLeast(0)
                 _lastSpeedTime = time
                 _lastSpeedCount = current
             }
