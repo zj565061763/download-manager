@@ -90,11 +90,11 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
     private var _lastSpeedTime: Long = 0
     private var _lastSpeedCount: Long = 0
 
-    /** 总量 */
+    /** 总数量 */
     var total: Long = 0
         private set
 
-    /** 当前传输量 */
+    /** 已传输数量 */
     var current: Long = 0
         private set
 
