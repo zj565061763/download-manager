@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.suspendCoroutine
 
 object FDownloadManager : IDownloadManager {
-    private val _mapDownloadInfo: MutableMap<String, DownloadInfoWrapper> = ConcurrentHashMap()
+    private val _mapDownloadInfo: MutableMap<String, DownloadInfoWrapper> = hashMapOf()
     private val _mapTempFile: MutableMap<File, String> = hashMapOf()
 
     private val _callbackHolder: MutableMap<IDownloadManager.Callback, String> = ConcurrentHashMap()
