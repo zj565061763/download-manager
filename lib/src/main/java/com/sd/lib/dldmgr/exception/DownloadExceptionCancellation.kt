@@ -1,3 +1,3 @@
 package com.sd.lib.dldmgr.exception
 
-class DownloadExceptionCancellation : DownloadException()
+class DownloadExceptionCancellation internal constructor() : DownloadException()
