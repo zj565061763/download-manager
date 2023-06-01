@@ -38,6 +38,7 @@ internal class DownloadInfo(val url: String) {
     /**
      * 下载进度
      */
+    @Synchronized
     fun notifyProgress(total: Long, current: Long): Boolean {
         if (_state.isFinished) return false
         _state = DownloadState.Downloading
@@ -47,6 +48,7 @@ internal class DownloadInfo(val url: String) {
     /**
      * 下载成功
      */
+    @Synchronized
     fun notifySuccess(): Boolean {
         if (_state.isFinished) return false
         this._state = DownloadState.Success
@@ -56,6 +58,7 @@ internal class DownloadInfo(val url: String) {
     /**
      * 下载失败
      */
+    @Synchronized
     fun notifyError(): Boolean {
         if (_state.isFinished) return false
         _state = DownloadState.Error
@@ -117,7 +120,6 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
      * @param current 当前传输量
      * @return true-进度发生了变化
      */
-    @Synchronized
     fun transmit(total: Long, current: Long): Boolean {
         val oldProgress = progress
         if (total <= 0 || current <= 0) {
