@@ -106,9 +106,7 @@ object FDownloadManager : IDownloadManager {
 
         _mapDownloadInfo[url] = DownloadInfoWrapper(downloadInfo, tempFile)
         _mapTempFile[tempFile] = url
-        logMsg {
-            "addTask url:${url} temp:${tempFile.absolutePath} size:${_mapDownloadInfo.size} tempSize:${_mapTempFile.size}"
-        }
+        logMsg { "addTask url:${url} temp:${tempFile.absolutePath} size:${_mapDownloadInfo.size} tempSize:${_mapTempFile.size}" }
         return true
     }
 
