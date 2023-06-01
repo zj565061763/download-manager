@@ -110,7 +110,7 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
      * @return true-进度发生了变化
      */
     fun transmit(total: Long, current: Long): Boolean {
-        val oldCurrent = current
+        val oldCurrent = this.current
         if (total <= 0 || current <= 0) {
             reset()
             return this.current != oldCurrent
