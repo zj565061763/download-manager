@@ -7,19 +7,23 @@ data class DownloadProgress(
     /** 当前传输量 */
     val current: Long,
 
-    /** 传输进度 */
-    val progress: Int,
-
     /** 传输速率（B/S） */
     val speedBps: Int,
 ) {
+    /** 传输进度 */
+    val progress: Int
+        get() {
+            return if (current > 0 && total > 0) {
+                val max = 100
+                (current * max / total).toInt().coerceAtMost(max)
+            } else {
+                0
+            }
+        }
+
     /** 传输速率（KB/S） */
     val speedKBps: Int
         get() = speedBps / 1024
-
-    /** 传输是否完成 */
-    val isFinished: Boolean
-        get() = current > 0 && current == total
 }
 
 internal class DownloadInfo(val url: String) {
@@ -34,7 +38,6 @@ internal class DownloadInfo(val url: String) {
         return DownloadProgress(
             total = _transmitParam.total,
             current = _transmitParam.current,
-            progress = _transmitParam.progress,
             speedBps = _transmitParam.speedBps,
         )
     }
@@ -91,8 +94,8 @@ private enum class DownloadState {
 
 private class TransmitParam(calculateSpeedInterval: Long = 100) {
     private val _calculateSpeedInterval: Long = calculateSpeedInterval.coerceAtLeast(100)
-    private var _lastTime: Long = 0
-    private var _lastCount: Long = 0
+    private var _lastSpeedTime: Long = 0
+    private var _lastSpeedCount: Long = 0
 
     /** 总量 */
     var total: Long = 0
@@ -102,21 +105,9 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
     var current: Long = 0
         private set
 
-    /** 传输进度 */
-    var progress: Int = 0
-        private set
-
     /** 传输速率（B/S） */
     var speedBps: Int = 0
         private set
-
-    /** 传输速率（KB/S） */
-    val speedKBps: Int
-        get() = speedBps / 1024
-
-    /** 传输是否完成 */
-    val isFinished: Boolean
-        get() = current > 0 && current == total
 
     /**
      * 传输
@@ -126,38 +117,37 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
      * @return true-进度发生了变化
      */
     fun transmit(total: Long, current: Long): Boolean {
-        val oldProgress = progress
+        val oldCurrent = current
         if (total <= 0 || current <= 0) {
             reset()
-            return oldProgress != progress
+            return this.current != oldCurrent
+        }
+
+        kotlin.run {
+            val time = System.currentTimeMillis()
+            val interval = time - _lastSpeedTime
+            if (interval >= _calculateSpeedInterval) {
+                val count = current - _lastSpeedCount
+                speedBps = (count * (1000f / interval)).toInt()
+                _lastSpeedTime = time
+                _lastSpeedCount = current
+            }
         }
 
         this.total = total
         this.current = current
-
-        val currentTime = System.currentTimeMillis()
-        val interval = currentTime - _lastTime
-        if (interval >= _calculateSpeedInterval) {
-            val count = current - _lastCount
-            speedBps = (count * (1000f / interval)).toInt()
-            _lastTime = currentTime
-            _lastCount = current
-        }
-
-        progress = (current * 100 / total).toInt()
-        return progress > oldProgress
+        return this.current > oldCurrent
     }
 
     private fun reset() {
+        _lastSpeedTime = 0
+        _lastSpeedCount = 0
         total = 0
         current = 0
-        progress = 0
         speedBps = 0
-        _lastTime = 0
-        _lastCount = 0
     }
 
     override fun toString(): String {
-        return "${current}/${total} ${progress}% ${speedKBps}KBps ${super.toString()}"
+        return "${current}/${total} ${super.toString()}"
     }
 }
