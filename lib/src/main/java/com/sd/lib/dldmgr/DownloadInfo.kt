@@ -121,12 +121,12 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
         }
 
         kotlin.run {
-            val currentTime = System.currentTimeMillis()
-            val interval = currentTime - _lastSpeedTime
+            val time = System.currentTimeMillis()
+            val interval = time - _lastSpeedTime
             if (interval >= _calculateSpeedInterval) {
                 val count = current - _lastSpeedCount
                 speedBps = (count * (1000f / interval)).toInt()
-                _lastSpeedTime = currentTime
+                _lastSpeedTime = time
                 _lastSpeedCount = current
             }
         }
