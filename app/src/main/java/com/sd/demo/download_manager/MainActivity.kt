@@ -14,10 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.sd.demo.download_manager.ui.theme.AppTheme
-import com.sd.lib.dldmgr.DownloadInfo
+import com.sd.lib.dldmgr.DownloadProgress
 import com.sd.lib.dldmgr.DownloadRequest
 import com.sd.lib.dldmgr.FDownloadManager
 import com.sd.lib.dldmgr.IDownloadManager
+import com.sd.lib.dldmgr.exception.DownloadException
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -74,23 +75,16 @@ class MainActivity : ComponentActivity() {
      * 下载回调
      */
     private val _downloadCallback: IDownloadManager.Callback = object : IDownloadManager.Callback {
-        override fun onProgress(info: DownloadInfo) {
-            // 下载参数
-            val param = info.transmitParam
-            // 下载进度
-            val progress = param.progress
-            // 下载速率
-            val speed = param.speedKBps
-
-            logMsg { "onProgress:${progress}% $speed KB/S" }
+        override fun onProgress(url: String, progress: DownloadProgress) {
+            logMsg { "onProgress ${progress.progress}% ${progress.speedKBps} KB/S" }
         }
 
-        override fun onSuccess(info: DownloadInfo, file: File) {
-            logMsg { "onSuccess:${info.url} file:${file.absolutePath}" }
+        override fun onSuccess(url: String, file: File) {
+            logMsg { "onSuccess file:${file.absolutePath}" }
         }
 
-        override fun onError(info: DownloadInfo) {
-            logMsg { "onError:${info.exception!!.javaClass.name}" }
+        override fun onError(url: String, exception: DownloadException) {
+            logMsg { "onError ${exception.javaClass.name}" }
         }
     }
 

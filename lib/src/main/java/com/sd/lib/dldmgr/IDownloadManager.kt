@@ -1,5 +1,6 @@
 package com.sd.lib.dldmgr
 
+import com.sd.lib.dldmgr.exception.DownloadException
 import java.io.File
 
 interface IDownloadManager {
@@ -37,9 +38,9 @@ interface IDownloadManager {
     fun deleteTempFile()
 
     /**
-     * 返回[url]对应的下载信息
+     * 返回[url]对应的下载进度
      */
-    fun getDownloadInfo(url: String?): DownloadInfo?
+    fun getProgress(url: String?): DownloadProgress?
 
     /**
      * 添加下载任务
@@ -74,26 +75,16 @@ interface IDownloadManager {
         /**
          * 下载中
          */
-        fun onProgress(info: DownloadInfo)
+        fun onProgress(url: String, progress: DownloadProgress)
 
         /**
          * 下载成功
-         *
-         * @param file 下载文件
          */
-        fun onSuccess(info: DownloadInfo, file: File)
+        fun onSuccess(url: String, file: File)
 
         /**
          * 下载失败
          */
-        fun onError(info: DownloadInfo)
-    }
-
-    abstract class EmptyCallback : Callback {
-        override fun onProgress(info: DownloadInfo) {}
-
-        override fun onSuccess(info: DownloadInfo, file: File) {}
-
-        override fun onError(info: DownloadInfo) {}
+        fun onError(url: String, exception: DownloadException)
     }
 }

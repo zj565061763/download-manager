@@ -65,8 +65,8 @@ object FDownloadManager : IDownloadManager {
         }
     }
 
-    override fun getDownloadInfo(url: String?): DownloadInfo? {
-        return _mapDownloadInfo[url]?.downloadInfo
+    override fun getProgress(url: String?): DownloadProgress? {
+        return _mapDownloadInfo[url]?.downloadInfo?.progress
     }
 
     override fun addTask(url: String?): Boolean {
@@ -117,7 +117,7 @@ object FDownloadManager : IDownloadManager {
     override fun cancelTask(url: String?): Boolean {
         if (url.isNullOrEmpty()) return false
 
-        val info = getDownloadInfo(url) ?: return false
+        val info = _mapDownloadInfo[url]?.downloadInfo ?: return false
         if (info.state.isFinished) return false
 
         logMsg { "cancelTask start url:${url}" }
@@ -172,10 +172,10 @@ object FDownloadManager : IDownloadManager {
 
     internal fun notifyProgress(info: DownloadInfo, total: Long, current: Long) {
         if (info.notifyProgress(total, current)) {
-            val copyInfo = info.copy()
+            val progress = info.progress
             _handler.post {
                 for (item in _callbackHolder.keys) {
-                    item.onProgress(copyInfo)
+                    item.onProgress(info.url, progress)
                 }
             }
         }
@@ -184,24 +184,22 @@ object FDownloadManager : IDownloadManager {
     internal fun notifySuccess(info: DownloadInfo, file: File) {
         if (info.notifySuccess()) {
             removeDownloadInfo(info.url)
-            val copyInfo = info.copy()
             _handler.post {
-                logMsg { "notify callback onSuccess url:${copyInfo.url} file:${file.absolutePath}" }
+                logMsg { "notify callback onSuccess url:${info.url} file:${file.absolutePath}" }
                 for (item in _callbackHolder.keys) {
-                    item.onSuccess(copyInfo, file)
+                    item.onSuccess(info.url, file)
                 }
             }
         }
     }
 
     internal fun notifyError(info: DownloadInfo, exception: DownloadException) {
-        if (info.notifyError(exception)) {
+        if (info.notifyError()) {
             removeDownloadInfo(info.url)
-            val copyInfo = info.copy()
             _handler.post {
-                logMsg { "notify callback onError url:${copyInfo.url} exception:${exception}" }
+                logMsg { "notify callback onError url:${info.url} exception:${exception}" }
                 for (item in _callbackHolder.keys) {
-                    item.onError(copyInfo)
+                    item.onError(info.url, exception)
                 }
             }
         }
