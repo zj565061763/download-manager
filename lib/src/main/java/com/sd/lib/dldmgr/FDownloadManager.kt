@@ -15,7 +15,6 @@ import com.sd.lib.io.fExist
 import com.sd.lib.io.fMoveToFile
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.suspendCoroutine
 
 object FDownloadManager : IDownloadManager {
     private val _mapDownloadInfo: MutableMap<String, DownloadInfoWrapper> = hashMapOf()
@@ -121,33 +120,11 @@ object FDownloadManager : IDownloadManager {
         return result
     }
 
-    override suspend fun awaitTask(url: String, callback: IDownloadManager.Callback?): Result<File> {
-        return suspendCoroutine { continuation ->
-            // TODO
-//            val add = addUrlCallback(url, object : IDownloadManager.Callback {
-//                override fun onPrepare(info: DownloadInfo) {
-//                    callback?.onPrepare(info)
-//                }
-//
-//                override fun onProgress(info: DownloadInfo) {
-//                    callback?.onProgress(info)
-//                }
-//
-//                override fun onSuccess(info: DownloadInfo, file: File) {
-//                    callback?.onSuccess(info, file)
-//                    continuation.resume(file)
-//                }
-//
-//                override fun onError(info: DownloadInfo) {
-//                    callback?.onError(info)
-//                    continuation.resume(null)
-//                }
-//            })
-//            if (add) {
-//                // 等待任务完成
-//            } else {
-//                continuation.resume(null)
-//            }
+    override suspend fun awaitTask(url: String): Result<File> {
+        synchronized(this@FDownloadManager) {
+            val downloadFile = getDownloadFile(url)
+            if (downloadFile != null) return Result.success(downloadFile)
+            TODO()
         }
     }
 

@@ -21,7 +21,6 @@ import com.sd.lib.dldmgr.IDownloadManager
 import com.sd.lib.dldmgr.exception.DownloadException
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import java.io.File
 
 private const val URL = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe"
@@ -57,13 +56,6 @@ class MainActivity : ComponentActivity() {
         // 添加下载任务
         val addTask = FDownloadManager.addTask(downloadRequest)
         logMsg { "click download addTask:${addTask}" }
-
-        if (addTask) {
-            _scope.launch {
-                val file = FDownloadManager.awaitTask(URL)
-                logMsg { "awaitTask file:${file}" }
-            }
-        }
     }
 
     private fun cancelDownload() {
