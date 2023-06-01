@@ -28,7 +28,6 @@ object FDownloadManager : IDownloadManager {
 
     private val _handler by lazy { Handler(Looper.getMainLooper()) }
 
-    @Synchronized
     override fun addCallback(callback: IDownloadManager.Callback) {
         val put = _callbackHolder.put(callback, "")
         if (put == null) {
@@ -36,7 +35,6 @@ object FDownloadManager : IDownloadManager {
         }
     }
 
-    @Synchronized
     override fun removeCallback(callback: IDownloadManager.Callback) {
         if (_callbackHolder.remove(callback) != null) {
             logMsg { "removeCallback:${callback} size:${_callbackHolder.size}" }
