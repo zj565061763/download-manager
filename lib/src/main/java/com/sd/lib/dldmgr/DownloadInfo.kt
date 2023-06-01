@@ -1,5 +1,27 @@
 package com.sd.lib.dldmgr
 
+data class DownloadProgress(
+    /** 总量 */
+    val total: Long,
+
+    /** 当前传输量 */
+    val current: Long,
+
+    /** 传输进度 */
+    val progress: Int,
+
+    /** 传输速率（B/S） */
+    val speedBps: Int,
+) {
+    /** 传输速率（KB/S） */
+    val speedKBps: Int
+        get() = speedBps / 1024
+
+    /** 传输是否完成 */
+    val isFinished: Boolean
+        get() = current > 0 && current == total
+}
+
 internal class DownloadInfo(val url: String) {
     @Volatile
     var state: DownloadState = DownloadState.Initialized
@@ -42,28 +64,6 @@ internal class DownloadInfo(val url: String) {
         state = DownloadState.Error
         return true
     }
-}
-
-data class DownloadProgress(
-    /** 总量 */
-    val total: Long,
-
-    /** 当前传输量 */
-    val current: Long,
-
-    /** 传输进度 */
-    val progress: Int,
-
-    /** 传输速率（B/S） */
-    val speedBps: Int,
-) {
-    /** 传输速率（KB/S） */
-    val speedKBps: Int
-        get() = speedBps / 1024
-
-    /** 传输是否完成 */
-    val isFinished: Boolean
-        get() = current > 0 && current == total
 }
 
 private class TransmitParam(calculateSpeedInterval: Long = 100) {
