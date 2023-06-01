@@ -12,11 +12,7 @@ data class DownloadProgress(
 
     /** 传输速率（B/S） */
     val speedBps: Int,
-) {
-    /** 传输速率（KB/S） */
-    val speedKBps: Int
-        get() = speedBps / 1024
-}
+)
 
 internal class DownloadInfo(val url: String) {
     private var _state = DownloadState.Initialized
@@ -139,6 +135,6 @@ private class TransmitParam {
     }
 
     override fun toString(): String {
-        return "${current}/${total} ${progress}% ${super.toString()}"
+        return "${current}/${total} $progress ${super.toString()}"
     }
 }

@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
      */
     private val _downloadCallback: IDownloadManager.Callback = object : IDownloadManager.Callback {
         override fun onProgress(url: String, progress: DownloadProgress) {
-            logMsg { "onProgress ${progress.progress}% ${progress.speedKBps} KB/S" }
+            logMsg { "onProgress ${progress.progress}" }
         }
 
         override fun onSuccess(url: String, file: File) {
