@@ -98,6 +98,10 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
     var current: Long = 0
         private set
 
+    /** 传输进度[0-100] */
+    var progress: Int = 0
+        private set
+
     /** 传输速率（B/S） */
     var speedBps: Int = 0
         private set
@@ -110,26 +114,28 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
      * @return true-进度发生了变化
      */
     fun transmit(total: Long, current: Long): Boolean {
-        val oldCurrent = this.current
+        val oldProgress = progress
         if (total <= 0 || current <= 0) {
             reset()
-            return this.current != oldCurrent
+            return oldProgress != progress
         }
 
         kotlin.run {
-            val time = System.currentTimeMillis()
-            val interval = time - _lastSpeedTime
+            val currentTime = System.currentTimeMillis()
+            val interval = currentTime - _lastSpeedTime
             if (interval >= _calculateSpeedInterval) {
                 val count = current - _lastSpeedCount
                 speedBps = (count * (1000f / interval)).toInt()
-                _lastSpeedTime = time
+                _lastSpeedTime = currentTime
                 _lastSpeedCount = current
             }
         }
 
         this.total = total
         this.current = current
-        return this.current > oldCurrent
+        this.progress = (current * 100 / total).toInt().coerceAtMost(100)
+
+        return this.progress > oldProgress
     }
 
     private fun reset() {
@@ -137,10 +143,11 @@ private class TransmitParam(calculateSpeedInterval: Long = 100) {
         _lastSpeedCount = 0
         total = 0
         current = 0
+        progress = 0
         speedBps = 0
     }
 
     override fun toString(): String {
-        return "${current}/${total} ${super.toString()}"
+        return "${current}/${total} ${progress}% ${super.toString()}"
     }
 }
