@@ -23,9 +23,7 @@ data class DownloadProgress(
 }
 
 internal class DownloadInfo(val url: String) {
-    @Volatile
-    private var state: DownloadState = DownloadState.Initialized
-
+    private var _state = DownloadState.Initialized
     private val _transmitParam = TransmitParam()
 
     /** 下载进度 */
@@ -41,8 +39,8 @@ internal class DownloadInfo(val url: String) {
      * 下载进度
      */
     fun notifyProgress(total: Long, current: Long): Boolean {
-        if (state.isFinished) return false
-        state = DownloadState.Downloading
+        if (_state.isFinished) return false
+        _state = DownloadState.Downloading
         return _transmitParam.transmit(total, current)
     }
 
@@ -50,8 +48,8 @@ internal class DownloadInfo(val url: String) {
      * 下载成功
      */
     fun notifySuccess(): Boolean {
-        if (state.isFinished) return false
-        this.state = DownloadState.Success
+        if (_state.isFinished) return false
+        this._state = DownloadState.Success
         return true
     }
 
@@ -59,8 +57,8 @@ internal class DownloadInfo(val url: String) {
      * 下载失败
      */
     fun notifyError(): Boolean {
-        if (state.isFinished) return false
-        state = DownloadState.Error
+        if (_state.isFinished) return false
+        _state = DownloadState.Error
         return true
     }
 }
