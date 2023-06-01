@@ -14,11 +14,11 @@ class TransmitParam @JvmOverloads constructor(calculateSpeedInterval: Long = 100
         private set
 
     /** 传输进度 */
-    var progress = 0
+    var progress: Int = 0
         private set
 
     /** 传输速率（B/S） */
-    var speedBps = 0
+    var speedBps: Int = 0
         private set
 
     /** 传输速率（KB/S） */
