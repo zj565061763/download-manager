@@ -38,9 +38,9 @@ interface IDownloadManager {
     fun deleteTempFile()
 
     /**
-     * 返回[url]对应的下载进度
+     * 是否有[url]对应的下载任务
      */
-    fun getProgress(url: String?): DownloadProgress?
+    fun hasTask(url: String?): Boolean
 
     /**
      * 添加下载任务
