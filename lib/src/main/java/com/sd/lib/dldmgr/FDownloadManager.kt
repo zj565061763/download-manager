@@ -11,7 +11,6 @@ import com.sd.lib.dldmgr.exception.DownloadExceptionSubmitTask
 import com.sd.lib.dldmgr.executor.IDownloadUpdater
 import com.sd.lib.io.IDir
 import com.sd.lib.io.fDir
-import com.sd.lib.io.fMoveToFile
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
@@ -253,7 +252,7 @@ private class DefaultDownloadUpdater(
             return
         }
 
-        if (_tempFile.fMoveToFile(downloadFile)) {
+        if (_tempFile.renameTo(downloadFile)) {
             FDownloadManager.notifySuccess(_downloadInfo, downloadFile)
         } else {
             logMsg { "updater download success error rename temp file to download file $_url" }
