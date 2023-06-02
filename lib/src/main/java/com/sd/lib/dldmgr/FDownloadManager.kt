@@ -14,12 +14,16 @@ import com.sd.lib.io.fDir
 import com.sd.lib.io.fMoveToFile
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 object FDownloadManager : IDownloadManager {
     private val _mapDownloadInfo: MutableMap<String, DownloadInfoWrapper> = hashMapOf()
     private val _mapTempFile: MutableMap<File, String> = hashMapOf()
 
     private val _callbackHolder: MutableMap<IDownloadManager.Callback, String> = ConcurrentHashMap()
+    private val _continuationHolder: MutableMap<String, MutableSet<Continuation<Result<File>>>> = hashMapOf()
 
     private val config get() = DownloadManagerConfig.get()
     private val _downloadDirectory by lazy { config.downloadDirectory.fDir() }
@@ -40,7 +44,7 @@ object FDownloadManager : IDownloadManager {
     }
 
     override fun getDownloadFile(url: String?): File? {
-        return _downloadDirectory.getKeyFile(url).takeIf { it?.exists() == true }
+        return _downloadDirectory.getKeyFile(url).takeIf { it?.isFile == true }
     }
 
     override fun deleteDownloadFile(ext: String?) {
@@ -120,10 +124,18 @@ object FDownloadManager : IDownloadManager {
     }
 
     override suspend fun awaitTask(url: String): Result<File> {
-        synchronized(this@FDownloadManager) {
-            val downloadFile = getDownloadFile(url)
-            if (downloadFile != null) return Result.success(downloadFile)
-            TODO()
+        val downloadFile = getDownloadFile(url)
+        if (downloadFile != null) return Result.success(downloadFile)
+        return suspendCoroutine { cont ->
+            synchronized(this@FDownloadManager) {
+                val holder = _continuationHolder[url] ?: hashSetOf<Continuation<Result<File>>>().also {
+                    _continuationHolder[url] = it
+                }
+                holder.add(cont)
+                logMsg { "awaitTask url:${url} size:${holder.size} urlSize:${_continuationHolder.size}" }
+                addCallback(_awaitCallback)
+                addTask(url)
+            }
         }
     }
 
@@ -169,6 +181,32 @@ object FDownloadManager : IDownloadManager {
                 for (item in _callbackHolder.keys) {
                     item.onError(info.url, exception)
                 }
+            }
+        }
+    }
+
+    private val _awaitCallback = object : IDownloadManager.Callback {
+        override fun onProgress(url: String, progress: DownloadProgress) {
+        }
+
+        override fun onSuccess(url: String, file: File) {
+            resumeTask(url, Result.success(file))
+        }
+
+        override fun onError(url: String, exception: DownloadException) {
+            resumeTask(url, Result.failure(exception))
+        }
+    }
+
+    @Synchronized
+    private fun resumeTask(url: String, result: Result<File>) {
+        _continuationHolder.remove(url)?.let { holder ->
+            logMsg { "resumeTask ${if (result.isSuccess) "success" else "failure"} url:${url} size:${holder.size} urlSize:${_continuationHolder.size}" }
+            holder.forEach {
+                it.resume(result)
+            }
+            if (_continuationHolder.isEmpty()) {
+                removeCallback(_awaitCallback)
             }
         }
     }
