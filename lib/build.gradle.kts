@@ -32,7 +32,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.sd.io)
     implementation(libs.kotlin.coroutines)
 }
 

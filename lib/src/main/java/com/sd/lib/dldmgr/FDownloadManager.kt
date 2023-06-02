@@ -9,8 +9,8 @@ import com.sd.lib.dldmgr.exception.DownloadExceptionCompleteFile
 import com.sd.lib.dldmgr.exception.DownloadExceptionPrepareFile
 import com.sd.lib.dldmgr.exception.DownloadExceptionSubmitTask
 import com.sd.lib.dldmgr.executor.IDownloadUpdater
-import com.sd.lib.io.IDir
-import com.sd.lib.io.fDir
+import com.sd.lib.dldmgr.utils.IDir
+import com.sd.lib.dldmgr.utils.fDir
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap

@@ -21,7 +21,6 @@ androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4
 
 androidx-activity-compose = "androidx.activity:activity-compose:1.7.1"
 kotlin-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
-sd-io = "com.github.zj565061763:io:434d5c4c93"
 
 junit = "junit:junit:4.13.2"
 androidx-test-ext-junit = "androidx.test.ext:junit:1.1.5"
