@@ -19,6 +19,7 @@ import com.sd.lib.dldmgr.DownloadRequest
 import com.sd.lib.dldmgr.FDownloadManager
 import com.sd.lib.dldmgr.IDownloadManager
 import com.sd.lib.dldmgr.exception.DownloadException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -28,6 +29,7 @@ private const val URL = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe"
 
 class MainActivity : ComponentActivity() {
     private val _scope = MainScope()
+    private var _awaitJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,10 +70,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun awaitDownload() {
+        _awaitJob?.cancel()
         _scope.launch {
             val result = FDownloadManager.awaitTask(URL)
             logMsg { "awaitDownload $result" }
-        }
+        }.also { _awaitJob = it }
     }
 
     private fun cancelDownload() {

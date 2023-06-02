@@ -11,11 +11,11 @@ import com.sd.lib.dldmgr.exception.DownloadExceptionSubmitTask
 import com.sd.lib.dldmgr.executor.IDownloadUpdater
 import com.sd.lib.io.IDir
 import com.sd.lib.io.fDir
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 object FDownloadManager : IDownloadManager {
     private val _mapDownloadInfo: MutableMap<String, DownloadInfoWrapper> = hashMapOf()
@@ -125,7 +125,7 @@ object FDownloadManager : IDownloadManager {
     override suspend fun awaitTask(url: String): Result<File> {
         val downloadFile = getDownloadFile(url)
         if (downloadFile != null) return Result.success(downloadFile)
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             synchronized(this@FDownloadManager) {
                 val holder = _continuationHolder[url] ?: hashSetOf<Continuation<Result<File>>>().also {
                     _continuationHolder[url] = it
@@ -134,6 +134,16 @@ object FDownloadManager : IDownloadManager {
                 logMsg { "awaitTask url:${url} size:${holder.size} urlSize:${_continuationHolder.size}" }
                 addCallback(_awaitCallback)
                 addTask(url)
+            }
+            cont.invokeOnCancellation {
+                synchronized(this@FDownloadManager) {
+                    _continuationHolder[url]?.let { holder ->
+                        holder.remove(cont)
+                        if (holder.isEmpty()) _continuationHolder.remove(url)
+                        logMsg { "awaitTask cancel url:${url} size:${holder.size} urlSize:${_continuationHolder.size}" }
+                    }
+                    removeAwaitCallback()
+                }
             }
         }
     }
@@ -204,9 +214,14 @@ object FDownloadManager : IDownloadManager {
             holder.forEach {
                 it.resume(result)
             }
-            if (_continuationHolder.isEmpty()) {
-                removeCallback(_awaitCallback)
-            }
+        }
+        removeAwaitCallback()
+    }
+
+    @Synchronized
+    private fun removeAwaitCallback() {
+        if (_continuationHolder.isEmpty()) {
+            removeCallback(_awaitCallback)
         }
     }
 }
