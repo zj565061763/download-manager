@@ -21,6 +21,7 @@ import com.sd.lib.dldmgr.IDownloadManager
 import com.sd.lib.dldmgr.exception.DownloadException
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.io.File
 
 private const val URL = "https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe"
@@ -35,6 +36,12 @@ class MainActivity : ComponentActivity() {
                 Content(
                     onClickDownload = {
                         download()
+                    },
+                    onClickAwaitDownload = {
+                        awaitDownload()
+                    },
+                    onClickDelete = {
+                        FDownloadManager.deleteDownloadFile(null)
                     },
                     onClickCancel = {
                         cancelDownload()
@@ -58,6 +65,13 @@ class MainActivity : ComponentActivity() {
         // 添加下载任务
         val addTask = FDownloadManager.addTask(downloadRequest)
         logMsg { "click download addTask:${addTask}" }
+    }
+
+    private fun awaitDownload() {
+        _scope.launch {
+            val result = FDownloadManager.awaitTask(URL)
+            logMsg { "awaitDownload $result" }
+        }
     }
 
     private fun cancelDownload() {
@@ -98,6 +112,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun Content(
     onClickDownload: () -> Unit,
+    onClickAwaitDownload: () -> Unit,
+    onClickDelete: () -> Unit,
     onClickCancel: () -> Unit,
 ) {
     Column(
@@ -109,6 +125,18 @@ private fun Content(
             onClick = onClickDownload
         ) {
             Text(text = "download")
+        }
+
+        Button(
+            onClick = onClickAwaitDownload
+        ) {
+            Text(text = "await download")
+        }
+
+        Button(
+            onClick = onClickDelete
+        ) {
+            Text(text = "delete")
         }
 
         Button(
