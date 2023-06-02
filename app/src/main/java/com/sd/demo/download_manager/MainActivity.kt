@@ -49,8 +49,10 @@ class MainActivity : ComponentActivity() {
 
     private fun download() {
         // 创建下载请求对象
-        val downloadRequest = DownloadRequest.Builder() // 设置断点下载，true-优先断点下载；false-不使用断点下载；null-跟随初始化配置
-            .setPreferBreakpoint(true) // 下载地址
+        val downloadRequest = DownloadRequest.Builder()
+            // true-优先断点下载；false-不使用断点下载；null-跟随初始化配置
+            .setPreferBreakpoint(true)
+            // 下载地址
             .build(URL)
 
         // 添加下载任务
