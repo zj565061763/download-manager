@@ -11,7 +11,6 @@ import com.sd.lib.dldmgr.exception.DownloadExceptionSubmitTask
 import com.sd.lib.dldmgr.executor.IDownloadUpdater
 import com.sd.lib.io.IDir
 import com.sd.lib.io.fDir
-import com.sd.lib.io.fExist
 import com.sd.lib.io.fMoveToFile
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -41,7 +40,7 @@ object FDownloadManager : IDownloadManager {
     }
 
     override fun getDownloadFile(url: String?): File? {
-        return _downloadDirectory.getKeyFile(url).takeIf { it.fExist() }
+        return _downloadDirectory.getKeyFile(url).takeIf { it?.exists() == true }
     }
 
     override fun deleteDownloadFile(ext: String?) {
