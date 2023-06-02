@@ -49,7 +49,7 @@ object FDownloadManager : IDownloadManager {
     override fun deleteDownloadFile(ext: String?) {
         _downloadDirectory.deleteFile(ext).let { count ->
             if (count > 0) {
-                logMsg { "deleteDownloadFile count:${count} ext:${ext}" }
+                logMsg { "deleteDownloadFile ext:${ext} count:${count} " }
             }
         }
     }
