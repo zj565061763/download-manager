@@ -56,23 +56,23 @@ class MainActivity : ComponentActivity() {
         FDownloadManager.addCallback(_downloadCallback)
     }
 
-    private fun download() {
-        // 创建下载请求对象
-        val downloadRequest = DownloadRequest.Builder()
+    private fun getDownloadRequest(): DownloadRequest {
+        return DownloadRequest.Builder()
             // true-优先断点下载；false-不使用断点下载；null-跟随初始化配置
             .setPreferBreakpoint(true)
             // 下载地址
             .build(URL)
+    }
 
-        // 添加下载任务
-        val addTask = FDownloadManager.addTask(downloadRequest)
-        logMsg { "click download addTask:${addTask}" }
+    private fun download() {
+        val addTask = FDownloadManager.addTask(getDownloadRequest())
+        logMsg { "download addTask:${addTask}" }
     }
 
     private fun awaitDownload() {
         _awaitJob?.cancel()
         _scope.launch {
-            val result = FDownloadManager.awaitTask(URL)
+            val result = FDownloadManager.awaitTask(getDownloadRequest())
             logMsg { "awaitDownload $result" }
         }.also { _awaitJob = it }
     }

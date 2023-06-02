@@ -64,9 +64,14 @@ interface IDownloadManager {
     fun cancelTask(url: String?): Boolean
 
     /**
-     * 监听任务
+     * 下载任务
      */
     suspend fun awaitTask(url: String): Result<File>
+
+    /**
+     * 下载任务
+     */
+    suspend fun awaitTask(request: DownloadRequest): Result<File>
 
     /**
      * 下载回调

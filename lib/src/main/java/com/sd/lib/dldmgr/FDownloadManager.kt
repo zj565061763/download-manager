@@ -123,6 +123,11 @@ object FDownloadManager : IDownloadManager {
     }
 
     override suspend fun awaitTask(url: String): Result<File> {
+        return awaitTask(DownloadRequest.Builder().build(url))
+    }
+
+    override suspend fun awaitTask(request: DownloadRequest): Result<File> {
+        val url = request.url
         val downloadFile = getDownloadFile(url)
         if (downloadFile != null) return Result.success(downloadFile)
         return suspendCancellableCoroutine { cont ->
@@ -133,7 +138,7 @@ object FDownloadManager : IDownloadManager {
                 holder.add(cont)
                 logMsg { "awaitTask url:${url} size:${holder.size} urlSize:${_continuationHolder.size}" }
                 addCallback(_awaitCallback)
-                addTask(url)
+                addTask(request)
             }
             cont.invokeOnCancellation {
                 synchronized(this@FDownloadManager) {
